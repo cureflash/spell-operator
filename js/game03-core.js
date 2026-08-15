@@ -14,7 +14,7 @@
 
   const itemDefinitions={
     healPotion:{name:"ヒールポーション",type:"consumable",price:80,healHp:30,description:"仲間1人のHPを30回復する。"},
-    manaPotion:{name:"マナポーション",type:"consumable",price:100,healMp:20,description:"ルミエルのMPを20回復する。"},
+    manaPotion:{name:"マナポーション",type:"consumable",price:100,healMp:20,description:"仲間1人のMPを20回復する。"},
     powerGrimoire:{name:"力の魔導書",type:"equipment",price:350,stat:"attack",bonus:8,description:"装備中、攻撃が8上がる。"},
     guardGrimoire:{name:"守りの魔導書",type:"equipment",price:350,stat:"defense",bonus:8,description:"装備中、防御が8上がる。"},
     magicGrimoire:{name:"魔力の魔導書",type:"equipment",price:450,stat:"spAttack",bonus:10,description:"装備中、特攻が10上がる。"},
@@ -42,13 +42,11 @@
   function normalizeVitals(memberKey){
     const p=state.party[memberKey],stats=getMemberStats(memberKey);
     p.hp=Math.max(0,Math.min(Number.isFinite(p.hp)?p.hp:stats.hp,stats.hp));
-    if(memberKey==="lumiere"){
-      const maxMp=maxMpFor(stats,p.level);
-      p.mp=Math.max(0,Math.min(Number.isFinite(p.mp)?p.mp:maxMp,maxMp));
-    }
+    const maxMp=maxMpFor(stats,p.level);
+    p.mp=Math.max(0,Math.min(Number.isFinite(p.mp)?p.mp:maxMp,maxMp));
   }
   function resetParty(){
-    state.party={sophie:{level:START_LEVEL,exp:0,hp:null},lumiere:{level:START_LEVEL,exp:0,hp:null,mp:null}};
+    state.party={sophie:{level:START_LEVEL,exp:0,hp:null,mp:null},lumiere:{level:START_LEVEL,exp:0,hp:null,mp:null}};
     normalizeVitals("sophie");normalizeVitals("lumiere");
   }
   function resetItems(){state.money=START_MONEY;state.inventory=Object.create(null);state.equipment={sophie:null,lumiere:null};}
@@ -61,7 +59,15 @@
   function serializeParty(){return JSON.parse(JSON.stringify(state.party))}
   function restoreParty(data){
     if(!data)return;
-    for(const key of ["sophie","lumiere"]){if(data[key]){state.party[key].level=Math.max(1,Math.floor(data[key].level||START_LEVEL));state.party[key].exp=Math.max(0,Math.floor(data[key].exp||0));state.party[key].hp=Number.isFinite(data[key].hp)?data[key].hp:null;if(key==="lumiere")state.party[key].mp=Number.isFinite(data[key].mp)?data[key].mp:null;normalizeVitals(key)}}
+    for(const key of ["sophie","lumiere"]){
+      if(data[key]){
+        state.party[key].level=Math.max(1,Math.floor(data[key].level||START_LEVEL));
+        state.party[key].exp=Math.max(0,Math.floor(data[key].exp||0));
+        state.party[key].hp=Number.isFinite(data[key].hp)?data[key].hp:null;
+        state.party[key].mp=Number.isFinite(data[key].mp)?data[key].mp:null;
+        normalizeVitals(key);
+      }
+    }
   }
   function serializeItems(){return{money:state.money,inventory:{...state.inventory},equipment:{...state.equipment}}}
   function restoreItems(data){
@@ -85,7 +91,7 @@
     const item=itemDefinitions[itemKey],p=state.party[memberKey];if(!p||item?.type!=="consumable"||inventoryCount(itemKey)<1)return{ok:false,amount:0};
     const stats=getMemberStats(memberKey);
     if(item.healHp){const before=p.hp;p.hp=Math.min(stats.hp,p.hp+item.healHp);const amount=p.hp-before;if(amount<=0)return{ok:false,amount:0};removeItem(itemKey,1);return{ok:true,amount};}
-    if(item.healMp){if(memberKey!=="lumiere")return{ok:false,amount:0};const maxMp=maxMpFor(stats,p.level),before=p.mp;p.mp=Math.min(maxMp,p.mp+item.healMp);const amount=p.mp-before;if(amount<=0)return{ok:false,amount:0};removeItem(itemKey,1);return{ok:true,amount};}
+    if(item.healMp){const maxMp=maxMpFor(stats,p.level),before=p.mp;p.mp=Math.min(maxMp,p.mp+item.healMp);const amount=p.mp-before;if(amount<=0)return{ok:false,amount:0};removeItem(itemKey,1);return{ok:true,amount};}
     return{ok:false,amount:0};
   }
 
