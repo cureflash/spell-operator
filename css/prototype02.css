@@ -1,0 +1,23 @@
+/* Prototype 0.2 */
+.spell-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.spell-card { padding: 20px; }
+.spell-card-head { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+.spell-card h3 { margin: 4px 0 0; font-size: 28px; }
+.spell-card > p { color: var(--muted); line-height: 1.7; min-height: 3.4em; }
+.spell-spec { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0; }
+.spell-spec div { padding: 10px; border-radius: 10px; background: #252b3e; }
+.spell-spec dt { color: var(--muted); font-size: 11px; }
+.spell-spec dd { margin: 4px 0 0; font-weight: 800; }
+.deploy-panel { margin-top: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.deploy-panel h3 { margin: 4px 0; }
+.deploy-panel p { margin: 5px 0 0; color: var(--muted); }
+.button-row.wrap { flex-wrap: wrap; }
+.button-row.center { justify-content: center; }
+.clear-summary.three { max-width: 520px; grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 820px) {
+  .spell-grid { grid-template-columns: 1fr; }
+  .deploy-panel { align-items: stretch; flex-direction: column; }
+  .deploy-panel .big { margin-top: 0; width: 100%; }
+  .clear-summary.three { grid-template-columns: 1fr; }
+}
