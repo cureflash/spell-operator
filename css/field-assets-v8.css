@@ -1,0 +1,19 @@
+/* Field asset override v8: Safari-safe SVG tile map. */
+.field-map{
+  background-color:#79ad58!important;
+  background-image:url("../assets/maps/starting_field_v8.svg?v=8")!important;
+  background-position:center!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+  image-rendering:pixelated;
+}
+.field-tile{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.field-tile::before,
+.field-tile::after{
+  display:none!important;
+  content:none!important;
+}
