@@ -1,0 +1,33 @@
+/* Sophie overworld sprite: 3 frames x 4 directions, DS-era RPG style. */
+.sophie-field{
+  overflow:visible;
+  transform:none!important;
+}
+.sophie-field .pixel-head,
+.sophie-field .pixel-body,
+.sophie-field .entity-tag{
+  display:none!important;
+}
+.sophie-field::before{
+  content:"";
+  position:absolute;
+  left:11%;
+  bottom:-2%;
+  width:calc(var(--tile-size)*.78);
+  height:calc(var(--tile-size)*1.17);
+  background-image:url("../assets/characters/sophie_walk.png");
+  background-repeat:no-repeat;
+  background-size:300% 400%;
+  background-position:var(--sophie-frame-x,50%) var(--sophie-row-y,33.333333%);
+  image-rendering:pixelated;
+  image-rendering:crisp-edges;
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.22));
+  pointer-events:none;
+}
+.sophie-field[data-frame="0"]{--sophie-frame-x:0%}
+.sophie-field[data-frame="1"]{--sophie-frame-x:50%}
+.sophie-field[data-frame="2"]{--sophie-frame-x:100%}
+.sophie-field[data-facing="down"]{--sophie-row-y:0%}
+.sophie-field[data-facing="up"]{--sophie-row-y:33.333333%}
+.sophie-field[data-facing="left"]{--sophie-row-y:66.666667%}
+.sophie-field[data-facing="right"]{--sophie-row-y:100%}
