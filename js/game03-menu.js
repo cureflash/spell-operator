@@ -51,8 +51,7 @@
 
   function statRows(stats,key){
     const p=state.party[key];
-    const rows=[["HP",`${p.hp} / ${stats.hp}`],["攻撃",stats.attack],["防御",stats.defense],["特攻",stats.spAttack],["特防",stats.spDefense],["素早さ",stats.speed]];
-    if(key==="lumiere")rows.splice(1,0,["MP",`${p.mp} / ${G.maxMpFor(stats,p.level)}`]);
+    const rows=[["HP",`${p.hp} / ${stats.hp}`],["MP",`${p.mp} / ${G.maxMpFor(stats,p.level)}`],["攻撃",stats.attack],["防御",stats.defense],["特攻",stats.spAttack],["特防",stats.spDefense],["素早さ",stats.speed]];
     return rows.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join("");
   }
   function memberCard(key){
