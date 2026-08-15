@@ -24,7 +24,15 @@
   }
   function place(sel,pos){const el=$(sel);if(!el)return;el.style.setProperty("--x",pos.x);el.style.setProperty("--y",pos.y);if(pos.facing)el.dataset.facing=pos.facing;el.classList.remove("facing-left");if(pos.facing==="left")el.classList.add("facing-left")}
   function render(){place("#field-player",model.player);place("#field-follower",model.follower);place("#field-npc",npc);place("#field-enemy",enemy);place("#field-sign",sign);place("#field-shop",shop);$("#field-enemy").classList.toggle("defeated",fieldState.enemyDefeated);updateObjective();window.SpellMenu?.renderFieldMenu?.()}
-  function updateObjective(){let text;if(fieldState.enemyDefeated)text="実戦成功。ルミエルと話してみよう";else if(G.magicReady())text="東の草むらにいる魔物へ向かおう";else text="北西の魔法工房で Fire と Heal を登録しよう";$("#field-objective").textContent=text}
+  function updateObjective(){
+    const storyObjective=window.SpellStory?.objective?.();
+    let text;
+    if(storyObjective)text=storyObjective;
+    else if(fieldState.enemyDefeated)text="実戦成功。ルミエルと話してみよう";
+    else if(G.magicReady())text="東の草むらにいる魔物へ向かおう";
+    else text="北西の魔法工房で Fire と Heal を登録しよう";
+    $("#field-objective").textContent=text;
+  }
 
   function showDialog(payload,speakerKey="system"){const data=typeof payload==="string"?{text:payload,speaker:speakerKey}:payload,speaker=speakers[data.speaker]||speakers.system;fieldState.dialogOpen=true;$("#field-dialog-name").textContent=data.name||speaker.name;$("#field-dialog-text").textContent=data.text||"";dialog.dataset.portrait=data.portrait||speaker.portrait;dialog.classList.remove("hidden")}
   function closeDialog(){fieldState.dialogOpen=false;dialog.classList.add("hidden")}
@@ -53,18 +61,26 @@
     const result=model.tryMove(direction);if(result.moved){fieldState.steps++;render()}else render();
   }
 
-  function startNewGame(){model.restore({player:{x:5,y:7,facing:"up"},follower:{x:5,y:8,facing:"up"}});fieldState.enemyDefeated=false;fieldState.dialogOpen=false;fieldState.steps=0;closeDialog();render();G.showScreen("field");setTimeout(()=>showDialog({speaker:"lumiere",text:"まずは魔法工房で Fire と Heal を準備しよう。北東には魔導具店もあるみたい。"}),80)}
+  function startNewGame(){
+    model.restore({player:{x:5,y:7,facing:"up"},follower:{x:5,y:8,facing:"up"}});fieldState.enemyDefeated=false;fieldState.dialogOpen=false;fieldState.steps=0;closeDialog();render();
+    if(window.SpellStory?.startChapter1)window.SpellStory.startChapter1();
+    else{G.showScreen("field");setTimeout(()=>showDialog({speaker:"lumiere",text:"まずは魔法工房で Fire と Heal を準備しよう。北東には魔導具店もあるみたい。"}),80)}
+  }
   function returnFromWorkshop(){render();G.showScreen("field");if(G.magicReady())setTimeout(()=>showDialog({speaker:"lumiere",text:"準備完了。東の草むらで実戦テストしよう。"}),80)}
   function onBattleWon(){fieldState.enemyDefeated=true;render();G.showScreen("field");setTimeout(()=>showDialog({speaker:"system",text:"グリッチスライムを倒した。\nルミエルが少し得意そうにこちらを見ている。"}),80)}
 
   function saveGame(){
-    const data={version:5,magic:G.serializeMagic(),party:G.serializeParty(),items:G.serializeItems(),field:{...model.snapshot(),enemyDefeated:fieldState.enemyDefeated,steps:fieldState.steps}};
-    localStorage.setItem("spell-operator-v03",JSON.stringify(data));showDialog({speaker:"system",text:"セーブしました。"});
+    const data={version:6,magic:G.serializeMagic(),party:G.serializeParty(),items:G.serializeItems(),story:window.SpellStory?.serialize?.()||null,field:{...model.snapshot(),enemyDefeated:fieldState.enemyDefeated,steps:fieldState.steps}};
+    localStorage.setItem("spell-operator-v03",JSON.stringify(data));
+    if(G.screens.field.classList.contains("active"))showDialog({speaker:"system",text:"セーブしました。"});
+    return true;
   }
   function loadGame(){
     try{
       const raw=localStorage.getItem("spell-operator-v03");if(!raw){showDialog({speaker:"system",text:"セーブデータがありません。"});return}
-      const data=JSON.parse(raw);G.restoreMagic(data.magic||{});G.restoreItems(data.items||{});G.restoreParty(data.party||{});model.restore(data.field||{});fieldState.enemyDefeated=Boolean(data.field?.enemyDefeated);fieldState.steps=Number(data.field?.steps||0);render();G.showScreen("field");showDialog({speaker:"system",text:"ロードしました。"});
+      const data=JSON.parse(raw);G.restoreMagic(data.magic||{});G.restoreItems(data.items||{});G.restoreParty(data.party||{});window.SpellStory?.restore?.(data.story);model.restore(data.field||{});fieldState.enemyDefeated=Boolean(data.field?.enemyDefeated);fieldState.steps=Number(data.field?.steps||0);render();
+      if(window.SpellStory&&!window.SpellStory.isComplete())window.SpellStory.resume();
+      else{G.showScreen("field");showDialog({speaker:"system",text:"ロードしました。"})}
     }catch(e){console.error(e);showDialog({speaker:"system",text:"ロードに失敗しました。"})}
   }
 
