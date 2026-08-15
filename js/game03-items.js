@@ -53,8 +53,7 @@
     const meta=item.type==="equipment"?`${statLabel[item.stat]||item.stat} +${item.bonus}`:item.healHp?`HP +${item.healHp}`:`MP +${item.healMp}`;
     let actions="";
     if(item.type==="consumable"){
-      if(item.healMp)actions=`<button data-use-item="${key}" data-target="lumiere">ルミエルに使う</button>`;
-      else actions=`<button data-use-item="${key}" data-target="sophie">ソフィーに使う</button><button data-use-item="${key}" data-target="lumiere">ルミエルに使う</button>`;
+      actions=`<button data-use-item="${key}" data-target="sophie">ソフィーに使う</button><button data-use-item="${key}" data-target="lumiere">ルミエルに使う</button>`;
     }else{
       actions=`<button data-equip-item="${key}" data-target="sophie">ソフィーに装備</button><button data-equip-item="${key}" data-target="lumiere">ルミエルに装備</button>`;
     }
@@ -100,7 +99,7 @@
 
   function use(key,target){
     const item=G.itemDefinitions[key],result=G.useItem(target,key);
-    if(!result.ok){message=item?.healMp&&target!=="lumiere"?"これはルミエル専用です。":"今は使う必要がありません。";renderBackpack();return;}
+    if(!result.ok){message="今は使う必要がありません。";renderBackpack();return;}
     message=`${memberName(target)}に${item.name}を使った。${result.amount}回復した。`;
     renderBackpack();
   }
