@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Spell Operator Prototype 0.1 - 魔法をプログラムして戦うブラウザRPG">
+  <title>Spell Operator Prototype 0.1</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="kicker">BROWSER RPG PROTOTYPE</p>
+        <h1>Spell Operator</h1>
+      </div>
+      <div class="version">Prototype 0.1</div>
+    </header>
+
+    <section id="screen-title" class="screen active">
+      <div class="title-card panel">
+        <p class="eyebrow">MAGIC IS CODE.</p>
+        <h2>自分で作った魔法で戦う。</h2>
+        <p>まずデバッグルームで <strong>Fire</strong> を完成させ、実戦登録してください。</p>
+        <button id="start-button" class="primary big">GAME START</button>
+      </div>
+    </section>
+
+    <section id="screen-debug" class="screen">
+      <div class="screen-heading">
+        <div>
+          <p class="kicker">DEBUG ROOM</p>
+          <h2>魔法開発：Fire</h2>
+        </div>
+        <div id="spell-badge" class="badge muted">未登録</div>
+      </div>
+
+      <div class="debug-grid">
+        <section class="panel editor-panel">
+          <div class="panel-title-row">
+            <h3>Spell Source</h3>
+            <button id="reset-code" class="secondary compact">初期コード</button>
+          </div>
+          <textarea id="code-editor" spellcheck="false" aria-label="魔法コード"></textarea>
+          <div class="hint-box">
+            <strong>課題</strong>
+            <span>1000回ループではオーバーヒートします。<code>range(1000)</code> を直して、5 → 4 → 3 → 2 → 1 と出力してから <code>cast("fire")</code> を実行する。</span>
+          </div>
+          <div class="button-row">
+            <button id="run-code" class="primary">▶ 実行</button>
+            <button id="register-spell" class="secondary" disabled>実戦登録</button>
+          </div>
+        </section>
+
+        <section class="panel console-panel">
+          <div class="panel-title-row">
+            <h3>Debug Console</h3>
+            <span id="run-state" class="status neutral">READY</span>
+          </div>
+          <pre id="console-output" class="console">コードを実行してください。</pre>
+          <dl class="metrics">
+            <div><dt>実行ステップ</dt><dd id="metric-steps">—</dd></div>
+            <div><dt>推定MP</dt><dd id="metric-mp">—</dd></div>
+            <div><dt>結果</dt><dd id="metric-result">未実行</dd></div>
+          </dl>
+          <div class="manual">
+            <h4>Prototype 0.1 命令</h4>
+            <p><code>spell fire</code> / <code>for i in range(5):</code> / <code>print(...)</code> / <code>cast("fire")</code></p>
+            <p>1000ステップを超えると <strong>OVERHEAT</strong>。</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="screen-battle" class="screen">
+      <div class="screen-heading">
+        <div>
+          <p class="kicker">BATTLE TEST</p>
+          <h2>実戦テスト</h2>
+        </div>
+        <div class="badge success">Fire 登録済み</div>
+      </div>
+
+      <section class="battlefield panel">
+        <div class="enemy-side">
+          <div class="enemy-card combatant-card">
+            <div>
+              <p class="name">デバッグスライム</p>
+              <div class="hp-row"><span>HP</span><div class="bar"><div id="enemy-hp-bar" class="bar-fill"></div></div><strong id="enemy-hp-text">80/80</strong></div>
+            </div>
+            <div id="enemy-sprite" class="sprite enemy" aria-label="敵">◉</div>
+          </div>
+        </div>
+
+        <div class="party-side">
+          <div class="party-sprites">
+            <div class="sprite sophie" aria-label="ソフィー">S</div>
+            <div class="sprite lumiere" aria-label="ルミエル">L</div>
+          </div>
+          <div class="party-cards">
+            <div class="combatant-card small">
+              <p class="name">ソフィー</p>
+              <div class="hp-row"><span>HP</span><div class="bar"><div id="sophie-hp-bar" class="bar-fill"></div></div><strong id="sophie-hp-text">42/42</strong></div>
+            </div>
+            <div class="combatant-card small">
+              <p class="name">ルミエル</p>
+              <div class="hp-row"><span>HP</span><div class="bar"><div id="lumiere-hp-bar" class="bar-fill"></div></div><strong id="lumiere-hp-text">35/35</strong></div>
+              <div class="hp-row mp"><span>MP</span><div class="bar"><div id="lumiere-mp-bar" class="bar-fill"></div></div><strong id="lumiere-mp-text">30/30</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="battle-ui panel">
+        <div id="battle-log" class="battle-log">デバッグスライムが あらわれた！</div>
+        <div id="sophie-menu" class="command-grid">
+          <button id="sophie-fight" class="command">たたかう</button>
+          <button id="sophie-defend" class="command">ぼうぎょ</button>
+        </div>
+        <div id="lumiere-menu" class="command-grid hidden">
+          <button id="lumiere-magic" class="command">まほう</button>
+          <button id="lumiere-defend" class="command">ぼうぎょ</button>
+        </div>
+        <div id="magic-menu" class="command-grid hidden">
+          <button id="cast-fire" class="command magic-command">Fire <span id="fire-cost">MP 5</span></button>
+          <button id="magic-back" class="command">もどる</button>
+        </div>
+      </section>
+    </section>
+
+    <section id="screen-clear" class="screen">
+      <div class="title-card panel clear-card">
+        <p class="eyebrow">SYSTEM CHECK COMPLETE</p>
+        <h2>Prototype Clear</h2>
+        <p>「魔法を作る → デバッグする → 登録する → RPG戦闘で使う」の一連の流れを確認できました。</p>
+        <dl class="clear-summary">
+          <div><dt>Fire MP</dt><dd id="clear-mp">—</dd></div>
+          <div><dt>実行ステップ</dt><dd id="clear-steps">—</dd></div>
+        </dl>
+        <button id="restart-button" class="primary">最初から</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/interpreter.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
