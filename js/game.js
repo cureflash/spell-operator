@@ -7,7 +7,7 @@
   addStyle("css/rpg-systems.css?v=2");
   addStyle("css/items.css?v=2");
   addStyle("css/story.css?v=1");
-  addStyle("css/rpg-field-v1.css?v=2");
+  addStyle("css/rpg-field-v1.css?v=3");
   const load = src => new Promise((resolve,reject)=>{ const s=document.createElement("script"); s.src=src; s.onload=resolve; s.onerror=reject; document.body.appendChild(s); });
   load("js/game03-core.js?v=6")
     .then(()=>load("js/game03-items.js?v=3"))
