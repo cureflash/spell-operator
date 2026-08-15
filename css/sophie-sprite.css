@@ -1,34 +1,32 @@
-/* Sophie overworld sprite v4: 3 frames x 4 directions, fixed 32x48 cells. */
-.sophie-field{
+/* Sophie + Lumiere overworld sprites: 8 frames x 4 directions. Row order: up, down, left, right. */
+.sophie-field,.lumiere-field{
   overflow:visible;
   transform:none!important;
+  filter:none!important;
 }
-.sophie-field .pixel-head,
-.sophie-field .pixel-body,
-.sophie-field .entity-tag{
+.sophie-field .pixel-head,.sophie-field .pixel-body,.sophie-field .entity-tag,
+.lumiere-field .pixel-head,.lumiere-field .pixel-body,.lumiere-field .entity-tag{
   display:none!important;
 }
-.sophie-field::before{
+.sophie-field::before,.lumiere-field::before{
   content:"";
   position:absolute;
-  z-index:2;
+  z-index:12;
   left:50%;
-  bottom:-8%;
-  width:calc(var(--tile-size)*1.02);
-  height:calc(var(--tile-size)*1.53);
+  bottom:-18%;
+  width:calc(var(--tile-size)*1.92);
+  height:calc(var(--tile-size)*1.92);
   transform:translateX(-50%);
-  background-image:url("../assets/characters/sophie_walk_v4.png?v=4");
   background-repeat:no-repeat;
-  background-size:300% 400%;
-  background-position:var(--sophie-frame-x,50%) var(--sophie-row-y,33.333333%);
+  background-size:800% 400%;
+  background-position:var(--sprite-frame-x,0%) var(--sprite-row-y,33.333333%);
   image-rendering:pixelated;
-  filter:drop-shadow(0 2px 1px rgba(0,0,0,.22));
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.24));
   pointer-events:none;
 }
-.sophie-field[data-frame="0"]{--sophie-frame-x:0%}
-.sophie-field[data-frame="1"]{--sophie-frame-x:50%}
-.sophie-field[data-frame="2"]{--sophie-frame-x:100%}
-.sophie-field[data-facing="down"]{--sophie-row-y:0%}
-.sophie-field[data-facing="up"]{--sophie-row-y:33.333333%}
-.sophie-field[data-facing="left"]{--sophie-row-y:66.666667%}
-.sophie-field[data-facing="right"]{--sophie-row-y:100%}
+.sophie-field::before{background-image:url("../assets/characters/sophie_walk_4dir_8frames.png?v=1")}
+.lumiere-field::before{background-image:url("../assets/characters/lumiere_walk_4dir_8frames.png?v=1")}
+.sophie-field[data-facing="up"],.lumiere-field[data-facing="up"]{--sprite-row-y:0%}
+.sophie-field[data-facing="down"],.lumiere-field[data-facing="down"]{--sprite-row-y:33.333333%}
+.sophie-field[data-facing="left"],.lumiere-field[data-facing="left"]{--sprite-row-y:66.666667%}
+.sophie-field[data-facing="right"],.lumiere-field[data-facing="right"]{--sprite-row-y:100%}
