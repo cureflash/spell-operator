@@ -11,8 +11,8 @@
   const load = src => new Promise((resolve,reject)=>{ const s=document.createElement("script"); s.src=src; s.onload=resolve; s.onerror=reject; document.body.appendChild(s); });
   load("js/game03-core.js?v=6")
     .then(()=>load("js/game03-items.js?v=3"))
-    .then(()=>load("js/game03-menu.js?v=5"))
-    .then(()=>load("js/game03-story.js?v=3"))
+    .then(()=>load("js/game03-menu.js?v=6"))
+    .then(()=>load("js/game03-story.js?v=4"))
     .then(()=>load("js/game03-battle.js?v=5"))
     .then(()=>load("js/game03-field.js?v=13"))
     .then(()=>{
