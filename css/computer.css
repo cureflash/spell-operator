@@ -1,18 +1,32 @@
-/* Sophie PC / grimoire editor */
+/* Sophie PC / grimoire specification library */
+.computer-screen{--pc-cyan:#7ce0ff;--pc-green:#8ff0bb}
 .computer-screen .screen-heading,
 .computer-editor-screen .screen-heading{border-bottom:1px solid rgba(124,224,255,.24)}
-.computer-screen{--pc-cyan:#7ce0ff;--pc-green:#8ff0bb}
-.computer-screen .screen-heading h2,.computer-editor-screen .screen-heading h2{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
-.pc-library-note{display:flex;gap:14px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:12px 14px;border:1px solid rgba(124,224,255,.32);border-radius:8px;background:linear-gradient(180deg,rgba(17,37,52,.95),rgba(12,25,37,.95));color:#dff8ff;font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
-.pc-library-note strong{color:var(--pc-cyan);letter-spacing:.08em}.pc-library-note span{font-size:12px;opacity:.82;text-align:right}
+.computer-screen .screen-heading h2,
+.computer-editor-screen .screen-heading h2{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
+.grimoire-library{display:grid!important;grid-template-columns:1fr;gap:18px}
+.spellbook-group{padding:14px;border:1px solid rgba(124,224,255,.26);border-radius:10px;background:rgba(10,20,31,.64)}
+.spellbook-group.learned-group{border-color:rgba(143,240,187,.3)}
+.spellbook-group-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:12px}
+.spellbook-group-head h3{margin:2px 0 0;font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
+.spellbook-group-head span{font-size:12px;opacity:.72;text-align:right}
+.spellbook-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.spellbook-empty{grid-column:1/-1;margin:0;padding:18px;border:1px dashed rgba(255,255,255,.18);border-radius:8px;text-align:center;opacity:.62}
 .computer-screen .spell-card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(27,34,51,.98),rgba(20,25,39,.98));border-color:rgba(124,224,255,.28)}
-.computer-screen .spell-card::after{content:"FILE";position:absolute;right:10px;top:8px;font:700 10px/1 ui-monospace,monospace;color:rgba(124,224,255,.34);letter-spacing:.12em}
-.computer-screen .spell-card.locked{filter:saturate(.2);opacity:.58}.computer-screen .spell-card.locked::after{content:"LOCKED"}
-.computer-screen .spell-card.locked button{cursor:not-allowed}
+.computer-screen .spell-card.learned{border-color:rgba(143,240,187,.42)}
+.computer-screen .spell-card::after{content:"SPEC";position:absolute;right:10px;top:8px;font:700 10px/1 ui-monospace,monospace;color:rgba(124,224,255,.34);letter-spacing:.12em}
+.computer-screen .spell-card.learned::after{content:"LEARNED";color:rgba(143,240,187,.52)}
 .computer-screen .spell-card h3{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
 .computer-screen .spell-card .primary{background:linear-gradient(180deg,#2489a8,#17647d);border-color:#7ce0ff;color:#fff}
+.grimoire-spec{margin:12px 0;padding:10px 12px;border-left:3px solid var(--pc-cyan);background:rgba(124,224,255,.07);font-size:13px}
+.grimoire-spec strong{display:block;margin-bottom:5px;color:var(--pc-cyan)}
+.grimoire-spec ul{margin:0;padding-left:20px}
+.grimoire-spec li+li{margin-top:4px}
+.spell-learned-note{display:block;margin-top:8px;color:var(--pc-green)}
 .computer-screen .deploy-panel{border-color:rgba(143,240,187,.28)}
 .computer-editor-screen .editor-panel,.computer-editor-screen .console-panel{border-color:rgba(124,224,255,.25)}
 .computer-editor-screen #code-editor{background:#0d1118;color:#d7f3ff;border-color:#41687a;caret-color:#8ff0bb}
 .computer-editor-screen .console{background:#090d12;color:#bfead2}
-@media(max-width:760px){.pc-library-note{align-items:flex-start;flex-direction:column}.pc-library-note span{text-align:left}}
+.computer-editor-screen .hint-box ul{margin:4px 0 8px;padding-left:20px}
+.computer-editor-screen .hint-box p{margin:6px 0 0}
+@media(max-width:760px){.spellbook-list{grid-template-columns:1fr}.spellbook-group-head{align-items:flex-start;flex-direction:column}.spellbook-group-head span{text-align:left}}
