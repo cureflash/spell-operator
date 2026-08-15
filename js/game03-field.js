@@ -36,7 +36,14 @@
 
   function tileType(x,y){if(y===0||y===H-1||x===0||x===W-1)return"tree";if(x>=1&&x<=4&&y>=1&&y<=3){if(x===2&&y===3)return"door";if(y===1)return"roof";return"building"}if(x>=10&&x<=12&&y>=1&&y<=2)return"water";if((y>=4&&y<=7&&x>=2&&x<=11)||(x===5&&y===8))return"path";if((x+y)%7===0)return"flower";return"grass"}
   function buildMap(){const map=$("#field-map");[...map.querySelectorAll(".field-tile")].forEach(el=>el.remove());const frag=document.createDocumentFragment();for(let y=0;y<H;y++)for(let x=0;x<W;x++){const t=document.createElement("div");t.className=`field-tile ${tileType(x,y)}`;t.dataset.x=x;t.dataset.y=y;frag.appendChild(t)}map.insertBefore(frag,map.firstChild)}
-  function place(sel,pos){const el=$(sel);el.style.setProperty("--x",pos.x);el.style.setProperty("--y",pos.y);el.classList.remove("facing-left");if(pos.facing==="left")el.classList.add("facing-left")}
+  function place(sel,pos){
+    const el=$(sel);
+    el.style.setProperty("--x",pos.x);
+    el.style.setProperty("--y",pos.y);
+    if(pos.facing)el.dataset.facing=pos.facing;
+    el.classList.remove("facing-left");
+    if(pos.facing==="left")el.classList.add("facing-left");
+  }
   function render(){place("#field-player",model.player);place("#field-follower",model.follower);place("#field-npc",npc);place("#field-enemy",enemy);place("#field-sign",sign);$("#field-enemy").classList.toggle("defeated",fieldState.enemyDefeated);updateObjective()}
   function updateObjective(){let text;if(fieldState.enemyDefeated)text="実戦成功。ルミエルと話してみよう";else if(G.magicReady())text="東の草むらにいる魔物へ向かおう";else text="北西の魔法工房で Fire と Heal を登録しよう";$("#field-objective").textContent=text}
 
@@ -92,7 +99,6 @@
     if(same(f,door)){G.openWorkshop();return}
     if(same(f,npc)){showDialog({speaker:"traveler",text:"東の草むらには変な魔物がいるよ。魔法を準備してから行った方がいい。"});return}
     if(same(f,sign)){showDialog({speaker:"sign",text:"← 魔法工房　　東の草むら →"});return}
-    // 何もない場所では完全に無反応。
   }
 
   function tryMove(direction){
