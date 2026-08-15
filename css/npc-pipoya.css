@@ -1,0 +1,60 @@
+/*
+ * NPC sprites: PIPOYA free 32x32 character-chip material.
+ * Source: https://pipoya.net/sozai/assets/charachip/character-chip-2/
+ * Material image used directly from Pipoya's official site.
+ * The NPCs are stationary for now, so a front-facing idle frame is selected for each.
+ */
+
+.story-npc .pixel-head,
+.story-npc .pixel-body{
+  display:none!important;
+}
+
+.story-npc::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:1px;
+  width:32px;
+  height:32px;
+  z-index:2;
+  transform:translateX(-50%) scale(1.18);
+  transform-origin:50% 100%;
+  background-image:url("https://pipoya.net/sozai/wp-content/uploads/2018/07/dd229ada7af682fc86bf9c55acdf301d.png");
+  background-repeat:no-repeat;
+  background-size:512px 512px;
+  image-rendering:pixelated;
+  pointer-events:none;
+}
+
+/* The source image is composed of 32px frames, 3 walk frames per character. */
+.npc-classmate::before{
+  /* young female-looking character */
+  background-position:-32px -128px;
+}
+
+.npc-librarian::before{
+  /* purple-robed / scholar-looking character */
+  background-position:-128px -256px;
+}
+
+.npc-parts::before{
+  /* hat / merchant-looking character */
+  background-position:-32px -256px;
+}
+
+.npc-traveler::before{
+  /* green adventurer-looking character */
+  background-position:-416px 0;
+}
+
+/* Keep quest marker above the imported sprite. */
+.story-npc .entity-tag{
+  z-index:5;
+}
+
+@media(max-width:760px){
+  .story-npc::before{
+    transform:translateX(-50%) scale(1.08);
+  }
+}
