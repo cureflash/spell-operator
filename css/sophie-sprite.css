@@ -1,4 +1,4 @@
-/* Sophie overworld sprite: 3 frames x 4 directions, fixed 32x48 cells. */
+/* Sophie overworld sprite v4: 3 frames x 4 directions, fixed 32x48 cells. */
 .sophie-field{
   overflow:visible;
   transform:none!important;
@@ -13,11 +13,11 @@
   position:absolute;
   z-index:2;
   left:50%;
-  bottom:-3%;
-  width:calc(var(--tile-size)*.78);
-  height:calc(var(--tile-size)*1.17);
+  bottom:-8%;
+  width:calc(var(--tile-size)*1.02);
+  height:calc(var(--tile-size)*1.53);
   transform:translateX(-50%);
-  background-image:url("../assets/characters/sophie_walk_v3.png");
+  background-image:url("../assets/characters/sophie_walk_v4.png?v=4");
   background-repeat:no-repeat;
   background-size:300% 400%;
   background-position:var(--sophie-frame-x,50%) var(--sophie-row-y,33.333333%);

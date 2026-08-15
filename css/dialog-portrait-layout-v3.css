@@ -1,0 +1,66 @@
+/* Dialogue layout v3: portrait fills the entire left pane; speaker name stays at text panel top-left. */
+.field-dialog{
+  grid-template-columns:160px 1fr!important;
+  min-height:160px!important;
+}
+.dialog-speaker{
+  padding:0!important;
+  justify-content:stretch!important;
+  overflow:hidden!important;
+}
+.dialog-portrait{
+  width:100%!important;
+  height:100%!important;
+  min-height:160px!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background-size:cover!important;
+  background-position:center!important;
+}
+.dialog-name{
+  position:absolute!important;
+  left:176px!important;
+  top:12px!important;
+  width:auto!important;
+  min-width:92px!important;
+  min-height:0!important;
+  padding:3px 10px!important;
+  display:block!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:#202128!important;
+  font-size:14px!important;
+  font-weight:900!important;
+  line-height:1.25!important;
+  text-align:left!important;
+  z-index:3!important;
+}
+.dialog-message{
+  padding:45px 42px 20px 18px!important;
+  min-height:160px!important;
+  align-items:flex-start!important;
+}
+#field-dialog-text{
+  font-size:14px!important;
+  line-height:1.75!important;
+}
+@media(max-width:760px){
+  .field-dialog{
+    grid-template-columns:144px 1fr!important;
+    min-height:144px!important;
+  }
+  .dialog-portrait{
+    min-height:144px!important;
+  }
+  .dialog-name{
+    left:158px!important;
+    top:10px!important;
+    font-size:13px!important;
+  }
+  .dialog-message{
+    min-height:144px!important;
+    padding:40px 34px 16px 14px!important;
+  }
+}

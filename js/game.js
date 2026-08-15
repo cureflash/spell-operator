@@ -1,8 +1,9 @@
 (() => {
   "use strict";
   const addStyle = href => { const style=document.createElement("link"); style.rel="stylesheet"; style.href=href; document.head.appendChild(style); };
-  addStyle("css/sophie-sprite.css?v=3");
-  addStyle("css/dialog-portrait-layout-v2.css?v=2");
+  addStyle("css/sophie-sprite.css?v=4");
+  addStyle("css/field-assets.css?v=5");
+  addStyle("css/dialog-portrait-layout-v3.css?v=3");
   const load = src => new Promise((resolve,reject)=>{ const s=document.createElement("script"); s.src=src; s.onload=resolve; s.onerror=reject; document.body.appendChild(s); });
   load("js/game03-core.js")
     .then(()=>load("js/game03-battle.js"))

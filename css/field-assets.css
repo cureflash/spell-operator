@@ -1,0 +1,13 @@
+/* Field asset override v5: render generated DS-style background while preserving logical tiles/collision model. */
+.field-map{
+  background:#7faf60 url("../assets/maps/starting_field_v5.png?v=5") center/100% 100% no-repeat!important;
+  image-rendering:pixelated;
+}
+.field-tile{
+  background:transparent!important;
+  border:0!important;
+}
+.field-tile::before,
+.field-tile::after{
+  display:none!important;
+}
