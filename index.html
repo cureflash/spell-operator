@@ -2,221 +2,117 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Spell Operator Prototype 0.2 - 魔法をプログラムして戦うブラウザRPG">
-  <title>Spell Operator Prototype 0.2</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="description" content="Spell Operator Prototype 0.3 - 連れ歩きフィールドと自作魔法バトル">
+  <title>Spell Operator Prototype 0.3</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/prototype02.css">
+  <link rel="stylesheet" href="css/prototype03.css">
 </head>
 <body>
   <main class="shell">
     <header class="topbar">
-      <div>
-        <p class="kicker">BROWSER RPG PROTOTYPE</p>
-        <h1>Spell Operator</h1>
-      </div>
-      <div class="version">Prototype 0.2</div>
+      <div><p class="kicker">BROWSER RPG PROTOTYPE</p><h1>Spell Operator</h1></div>
+      <div class="version">Prototype 0.3</div>
     </header>
 
     <section id="screen-title" class="screen active">
       <div class="title-card panel">
         <p class="eyebrow">MAGIC IS CODE.</p>
-        <h2>作った魔法を、戦力にする。</h2>
-        <p><strong>Fire</strong> と <strong>Heal</strong> を開発し、2連戦の実戦テストへ進んでください。</p>
+        <h2>ソフィーとルミエルの二人旅。</h2>
+        <p>フィールドを歩き、魔法工房でコードを書き、自作した魔法で戦います。</p>
         <button id="start-button" class="primary big">GAME START</button>
       </div>
     </section>
 
-    <section id="screen-hub" class="screen">
-      <div class="screen-heading">
-        <div>
-          <p class="kicker">SPELL WORKSHOP</p>
-          <h2>魔法工房</h2>
+    <section id="screen-field" class="screen">
+      <div class="game-window field-window">
+        <div class="field-hud">
+          <div><span class="field-area">はじまりの平原</span><span id="field-objective">魔法工房へ行こう</span></div>
+          <div class="field-tools"><button id="field-save" class="mini-button">SAVE</button><button id="field-load" class="mini-button">LOAD</button></div>
         </div>
-        <div id="workshop-progress" class="badge muted">0 / 2 登録</div>
+        <div id="field-map" class="field-map" aria-label="フィールドマップ">
+          <div id="field-player" class="field-entity person sophie-field" aria-label="ソフィー"><span class="pixel-head"></span><span class="pixel-body"></span><span class="entity-tag">S</span></div>
+          <div id="field-follower" class="field-entity person lumiere-field" aria-label="ルミエル"><span class="pixel-head"></span><span class="pixel-body"></span><span class="entity-tag">L</span></div>
+          <div id="field-npc" class="field-entity person npc-field" aria-label="旅人"><span class="pixel-head"></span><span class="pixel-body"></span><span class="entity-tag">!</span></div>
+          <div id="field-enemy" class="field-entity field-monster" aria-label="魔物"><span>●</span></div>
+          <div id="field-sign" class="field-entity field-sign" aria-label="看板">▣</div>
+        </div>
+        <div id="field-dialog" class="field-dialog hidden"><div id="field-dialog-text"></div><span class="dialog-next">▼</span></div>
       </div>
+      <div class="field-help panel"><span>移動：矢印 / WASD</span><span>決定・話す：Enter / Space</span><span>ルミエルに振り向いて話しかけられます</span></div>
+      <div class="touch-controls" aria-label="タッチ操作">
+        <div class="dpad"><button data-dir="up">▲</button><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div>
+        <button id="field-action" class="action-button">A</button>
+      </div>
+    </section>
 
+    <section id="screen-hub" class="screen">
+      <div class="screen-heading"><div><p class="kicker">SPELL WORKSHOP</p><h2>魔法工房</h2></div><div id="workshop-progress" class="badge muted">0 / 2 登録</div></div>
       <div class="spell-grid">
         <article class="panel spell-card">
-          <div class="spell-card-head">
-            <div>
-              <p class="eyebrow">LOOP / ATTACK</p>
-              <h3>Fire</h3>
-            </div>
-            <span id="fire-status" class="badge muted">未登録</span>
-          </div>
+          <div class="spell-card-head"><div><p class="eyebrow">LOOP / ATTACK</p><h3>Fire</h3></div><span id="fire-status" class="badge muted">未登録</span></div>
           <p>ループを必要な回数まで削り、オーバーヒートを避けて攻撃魔法を完成させる。</p>
-          <dl class="spell-spec">
-            <div><dt>効果</dt><dd>敵に35ダメージ</dd></div>
-            <div><dt>主題</dt><dd>for / 計算量</dd></div>
-          </dl>
+          <dl class="spell-spec"><div><dt>効果</dt><dd>敵に35ダメージ</dd></div><div><dt>主題</dt><dd>for / 計算量</dd></div></dl>
           <button id="develop-fire" class="primary">Fireを開発</button>
         </article>
-
         <article class="panel spell-card">
-          <div class="spell-card-head">
-            <div>
-              <p class="eyebrow">IF / SUPPORT</p>
-              <h3>Heal</h3>
-            </div>
-            <span id="heal-status" class="badge muted">未登録</span>
-          </div>
+          <div class="spell-card-head"><div><p class="eyebrow">IF / SUPPORT</p><h3>Heal</h3></div><span id="heal-status" class="badge muted">未登録</span></div>
           <p>HPを変数に入れ、条件を満たしたときだけ回復処理を実行する。</p>
-          <dl class="spell-spec">
-            <div><dt>効果</dt><dd>味方1人を20回復</dd></div>
-            <div><dt>主題</dt><dd>変数 / if</dd></div>
-          </dl>
+          <dl class="spell-spec"><div><dt>効果</dt><dd>味方1人を20回復</dd></div><div><dt>主題</dt><dd>変数 / if</dd></div></dl>
           <button id="develop-heal" class="primary">Healを開発</button>
         </article>
       </div>
-
-      <section class="panel deploy-panel">
-        <div>
-          <p class="eyebrow">BATTLE TEST</p>
-          <h3>登録した魔法を実戦で試す</h3>
-          <p>2つとも登録すると、HP・MPを持ち越す2連戦へ進めます。</p>
-        </div>
-        <button id="battle-button" class="primary big" disabled>実戦テスト</button>
-      </section>
+      <section class="panel deploy-panel"><div><p class="eyebrow">FIELD</p><h3>フィールドへ戻る</h3><p>FireとHealを登録したら、東側にいる魔物へ向かってください。</p></div><button id="return-field" class="primary big">フィールドへ</button></section>
     </section>
 
     <section id="screen-debug" class="screen">
-      <div class="screen-heading">
-        <div>
-          <p class="kicker">DEBUG ROOM</p>
-          <h2 id="debug-title">魔法開発</h2>
-        </div>
-        <div id="spell-badge" class="badge muted">未登録</div>
-      </div>
-
+      <div class="screen-heading"><div><p class="kicker">DEBUG ROOM</p><h2 id="debug-title">魔法開発</h2></div><div id="spell-badge" class="badge muted">未登録</div></div>
       <div class="debug-grid">
         <section class="panel editor-panel">
-          <div class="panel-title-row">
-            <h3>Spell Source</h3>
-            <button id="reset-code" class="secondary compact">初期コード</button>
-          </div>
+          <div class="panel-title-row"><h3>Spell Source</h3><button id="reset-code" class="secondary compact">初期コード</button></div>
           <textarea id="code-editor" spellcheck="false" aria-label="魔法コード"></textarea>
-          <div class="hint-box">
-            <strong>課題</strong>
-            <span id="debug-hint"></span>
-          </div>
-          <div class="button-row wrap">
-            <button id="run-code" class="primary">▶ 実行</button>
-            <button id="register-spell" class="secondary" disabled>実戦登録</button>
-            <button id="back-workshop" class="secondary">工房へ戻る</button>
-          </div>
+          <div class="hint-box"><strong>課題</strong><span id="debug-hint"></span></div>
+          <div class="button-row wrap"><button id="run-code" class="primary">▶ 実行</button><button id="register-spell" class="secondary" disabled>実戦登録</button><button id="back-workshop" class="secondary">工房へ戻る</button></div>
         </section>
-
         <section class="panel console-panel">
-          <div class="panel-title-row">
-            <h3>Debug Console</h3>
-            <span id="run-state" class="status neutral">READY</span>
-          </div>
+          <div class="panel-title-row"><h3>Debug Console</h3><span id="run-state" class="status neutral">READY</span></div>
           <pre id="console-output" class="console">コードを実行してください。</pre>
-          <dl class="metrics">
-            <div><dt>実行ステップ</dt><dd id="metric-steps">—</dd></div>
-            <div><dt>推定MP</dt><dd id="metric-mp">—</dd></div>
-            <div><dt>結果</dt><dd id="metric-result">未実行</dd></div>
-          </dl>
-          <div class="manual">
-            <h4>Prototype 0.2 命令</h4>
-            <p><code>spell</code> / 変数代入 / <code>for</code> / <code>if</code> / <code>print()</code> / <code>cast()</code></p>
-            <p>1000ステップを超えると <strong>OVERHEAT</strong>。少ないステップほどMP消費も小さくなります。</p>
-          </div>
+          <dl class="metrics"><div><dt>実行ステップ</dt><dd id="metric-steps">—</dd></div><div><dt>推定MP</dt><dd id="metric-mp">—</dd></div><div><dt>結果</dt><dd id="metric-result">未実行</dd></div></dl>
+          <div class="manual"><h4>Prototype 0.3 命令</h4><p><code>spell</code> / 変数代入 / <code>for</code> / <code>if</code> / <code>print()</code> / <code>cast()</code></p><p>1000ステップを超えると <strong>OVERHEAT</strong>。少ないステップほどMP消費も小さくなります。</p></div>
         </section>
       </div>
     </section>
 
     <section id="screen-battle" class="screen">
-      <div class="screen-heading">
-        <div>
-          <p class="kicker">BATTLE TEST</p>
-          <h2>実戦テスト</h2>
-        </div>
-        <div id="encounter-badge" class="badge success">ENCOUNTER 1 / 2</div>
-      </div>
-
-      <section class="battlefield panel">
-        <div class="enemy-side">
-          <div class="enemy-card combatant-card">
-            <div>
-              <p id="enemy-name" class="name">デバッグスライム</p>
-              <div class="hp-row"><span>HP</span><div class="bar"><div id="enemy-hp-bar" class="bar-fill"></div></div><strong id="enemy-hp-text">80/80</strong></div>
-            </div>
-            <div id="enemy-sprite" class="sprite enemy" aria-label="敵">◉</div>
+      <div class="battle-shell game-window">
+        <div class="battle-scene">
+          <div class="enemy-status pokemon-status"><p id="enemy-name" class="name">グリッチスライム</p><div class="status-line"><span>HP</span><div class="bar"><div id="enemy-hp-bar" class="bar-fill"></div></div><strong id="enemy-hp-text">90/90</strong></div></div>
+          <div class="enemy-platform"><div id="enemy-sprite" class="battle-sprite enemy-sprite">●</div></div>
+          <div class="party-platform"><div class="battle-sprite sophie-battle"><span>S</span></div><div class="battle-sprite lumiere-battle"><span>L</span></div></div>
+          <div class="party-status pokemon-status">
+            <div class="party-status-row"><span class="party-name">ソフィー</span><div class="status-line"><span>HP</span><div class="bar"><div id="sophie-hp-bar" class="bar-fill"></div></div><strong id="sophie-hp-text">42/42</strong></div></div>
+            <div class="party-status-row"><span class="party-name">ルミエル</span><div class="status-line"><span>HP</span><div class="bar"><div id="lumiere-hp-bar" class="bar-fill"></div></div><strong id="lumiere-hp-text">35/35</strong></div><div class="status-line mp"><span>MP</span><div class="bar"><div id="lumiere-mp-bar" class="bar-fill"></div></div><strong id="lumiere-mp-text">30/30</strong></div></div>
           </div>
         </div>
-
-        <div class="party-side">
-          <div class="party-sprites">
-            <div class="sprite sophie" aria-label="ソフィー">S</div>
-            <div class="sprite lumiere" aria-label="ルミエル">L</div>
-          </div>
-          <div class="party-cards">
-            <div class="combatant-card small">
-              <p class="name">ソフィー</p>
-              <div class="hp-row"><span>HP</span><div class="bar"><div id="sophie-hp-bar" class="bar-fill"></div></div><strong id="sophie-hp-text">42/42</strong></div>
-            </div>
-            <div class="combatant-card small">
-              <p class="name">ルミエル</p>
-              <div class="hp-row"><span>HP</span><div class="bar"><div id="lumiere-hp-bar" class="bar-fill"></div></div><strong id="lumiere-hp-text">35/35</strong></div>
-              <div class="hp-row mp"><span>MP</span><div class="bar"><div id="lumiere-mp-bar" class="bar-fill"></div></div><strong id="lumiere-mp-text">30/30</strong></div>
-            </div>
+        <div class="battle-command-box">
+          <div id="battle-log" class="battle-log">魔物が あらわれた！</div>
+          <div class="battle-menu-wrap">
+            <div id="sophie-menu" class="command-grid"><button id="sophie-fight" class="command">たたかう</button><button id="sophie-defend" class="command">ぼうぎょ</button></div>
+            <div id="lumiere-menu" class="command-grid hidden"><button id="lumiere-magic" class="command">まほう</button><button id="lumiere-defend" class="command">ぼうぎょ</button></div>
+            <div id="magic-menu" class="command-grid hidden"><button id="cast-fire" class="command magic-command">Fire <span id="fire-cost">MP —</span></button><button id="cast-heal" class="command magic-command">Heal <span id="heal-cost">MP —</span></button><button id="magic-back" class="command">もどる</button></div>
+            <div id="heal-target-menu" class="command-grid hidden"><button id="heal-sophie" class="command">ソフィー</button><button id="heal-lumiere" class="command">ルミエル</button><button id="heal-back" class="command">もどる</button></div>
           </div>
         </div>
-      </section>
-
-      <section class="battle-ui panel">
-        <div id="battle-log" class="battle-log">敵が あらわれた！</div>
-        <div id="sophie-menu" class="command-grid">
-          <button id="sophie-fight" class="command">たたかう</button>
-          <button id="sophie-defend" class="command">ぼうぎょ</button>
-        </div>
-        <div id="lumiere-menu" class="command-grid hidden">
-          <button id="lumiere-magic" class="command">まほう</button>
-          <button id="lumiere-defend" class="command">ぼうぎょ</button>
-        </div>
-        <div id="magic-menu" class="command-grid hidden">
-          <button id="cast-fire" class="command magic-command">Fire <span id="fire-cost">MP —</span></button>
-          <button id="cast-heal" class="command magic-command">Heal <span id="heal-cost">MP —</span></button>
-          <button id="magic-back" class="command">もどる</button>
-        </div>
-        <div id="heal-target-menu" class="command-grid hidden">
-          <button id="heal-sophie" class="command">ソフィーを回復</button>
-          <button id="heal-lumiere" class="command">ルミエルを回復</button>
-          <button id="heal-back" class="command">もどる</button>
-        </div>
-      </section>
-    </section>
-
-    <section id="screen-clear" class="screen">
-      <div class="title-card panel clear-card">
-        <p class="eyebrow">SYSTEM CHECK COMPLETE</p>
-        <h2>Prototype 0.2 Clear</h2>
-        <p>複数魔法の開発・登録・使い分けと、HP/MPを持ち越す連戦を確認できました。</p>
-        <dl class="clear-summary three">
-          <div><dt>Fire MP</dt><dd id="clear-fire-mp">—</dd></div>
-          <div><dt>Heal MP</dt><dd id="clear-heal-mp">—</dd></div>
-          <div><dt>撃破数</dt><dd>2</dd></div>
-        </dl>
-        <button id="clear-workshop" class="primary">魔法工房へ</button>
       </div>
     </section>
 
-    <section id="screen-defeat" class="screen">
-      <div class="title-card panel clear-card">
-        <p class="eyebrow">BATTLE FAILED</p>
-        <h2>戦闘不能</h2>
-        <p>魔法のMP効率や、Healを使うタイミングを見直してもう一度試せます。</p>
-        <div class="button-row center">
-          <button id="retry-battle" class="primary">再戦</button>
-          <button id="defeat-workshop" class="secondary">魔法工房へ</button>
-        </div>
-      </div>
-    </section>
+    <section id="screen-clear" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE WON</p><h2>勝利！</h2><p>自作した魔法を実戦で使えました。フィールドへ戻ります。</p><dl class="clear-summary"><div><dt>Fire MP</dt><dd id="clear-fire-mp">—</dd></div><div><dt>Heal MP</dt><dd id="clear-heal-mp">—</dd></div></dl><button id="clear-field" class="primary">フィールドへ戻る</button></div></section>
+
+    <section id="screen-defeat" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE FAILED</p><h2>戦闘不能</h2><p>再戦するか、魔法工房へ戻ってコードを見直せます。</p><div class="button-row center"><button id="retry-battle" class="primary">再戦</button><button id="defeat-workshop" class="secondary">魔法工房へ</button></div></div></section>
   </main>
-
   <script src="js/interpreter.js"></script>
+  <script src="js/field-model.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>
