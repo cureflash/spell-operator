@@ -12,7 +12,7 @@
   load("js/game03-core.js?v=6")
     .then(()=>load("js/game03-items.js?v=3"))
     .then(()=>load("js/game03-menu.js?v=4"))
-    .then(()=>load("js/game03-story.js?v=2"))
+    .then(()=>load("js/game03-story.js?v=3"))
     .then(()=>load("js/game03-battle.js?v=5"))
     .then(()=>load("js/game03-field.js?v=13"))
     .then(()=>load("js/sophie-sprite.js?v=4"))
