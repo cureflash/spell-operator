@@ -4,10 +4,10 @@
   addStyle("css/sophie-sprite.css?v=4");
   addStyle("css/field-assets-v8.css?v=8");
   addStyle("css/dialog-portrait-layout-v3.css?v=3");
-  addStyle("css/rpg-systems.css?v=1");
+  addStyle("css/rpg-systems.css?v=2");
   const load = src => new Promise((resolve,reject)=>{ const s=document.createElement("script"); s.src=src; s.onload=resolve; s.onerror=reject; document.body.appendChild(s); });
   load("js/game03-core.js?v=3")
-    .then(()=>load("js/game03-menu.js?v=1"))
+    .then(()=>load("js/game03-menu.js?v=2"))
     .then(()=>load("js/game03-battle.js?v=3"))
     .then(()=>load("js/game03-field.js?v=10"))
     .then(()=>load("js/sophie-sprite.js?v=3"))
