@@ -12,6 +12,7 @@
   addStyle("css/computer.css?v=3");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   load("js/python-runner.js?v=1")
+    .then(()=>load("js/interpreter.js?v=3"))
     .then(()=>load("js/game03-core.js?v=8"))
     .then(()=>load("js/python-grimoire.js?v=1"))
     .then(()=>load("js/game03-items.js?v=3"))
