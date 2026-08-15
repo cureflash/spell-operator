@@ -1,68 +1,41 @@
 (() => {
   "use strict";
+  const entities=[document.getElementById("field-player"),document.getElementById("field-follower")].filter(Boolean);
+  if(!entities.length)return;
 
-  const player = document.getElementById("field-player");
-  if (!player) return;
-
-  const keyToDirection = {
-    ArrowUp: "up", w: "up", W: "up",
-    ArrowDown: "down", s: "down", S: "down",
-    ArrowLeft: "left", a: "left", A: "left",
-    ArrowRight: "right", d: "right", D: "right"
-  };
-
-  let previousX = Number(player.style.getPropertyValue("--x") || 0);
-  let previousY = Number(player.style.getPropertyValue("--y") || 0);
-  let walkPhase = 0;
-  let idleTimer = null;
-
-  player.dataset.facing = player.classList.contains("facing-left") ? "left" : "up";
-  player.dataset.frame = "1";
-
-  function face(direction) {
-    if (!direction) return;
-    player.dataset.facing = direction;
+  const state=new Map();
+  for(const el of entities){
+    state.set(el,{x:Number(el.style.getPropertyValue("--x")||0),y:Number(el.style.getPropertyValue("--y")||0),frame:0,timer:null});
+    if(!el.dataset.facing)el.dataset.facing="down";
+    el.dataset.frame="0";
+    el.style.setProperty("--sprite-frame-x","0%");
   }
 
-  function animateStep() {
-    walkPhase ^= 1;
-    player.dataset.frame = walkPhase ? "0" : "2";
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      player.dataset.frame = "1";
-    }, 125);
+  function setFrame(el,frame){
+    const f=((frame%8)+8)%8;
+    el.dataset.frame=String(f);
+    el.style.setProperty("--sprite-frame-x",`${(f*100/7).toFixed(6)}%`);
   }
 
-  function readPosition() {
-    return {
-      x: Number(player.style.getPropertyValue("--x") || 0),
-      y: Number(player.style.getPropertyValue("--y") || 0)
-    };
-  }
+  function readPosition(el){return{x:Number(el.style.getPropertyValue("--x")||0),y:Number(el.style.getPropertyValue("--y")||0)}}
 
-  const observer = new MutationObserver(() => {
-    const current = readPosition();
-    const dx = current.x - previousX;
-    const dy = current.y - previousY;
-
-    if (dx || dy) {
-      if (Math.abs(dx) >= Math.abs(dy)) face(dx < 0 ? "left" : "right");
-      else face(dy < 0 ? "up" : "down");
-      animateStep();
-      previousX = current.x;
-      previousY = current.y;
+  function animateMove(el,dx,dy){
+    const s=state.get(el);if(!s)return;
+    if(dx||dy){
+      if(Math.abs(dx)>=Math.abs(dy))el.dataset.facing=dx<0?"left":"right";
+      else el.dataset.facing=dy<0?"up":"down";
     }
-  });
+    s.frame=(s.frame+1)%8;
+    setFrame(el,s.frame);
+    clearTimeout(s.timer);
+    s.timer=setTimeout(()=>setFrame(el,0),150);
+  }
 
-  observer.observe(player, { attributes: true, attributeFilter: ["style"] });
-
-  document.addEventListener("keydown", event => {
-    const direction = keyToDirection[event.key];
-    if (direction) face(direction);
-  }, true);
-
-  document.querySelectorAll("[data-dir]").forEach(button => {
-    button.addEventListener("pointerdown", () => face(button.dataset.dir), true);
-    button.addEventListener("click", () => face(button.dataset.dir), true);
-  });
+  for(const el of entities){
+    const observer=new MutationObserver(()=>{
+      const s=state.get(el),p=readPosition(el),dx=p.x-s.x,dy=p.y-s.y;
+      if(dx||dy){animateMove(el,dx,dy);s.x=p.x;s.y=p.y}
+    });
+    observer.observe(el,{attributes:true,attributeFilter:["style"]});
+  }
 })();
