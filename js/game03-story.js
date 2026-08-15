@@ -1,153 +1,145 @@
 (() => {
   "use strict";
-  const G=window.SpellGame03,$=G.$;
+  const G=window.SpellGame03,$=G.$,{key}=window.SpellFieldModel;
   const ENCRYPTED="080B07FE080907FA0802080B07F0";
   const PASSWORD="REPAIR7";
-  const story={stage:0,friendSolved:false,libraryLearned:false,passwordSolved:false,rewardTaken:false};
+  const story={active:false,scene:"school",schoolTalked:false,friendSolved:false,libraryLearned:false,shopAsked:false,passwordSolved:false,rewardTaken:false,puzzle:null};
+
+  const scenes={
+    school:{area:"放課後の学校",theme:"school",npc:{x:8,y:4,role:"friend",label:"クラスメイト"},exit:{x:12,y:7},spawn:{player:{x:4,y:7,facing:"right"},follower:{x:3,y:7,facing:"right"}}},
+    friend:{area:"友達の家",theme:"friend",npc:{x:8,y:3,role:"friend",label:"クラスメイト"},exit:{x:12,y:7},spawn:{player:{x:4,y:7,facing:"up"},follower:{x:3,y:7,facing:"up"}}},
+    library:{area:"ピジブルの私設図書館",theme:"library",npc:{x:7,y:3,role:"pigible",label:"ピジブル"},exit:{x:12,y:7},spawn:{player:{x:4,y:7,facing:"up"},follower:{x:3,y:7,facing:"up"}}},
+    parts:{area:"パーツ屋",theme:"parts",npc:{x:6,y:3,role:"shopkeeper",label:"店主"},terminal:{x:9,y:3},exit:{x:12,y:7},spawn:{player:{x:4,y:7,facing:"up"},follower:{x:3,y:7,facing:"up"}}}
+  };
+
+  function borderBlocked(){const a=[];for(let x=0;x<14;x++){a.push(key(x,0),key(x,9))}for(let y=1;y<9;y++){a.push(key(0,y),key(13,y))}return a}
+  function sceneConfig(){
+    const s=scenes[story.scene]||scenes.school,blocked=borderBlocked();
+    if(s.npc)blocked.push(key(s.npc.x,s.npc.y));
+    if(s.terminal)blocked.push(key(s.terminal.x,s.terminal.y));
+    if(s.exit)blocked.push(key(s.exit.x,s.exit.y));
+    return {...s,blocked};
+  }
 
   function ensureUi(){
-    const main=document.querySelector("main.shell");
-    if(!main||$("#screen-story"))return;
-    const section=document.createElement("section");
-    section.id="screen-story";section.className="screen";
-    section.innerHTML=`
-      <div class="story-wrap">
-        <div class="story-heading"><div><p class="kicker">CHAPTER 1</p><h2 id="story-title">最初の暗号</h2></div><span id="story-progress" class="story-progress">1 / 4</span></div>
-        <div id="story-scene" class="story-scene panel"></div>
-      </div>`;
-    const field=$("#screen-field");main.insertBefore(section,field||null);G.screens.story=section;
+    const main=document.querySelector("main.shell");if(!main)return;
+    let section=$("#screen-story");
+    if(!section){section=document.createElement("section");section.id="screen-story";section.className="screen";const field=$("#screen-field");main.insertBefore(section,field||null);G.screens.story=section}
+    section.innerHTML=`<div class="story-wrap"><div class="story-heading"><div><p class="kicker">CHAPTER 1 / PUZZLE</p><h2 id="story-title">暗号</h2></div><button id="story-cancel" class="secondary">フィールドへ戻る</button></div><div id="story-scene" class="story-scene panel"></div></div>`;
+    G.screens.story=section;
+  }
+  function esc(v){return String(v).replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+
+  function objective(){
+    if(!story.active)return null;
+    if(story.scene==="school")return story.schoolTalked?"東の出口から友達の家へ行こう":"教室にいるクラスメイトに話しかけよう";
+    if(story.scene==="friend")return story.friendSolved?"東の出口からピジブルの図書館へ行こう":"クラスメイトに話しかけて暗号を解こう";
+    if(story.scene==="library")return story.libraryLearned?"東の出口からパーツ屋へ行こう":"ピジブルに暗号の仕組みを聞こう";
+    if(story.scene==="parts"){
+      if(!story.shopAsked)return"店主に旧式端末の話を聞こう";
+      if(!story.passwordSolved)return"奥の旧式端末を調べてパスワードを復号しよう";
+      if(!story.rewardTaken)return"店主に端末が直ったことを報告しよう";
+      return"東の出口から平原へ出よう";
+    }
+    return null;
   }
 
-  function esc(v){return String(v).replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
-  function scene(title,location,body,actions=""){
-    $("#story-title").textContent=title;
-    $("#story-progress").textContent=`${Math.min(story.stage+1,4)} / 4`;
-    $("#story-scene").innerHTML=`<div class="story-location">${location}</div>${body}<div class="story-actions">${actions}</div>`;
-  }
+  function fieldDialog(name,text,portrait="traveler"){window.SpellField?.showDialog?.({speaker:"system",name,portrait,text})}
 
-  function render(){
-    if(story.stage<=0)return renderSchool();
-    if(story.stage===1)return renderFriend();
-    if(story.stage===2)return renderLibrary();
-    if(story.stage===3)return renderPartsShop();
-    return renderComplete();
-  }
-
-  function renderSchool(){
-    scene("最初の暗号","放課後・学校",
-      `<div class="story-dialog"><strong>クラスメイト</strong><p>「ソフィー、暗号って得意？　これ、解けたら面白い場所を教えてあげる」</p></div>
-       <div class="story-dialog sophie"><strong>ソフィー</strong><p>「暗号？　急だな……まあ、やってみるけど」</p></div>
-       <div class="story-dialog lumiere"><strong>ルミエル</strong><p>「規則があるならプログラムでも解ける。人力でやるより確実かもね」</p></div>`,
-      `<button class="primary" data-story-next="friend">友達の家へ行く</button>`);
-  }
-
-  function renderFriend(){
-    const result=story.friendSolved?`<p class="story-success">正解。LIBRARY＝図書館だ。</p>`:"";
-    scene("暗号クイズ","友達の家",
-      `<div class="story-dialog"><strong>クラスメイト</strong><p>「AをD、BをEみたいに、アルファベットを3文字先へずらしてあるよ」</p></div>
-       <div class="cipher-card"><span>暗号文</span><code>OLEUDUB</code><small>3文字戻すと元の単語になる。</small></div>
-       <label class="story-input-label">復号した単語<input id="friend-answer" autocomplete="off" spellcheck="false" placeholder="英大文字で入力"></label>
-       <p id="friend-result" class="story-result">${result}</p>`,
-      story.friendSolved?`<button class="primary" data-story-next="library">図書館へ行く</button>`:`<button class="primary" id="friend-check">答え合わせ</button>`);
-  }
-
-  function renderLibrary(){
-    scene("文字を数字として見る","ピジブルの私設図書館",
-      `<div class="story-dialog"><strong>ピジブル</strong><p>「文字は見た目だけじゃない。コンピュータの中ではUnicodeの番号として扱える」</p></div>
-       <div class="lesson-grid">
-         <div><strong>① 4文字ずつ区切る</strong><code>080B / 07FE / ...</code></div>
-         <div><strong>② 16進数を整数へ</strong><code>int(block, 16)</code></div>
-         <div><strong>③ 暗号化時の加算を戻す</strong><code>number - 1977</code></div>
-         <div><strong>④ 文字へ戻す</strong><code>chr(number)</code></div>
-       </div>
-       <div class="story-dialog lumiere"><strong>ルミエル</strong><p>「つまり、同じ処理を4文字ごとに繰り返せばいい。こういうのはループ向きだね」</p></div>`,
-      `<button class="primary" data-story-next="parts">パーツ屋へ行く</button>`);
-  }
-
-  function starterCode(){return `code = "${ENCRYPTED}"\npassword = ""\n\nfor i in range(0, len(code), 4):\n    block = code[i:i+4]\n    number = int(block, 16)\n    number = number - 0\n    password = password + chr(number)\n\nprint(password)`;}
-
-  function decodeWithOffset(offset){
-    let out="";
-    try{
-      for(let i=0;i<ENCRYPTED.length;i+=4){const n=parseInt(ENCRYPTED.slice(i,i+4),16)-offset;if(n<0||n>0x10ffff)return"";out+=String.fromCodePoint(n)}
-      return out;
-    }catch{return""}
-  }
-
-  function validateCode(source){
-    const hasLoop=/range\s*\(\s*0\s*,\s*len\s*\(\s*code\s*\)\s*,\s*4\s*\)/.test(source);
-    const hasHex=/int\s*\(\s*block\s*,\s*16\s*\)/.test(source);
-    const hasChr=/chr\s*\(\s*number\s*\)/.test(source);
-    const m=source.match(/number\s*=\s*number\s*-\s*(\d+)/);
-    const offset=m?Number(m[1]):NaN;
-    const output=Number.isFinite(offset)?decodeWithOffset(offset):"";
-    return {ok:hasLoop&&hasHex&&hasChr&&offset===1977&&output===PASSWORD,hasLoop,hasHex,hasChr,offset,output};
-  }
-
-  function renderPartsShop(){
-    const success=story.passwordSolved?`<div class="terminal-success">ACCESS GRANTED — PASSWORD: ${PASSWORD}</div>`:"";
-    scene("旧式端末のパスワード","パーツ屋・バックヤード",
-      `<div class="story-dialog"><strong>パーツ屋の店主</strong><p>「昔の注文端末なんだが、パスワードを忘れちまってな。残ってるのはこの暗号だけだ」</p></div>
-       <div class="cipher-card terminal"><span>ENCRYPTED PASSWORD</span><code>${ENCRYPTED}</code><small>4桁の16進数が連結されている。</small></div>
-       ${story.passwordSolved?success:`<div class="code-puzzle"><div class="code-puzzle-head"><strong>DECODE PROGRAM</strong><button id="story-reset-code" class="secondary compact">初期コード</button></div><textarea id="story-code" spellcheck="false">${esc(starterCode())}</textarea><div class="story-hint">図書館のメモ：暗号化時に各文字のUnicode番号へ <strong>1977</strong> を足している。</div><pre id="story-console" class="story-console">コードを修正して実行してください。</pre></div>`}`,
-      story.passwordSolved?`<button class="primary" data-story-next="reward">端末を起動する</button>`:`<button class="primary" id="story-run-code">▶ 復号プログラムを実行</button>`);
-  }
-
-  function renderComplete(){
-    scene("端末復旧","パーツ屋",
-      `<div class="story-dialog"><strong>パーツ屋の店主</strong><p>「動いた！　注文履歴も景品システムも戻ってる。助かったぜ」</p></div>
-       <div class="reward-card"><strong>報酬</strong><p>200 G</p><p>リペレーションの魔導書 ×1</p></div>
-       <div class="story-dialog lumiere"><strong>ルミエル</strong><p>「最後に出てきた景品がお菓子じゃなくて魔導書なのは、ちょっと残念だけど……使えそう」</p></div>
-       <p class="story-complete-note">第1章クリア。ここから現在のフィールド探索・魔法開発へ続きます。</p>`,
-      `<button class="primary big" id="story-finish">平原へ出る</button>`);
-  }
-
-  function checkFriend(){
-    const answer=$("#friend-answer")?.value.trim().toUpperCase()||"";
-    if(answer==="LIBRARY"){
-      story.friendSolved=true;story.stage=1;renderFriend();
-    }else{
-      const r=$("#friend-result");if(r)r.textContent="まだ違う。各文字を3つ前へ戻してみよう。";
+  function interactNpc(){
+    if(story.scene==="school"){
+      story.schoolTalked=true;
+      fieldDialog("クラスメイト","ソフィー、暗号って得意？　続きはうちで見せるよ。東の出口から来て。\n\nルミエル「規則があるなら、プログラムでも解けそう」");
+      window.SpellField?.updateObjective?.();return;
+    }
+    if(story.scene==="friend"){
+      if(story.friendSolved){fieldDialog("クラスメイト","正解は LIBRARY。ピジブルの図書館なら、もっと面白い暗号を知ってるかも。");return}
+      openFriendPuzzle();return;
+    }
+    if(story.scene==="library"){
+      if(!story.libraryLearned){
+        story.libraryLearned=true;
+        fieldDialog("ピジブル","文字はコンピュータの中ではUnicodeの番号として扱える。\n4文字ずつ区切って16進数から整数へ変換し、暗号化で足された1977を引く。それを chr() で文字へ戻すんだ。\n\nルミエル「同じ処理の繰り返し。ループ向きだね」,"system");
+        window.SpellField?.updateObjective?.();
+      }else fieldDialog("ピジブル","4文字ずつ、16進数、1977を引く、chr()。この4つを覚えておけばいい。","system");
+      return;
+    }
+    if(story.scene==="parts"){
+      if(!story.shopAsked){story.shopAsked=true;fieldDialog("パーツ屋の店主","昔の注文端末なんだが、パスワードを忘れちまってな。残ってるのは暗号化された文字列だけだ。奥の端末を見てくれ。","system");window.SpellField?.updateObjective?.();return}
+      if(story.passwordSolved&&!story.rewardTaken){grantReward();fieldDialog("パーツ屋の店主","動いた！　注文履歴も景品システムも戻ってる。礼だ、持っていけ。\n\n200G と「リペレーションの魔導書」を手に入れた！","system");window.SpellField?.updateObjective?.();return}
+      if(story.rewardTaken){fieldDialog("パーツ屋の店主","助かったぜ。東から平原へ抜けられる。","system");return}
+      fieldDialog("パーツ屋の店主","奥の旧式端末を頼む。暗号は端末に残ってる。","system");
     }
   }
 
-  function runDecoder(){
-    const source=$("#story-code")?.value||"",result=validateCode(source),consoleEl=$("#story-console");
-    if(!consoleEl)return;
-    const checks=[`4文字ループ: ${result.hasLoop?"OK":"NG"}`,`16進数変換: ${result.hasHex?"OK":"NG"}`,`chr(): ${result.hasChr?"OK":"NG"}`,`減算値: ${Number.isFinite(result.offset)?result.offset:"未指定"}`];
-    if(result.output)checks.push(`OUTPUT: ${result.output}`);
-    if(result.ok){story.passwordSolved=true;story.stage=3;checks.push("","ACCESS GRANTED");consoleEl.textContent=checks.join("\n");setTimeout(renderPartsShop,350)}
-    else{checks.push("","ACCESS DENIED — 図書館のメモを確認してください。");consoleEl.textContent=checks.join("\n")}
+  function interactTerminal(){
+    if(story.scene!=="parts")return;
+    if(!story.shopAsked){fieldDialog("SYSTEM","端末はロックされている。先に店主へ事情を聞こう。","system");return}
+    if(story.passwordSolved){fieldDialog("SYSTEM",`ACCESS GRANTED\nPASSWORD: ${PASSWORD}\n注文システムは復旧している。`,"system");return}
+    openDecoderPuzzle();
   }
 
-  function grantReward(){
-    if(!story.rewardTaken){story.rewardTaken=true;G.state.money+=200;G.addItem?.("repairManual",1);window.SpellMenu?.renderFieldMenu?.()}
-    story.stage=4;renderComplete();
+  function canExit(){
+    if(story.scene==="school")return story.schoolTalked;
+    if(story.scene==="friend")return story.friendSolved;
+    if(story.scene==="library")return story.libraryLearned;
+    if(story.scene==="parts")return story.rewardTaken;
+    return false;
+  }
+  function useExit(){
+    if(!canExit()){fieldDialog("ルミエル","まだここでやることが残ってる。","lumiere");return}
+    if(story.scene==="school")story.scene="friend";
+    else if(story.scene==="friend")story.scene="library";
+    else if(story.scene==="library")story.scene="parts";
+    else if(story.scene==="parts"){story.active=false;story.scene="done";window.SpellField?.finishStoryChapter?.();return}
+    window.SpellField?.enterStoryScene?.(sceneConfig());
   }
 
-  function next(target){
-    if(target==="friend"){story.stage=1;renderFriend();return}
-    if(target==="library"&&story.friendSolved){story.stage=2;story.libraryLearned=true;renderLibrary();return}
-    if(target==="parts"&&story.libraryLearned){story.stage=3;renderPartsShop();return}
-    if(target==="reward"&&story.passwordSolved){grantReward();}
+  function entityAt(pos){
+    if(!story.active)return null;const s=scenes[story.scene];if(!s)return null;
+    if(s.npc&&pos.x===s.npc.x&&pos.y===s.npc.y)return"npc";
+    if(s.terminal&&pos.x===s.terminal.x&&pos.y===s.terminal.y)return"terminal";
+    if(s.exit&&pos.x===s.exit.x&&pos.y===s.exit.y)return"exit";
+    return null;
+  }
+  function interact(kind){if(kind==="npc")interactNpc();else if(kind==="terminal")interactTerminal();else if(kind==="exit")useExit()}
+
+  function openFriendPuzzle(){story.puzzle="friend";renderPuzzle();G.showScreen("story")}
+  function openDecoderPuzzle(){story.puzzle="decoder";renderPuzzle();G.showScreen("story")}
+  function returnField(){story.puzzle=null;G.showScreen("field");window.SpellField?.updateObjective?.()}
+
+  function starterCode(){return `code = "${ENCRYPTED}"\npassword = ""\n\nfor i in range(0, len(code), 4):\n    block = code[i:i+4]\n    number = int(block, 16)\n    number = number - 0\n    password = password + chr(number)\n\nprint(password)`}
+  function decodeWithOffset(offset){let out="";try{for(let i=0;i<ENCRYPTED.length;i+=4){const n=parseInt(ENCRYPTED.slice(i,i+4),16)-offset;if(n<0||n>0x10ffff)return"";out+=String.fromCodePoint(n)}return out}catch{return""}}
+  function validateCode(source){const hasLoop=/range\s*\(\s*0\s*,\s*len\s*\(\s*code\s*\)\s*,\s*4\s*\)/.test(source),hasHex=/int\s*\(\s*block\s*,\s*16\s*\)/.test(source),hasChr=/chr\s*\(\s*number\s*\)/.test(source),m=source.match(/number\s*=\s*number\s*-\s*(\d+)/),offset=m?Number(m[1]):NaN,output=Number.isFinite(offset)?decodeWithOffset(offset):"";return{ok:hasLoop&&hasHex&&hasChr&&offset===1977&&output===PASSWORD,hasLoop,hasHex,hasChr,offset,output}}
+
+  function renderPuzzle(){
+    const box=$("#story-scene");if(!box)return;
+    if(story.puzzle==="friend"){
+      $("#story-title").textContent="友達の暗号クイズ";
+      box.innerHTML=`<div class="story-location">友達の家</div><div class="story-dialog"><strong>クラスメイト</strong><p>「AをD、BをEみたいに、3文字先へずらしたよ。元に戻してみて」</p></div><div class="cipher-card"><span>暗号文</span><code>OLEUDUB</code><small>各文字を3つ前へ戻す。</small></div><label class="story-input-label">復号した単語<input id="friend-answer" autocomplete="off" spellcheck="false" placeholder="英大文字で入力"></label><p id="friend-result" class="story-result"></p><div class="story-actions"><button id="friend-check" class="primary">答え合わせ</button></div>`;return;
+    }
+    $("#story-title").textContent="旧式端末のパスワード復号";
+    box.innerHTML=`<div class="story-location">パーツ屋・旧式端末</div><div class="cipher-card terminal"><span>ENCRYPTED PASSWORD</span><code>${ENCRYPTED}</code><small>4桁の16進数が連結されている。</small></div><div class="code-puzzle"><div class="code-puzzle-head"><strong>DECODE PROGRAM</strong><button id="story-reset-code" class="secondary compact">初期コード</button></div><textarea id="story-code" spellcheck="false">${esc(starterCode())}</textarea><div class="story-hint">ピジブルのメモ：各Unicode番号に <strong>1977</strong> が足されている。</div><pre id="story-console" class="story-console">コードを修正して実行してください。</pre></div><div class="story-actions"><button id="story-run-code" class="primary">▶ 復号プログラムを実行</button></div>`;
   }
 
-  function finish(){G.showScreen("field");window.SpellField?.updateObjective?.();setTimeout(()=>window.SpellField?.showDialog?.({speaker:"lumiere",text:"パスワードの件は片付いた。次は魔法工房で実戦用の魔法を準備しよう。"}),80)}
-  function startChapter1(){story.stage=0;story.friendSolved=false;story.libraryLearned=false;story.passwordSolved=false;story.rewardTaken=false;renderSchool();G.showScreen("story")}
-  function resume(){render();G.showScreen("story")}
-  function serialize(){return {...story}}
-  function restore(data){Object.assign(story,{stage:0,friendSolved:false,libraryLearned:false,passwordSolved:false,rewardTaken:false},data||{})}
-  function isComplete(){return story.stage>=4&&story.rewardTaken}
-  function objective(){if(story.stage<=0)return"放課後、友達の暗号を見てみよう";if(story.stage===1&&!story.friendSolved)return"OLEUDUBを3文字戻して解読しよう";if(story.stage===2)return"ピジブルからUnicode暗号の仕組みを聞こう";if(story.stage===3&&!story.passwordSolved)return"パーツ屋の旧式端末のパスワードを復号しよう";if(!story.rewardTaken)return"復旧した端末を起動しよう";return null}
+  function checkFriend(){const answer=$("#friend-answer")?.value.trim().toUpperCase()||"",r=$("#friend-result");if(answer!=="LIBRARY"){if(r)r.textContent="まだ違う。各文字を3つ前へ戻してみよう。";return}story.friendSolved=true;if(r){r.className="story-result story-success";r.textContent="正解：LIBRARY（図書館）"}const actions=document.querySelector("#screen-story .story-actions");if(actions)actions.innerHTML='<button id="story-return" class="primary">友達の家へ戻る</button>'}
+  function runDecoder(){const source=$("#story-code")?.value||"",result=validateCode(source),c=$("#story-console");if(!c)return;const lines=[`4文字ループ: ${result.hasLoop?"OK":"NG"}`,`16進数変換: ${result.hasHex?"OK":"NG"}`,`chr(): ${result.hasChr?"OK":"NG"}`,`減算値: ${Number.isFinite(result.offset)?result.offset:"未指定"}`];if(result.output)lines.push(`OUTPUT: ${result.output}`);if(result.ok){story.passwordSolved=true;lines.push("","ACCESS GRANTED");c.textContent=lines.join("\n");const actions=document.querySelector("#screen-story .story-actions");if(actions)actions.innerHTML='<button id="story-return" class="primary">パーツ屋へ戻る</button>'}else{lines.push("","ACCESS DENIED — ピジブルの説明を確認しよう。");c.textContent=lines.join("\n")}}
+
+  function grantReward(){if(story.rewardTaken)return;story.rewardTaken=true;G.state.money+=200;G.addItem?.("repairManual",1);window.SpellItems?.renderBackpack?.();window.SpellMenu?.renderFieldMenu?.()}
+  function startChapter1(){Object.assign(story,{active:true,scene:"school",schoolTalked:false,friendSolved:false,libraryLearned:false,shopAsked:false,passwordSolved:false,rewardTaken:false,puzzle:null});window.SpellField?.enterStoryScene?.(sceneConfig())}
+  function resume(fieldSnapshot){if(!story.active||story.scene==="done")return;window.SpellField?.enterStoryScene?.(sceneConfig(),fieldSnapshot)}
+  function serialize(){return{...story,puzzle:null}}
+  function restore(data){Object.assign(story,{active:false,scene:"school",schoolTalked:false,friendSolved:false,libraryLearned:false,shopAsked:false,passwordSolved:false,rewardTaken:false,puzzle:null},data||{});story.puzzle=null}
+  function isComplete(){return story.scene==="done"||(!story.active&&story.rewardTaken)}
+  function isActive(){return story.active}
 
   ensureUi();
   $("#screen-story")?.addEventListener("click",e=>{
-    const nextBtn=e.target.closest("[data-story-next]");if(nextBtn){next(nextBtn.dataset.storyNext);return}
+    if(e.target.closest("#story-cancel")||e.target.closest("#story-return")){returnField();return}
     if(e.target.closest("#friend-check")){checkFriend();return}
     if(e.target.closest("#story-run-code")){runDecoder();return}
-    if(e.target.closest("#story-reset-code")){const ta=$("#story-code");if(ta)ta.value=starterCode();const c=$("#story-console");if(c)c.textContent="初期コードへ戻しました。";return}
-    if(e.target.closest("#story-finish")){finish();}
+    if(e.target.closest("#story-reset-code")){const ta=$("#story-code");if(ta)ta.value=starterCode();const c=$("#story-console");if(c)c.textContent="初期コードへ戻しました。"}
   });
 
-  window.SpellStory={startChapter1,resume,serialize,restore,isComplete,objective,render};
+  window.SpellStory={startChapter1,resume,serialize,restore,isComplete,isActive,objective,sceneConfig,entityAt,interact,useExit};
 })();
