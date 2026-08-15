@@ -5,8 +5,8 @@
   addStyle("css/field-assets-v8.css?v=8");
   addStyle("css/dialog-portrait-layout-v3.css?v=3");
   const load = src => new Promise((resolve,reject)=>{ const s=document.createElement("script"); s.src=src; s.onload=resolve; s.onerror=reject; document.body.appendChild(s); });
-  load("js/game03-core.js")
-    .then(()=>load("js/game03-battle.js"))
+  load("js/game03-core.js?v=2")
+    .then(()=>load("js/game03-battle.js?v=2"))
     .then(()=>load("js/game03-field.js?v=8"))
     .then(()=>load("js/sophie-sprite.js?v=3"))
     .catch(error=>{
