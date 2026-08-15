@@ -1,0 +1,19 @@
+/* Field asset override v7: regular PNG background. */
+.field-map{
+  background-color:#7faf60!important;
+  background-image:url("../assets/maps/starting_field_v7.png?v=7")!important;
+  background-position:center!important;
+  background-size:100% 100%!important;
+  background-repeat:no-repeat!important;
+  image-rendering:pixelated;
+}
+.field-tile{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.field-tile::before,
+.field-tile::after{
+  display:none!important;
+  content:none!important;
+}
