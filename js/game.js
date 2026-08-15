@@ -9,11 +9,11 @@
   addStyle("css/story.css?v=1");
   addStyle("css/rpg-field-v1.css?v=3");
   addStyle("css/npc-pipoya.css?v=3");
-  addStyle("css/computer.css?v=1");
+  addStyle("css/computer.css?v=2");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
-  load("js/game03-core.js?v=7")
+  load("js/game03-core.js?v=8")
     .then(()=>load("js/game03-items.js?v=3"))
-    .then(()=>load("js/game03-menu.js?v=7"))
+    .then(()=>load("js/game03-menu.js?v=8"))
     .then(()=>load("js/game03-story.js?v=5"))
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/game03-field.js?v=15"))
