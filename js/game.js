@@ -15,7 +15,11 @@
     .then(()=>load("js/game03-story.js?v=2"))
     .then(()=>load("js/game03-battle.js?v=5"))
     .then(()=>load("js/game03-field.js?v=13"))
-    .then(()=>load("js/sophie-sprite.js?v=4"))
+    .then(()=>{
+      const area=document.querySelector(".field-area");if(area)area.textContent="はじまりの町";
+      const help=[...document.querySelectorAll(".field-help span")];if(help[1])help[1].textContent="話す・調べる：Enter";
+      return load("js/sophie-sprite.js?v=4");
+    })
     .catch(error=>{
       console.error("Spell Operator boot failed",error); document.body.insertAdjacentHTML("beforeend",'<p style="padding:16px;color:#fff">ゲームの読み込みに失敗しました。再読み込みしてください。</p>');
     });
