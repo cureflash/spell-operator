@@ -1,32 +1,22 @@
-/* Sophie + Lumiere overworld sprites: 8 frames x 4 directions. Row order: up, down, left, right. */
-.sophie-field,.lumiere-field{
-  overflow:visible;
-  transform:none!important;
-  filter:none!important;
-}
+/* Registered 4-direction / 8-frame character sheets. Each source sheet is 2048x1024 (8 x 4 cells). */
+.sophie-field,.lumiere-field{overflow:visible;transform:none!important;}
 .sophie-field .pixel-head,.sophie-field .pixel-body,.sophie-field .entity-tag,
-.lumiere-field .pixel-head,.lumiere-field .pixel-body,.lumiere-field .entity-tag{
-  display:none!important;
-}
+.lumiere-field .pixel-head,.lumiere-field .pixel-body,.lumiere-field .entity-tag{display:none!important;}
 .sophie-field::before,.lumiere-field::before{
-  content:"";
-  position:absolute;
-  z-index:12;
-  left:50%;
-  bottom:-18%;
-  width:calc(var(--tile-size)*1.92);
-  height:calc(var(--tile-size)*1.92);
-  transform:translateX(-50%);
-  background-repeat:no-repeat;
-  background-size:800% 400%;
-  background-position:var(--sprite-frame-x,0%) var(--sprite-row-y,33.333333%);
-  image-rendering:pixelated;
-  filter:drop-shadow(0 2px 1px rgba(0,0,0,.24));
-  pointer-events:none;
+  content:"";position:absolute;z-index:2;left:50%;bottom:-22%;width:calc(var(--tile-size)*1.55);height:calc(var(--tile-size)*1.55);transform:translateX(-50%);
+  background-repeat:no-repeat;background-size:800% 400%;background-position:var(--sprite-frame-x,0%) var(--sprite-row-y,0%);image-rendering:pixelated;filter:drop-shadow(0 2px 1px rgba(0,0,0,.22));pointer-events:none;
 }
-.sophie-field::before{background-image:url("../assets/characters/sophie_walk_4dir_8frames.png?v=1")}
-.lumiere-field::before{background-image:url("../assets/characters/lumiere_walk_4dir_8frames.png?v=1")}
-.sophie-field[data-facing="up"],.lumiere-field[data-facing="up"]{--sprite-row-y:0%}
-.sophie-field[data-facing="down"],.lumiere-field[data-facing="down"]{--sprite-row-y:33.333333%}
+.sophie-field::before{background-image:url("../assets/characters/sophie_walk_4dir_8frames.png?v=1");}
+.lumiere-field::before{background-image:url("../assets/characters/lumiere_walk_4dir_8frames.png?v=1");}
+.sophie-field[data-frame="0"],.lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
+.sophie-field[data-frame="1"],.lumiere-field[data-frame="1"]{--sprite-frame-x:14.285714%}
+.sophie-field[data-frame="2"],.lumiere-field[data-frame="2"]{--sprite-frame-x:28.571429%}
+.sophie-field[data-frame="3"],.lumiere-field[data-frame="3"]{--sprite-frame-x:42.857143%}
+.sophie-field[data-frame="4"],.lumiere-field[data-frame="4"]{--sprite-frame-x:57.142857%}
+.sophie-field[data-frame="5"],.lumiere-field[data-frame="5"]{--sprite-frame-x:71.428571%}
+.sophie-field[data-frame="6"],.lumiere-field[data-frame="6"]{--sprite-frame-x:85.714286%}
+.sophie-field[data-frame="7"],.lumiere-field[data-frame="7"]{--sprite-frame-x:100%}
+.sophie-field[data-facing="down"],.lumiere-field[data-facing="down"]{--sprite-row-y:0%}
+.sophie-field[data-facing="up"],.lumiere-field[data-facing="up"]{--sprite-row-y:33.333333%}
 .sophie-field[data-facing="left"],.lumiere-field[data-facing="left"]{--sprite-row-y:66.666667%}
 .sophie-field[data-facing="right"],.lumiere-field[data-facing="right"]{--sprite-row-y:100%}
