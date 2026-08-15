@@ -18,7 +18,8 @@
     powerGrimoire:{name:"力の魔導書",type:"equipment",price:350,stat:"attack",bonus:8,description:"装備中、攻撃が8上がる。"},
     guardGrimoire:{name:"守りの魔導書",type:"equipment",price:350,stat:"defense",bonus:8,description:"装備中、防御が8上がる。"},
     magicGrimoire:{name:"魔力の魔導書",type:"equipment",price:450,stat:"spAttack",bonus:10,description:"装備中、特攻が10上がる。"},
-    swiftGrimoire:{name:"迅速の魔導書",type:"equipment",price:400,stat:"speed",bonus:8,description:"装備中、素早さが8上がる。"}
+    swiftGrimoire:{name:"迅速の魔導書",type:"equipment",price:400,stat:"speed",bonus:8,description:"装備中、素早さが8上がる。"},
+    repairManual:{name:"リペレーションの魔導書",type:"key",price:0,description:"旧式端末の景品として手に入れた魔導書。修復魔法の開発手順が記されている。"}
   };
 
   function calcStat(base,level,isHp=false){const core=Math.floor((2*base*level)/100);return isHp?core+level+10:core+5}
@@ -80,7 +81,7 @@
   function inventoryCount(key){return Math.max(0,Math.floor(state.inventory[key]||0))}
   function addItem(key,count=1){if(!itemDefinitions[key])return false;state.inventory[key]=inventoryCount(key)+Math.max(0,Math.floor(count));return true}
   function removeItem(key,count=1){const n=Math.max(0,Math.floor(count));if(inventoryCount(key)<n)return false;state.inventory[key]=inventoryCount(key)-n;if(state.inventory[key]<=0)delete state.inventory[key];return true}
-  function buyItem(key){const item=itemDefinitions[key];if(!item||state.money<item.price)return false;state.money-=item.price;addItem(key,1);return true}
+  function buyItem(key){const item=itemDefinitions[key];if(!item||item.price<=0||state.money<item.price)return false;state.money-=item.price;addItem(key,1);return true}
   function equipItem(memberKey,itemKey){
     const item=itemDefinitions[itemKey];if(!partySpecies[memberKey]||item?.type!=="equipment"||inventoryCount(itemKey)<1)return false;
     const old=state.equipment[memberKey];
