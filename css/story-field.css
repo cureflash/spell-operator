@@ -1,0 +1,40 @@
+/* Chapter 1 RPG field maps and puzzle UI */
+.field-map.story-map{background-repeat:no-repeat!important;background-size:100% 100%!important;background-position:center!important}
+.field-map.story-map[data-story-theme="school"]{
+  background-image:
+    linear-gradient(#536750 0 18%,transparent 18%),
+    linear-gradient(90deg,transparent 0 8%,#d9c69d 8% 92%,transparent 92%),
+    repeating-linear-gradient(90deg,#c8af7d 0 7.14%,#d4bb86 7.14% 14.28%)!important;
+  background-color:#c8af7d!important;
+}
+.field-map.story-map[data-story-theme="friend"]{
+  background-image:
+    linear-gradient(#eadfc9 0 18%,transparent 18%),
+    linear-gradient(90deg,transparent 0 8%,rgba(255,255,255,.12) 8% 92%,transparent 92%),
+    repeating-linear-gradient(0deg,#b98d62 0 9%,#c99c70 9% 18%)!important;
+  background-color:#bc9067!important;
+}
+.field-map.story-map[data-story-theme="library"]{
+  background-image:
+    linear-gradient(90deg,#5b3a28 0 8%,transparent 8% 92%,#5b3a28 92%),
+    repeating-linear-gradient(90deg,transparent 0 12%,rgba(83,51,33,.95) 12% 16%,transparent 16% 28%),
+    repeating-linear-gradient(0deg,#d0b17e 0 10%,#c4a46f 10% 20%)!important;
+  background-color:#c9aa76!important;
+}
+.field-map.story-map[data-story-theme="parts"]{
+  background-image:
+    linear-gradient(90deg,#454951 0 8%,transparent 8% 92%,#454951 92%),
+    radial-gradient(circle at 25% 25%,rgba(255,190,80,.14) 0 5%,transparent 6%),
+    repeating-linear-gradient(45deg,#777b80 0 8px,#6a6e74 8px 16px)!important;
+  background-color:#6d7176!important;
+}
+.field-map.story-map .field-tile{background:transparent!important}
+.story-entity{z-index:11;overflow:visible}
+.story-entity .entity-tag{display:grid!important;right:-35%;bottom:-18%;min-width:max-content;height:auto;padding:3px 5px;border-radius:4px;font-size:8px;white-space:nowrap}
+.story-entity[data-role="friend"] .pixel-head{box-shadow:inset 0 7px #5b382d}.story-entity[data-role="friend"] .pixel-body{background:#d47772}
+.story-entity[data-role="pigible"] .pixel-head{box-shadow:inset 0 7px #73616a}.story-entity[data-role="pigible"] .pixel-body{background:#6a7599}
+.story-entity[data-role="shopkeeper"] .pixel-head{box-shadow:inset 0 7px #8a7660}.story-entity[data-role="shopkeeper"] .pixel-body{background:#715f48}
+.story-terminal{z-index:8;display:grid;place-items:center;border:3px solid #252a31;border-radius:5px;background:#343a43;color:#78f0a3;font:900 calc(var(--tile-size)*.22)/1 ui-monospace,monospace;box-shadow:inset 0 0 0 3px #616873,0 3px 0 rgba(0,0,0,.25)}
+.story-terminal::before{content:">_"}.story-exit{z-index:6;display:grid;place-items:center;background:#684934;border:3px solid #3b2b22;color:#f3d69f;font:900 calc(var(--tile-size)*.24)/1 ui-monospace,monospace;box-shadow:inset 0 0 0 2px #b28d62}.story-exit::before{content:"EXIT"}
+.story-map-label{font-weight:900;color:#5b4169}
+.story-wrap{max-width:860px;margin:0 auto}.story-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.story-heading h2{margin:0}.story-progress{padding:6px 10px;border:2px solid #6a6172;border-radius:6px;background:#fff;color:#28232d;font-weight:900}.story-scene{padding:18px}.story-location{font-size:12px;font-weight:900;letter-spacing:.08em;color:#8b70a5;margin-bottom:10px}.story-dialog{padding:12px 14px;border:3px solid #505664;border-radius:8px;background:#fffef2;color:#252831;margin:9px 0}.story-dialog p{margin:4px 0 0;line-height:1.7}.story-dialog.lumiere{border-color:#7793b4;background:#f4f8ff}.cipher-card{display:grid;gap:6px;padding:15px;border:3px solid #4c5260;border-radius:8px;background:#20252d;color:#eaf5e9;margin:12px 0}.cipher-card code{font-size:20px;letter-spacing:.08em;color:#8df0a0;overflow-wrap:anywhere}.cipher-card small{color:#aeb7c1}.story-input-label{display:grid;gap:6px;font-weight:900;margin:12px 0}.story-input-label input{padding:12px;border:3px solid #5b6170;border-radius:6px;font:900 16px/1 ui-monospace,monospace}.story-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.story-result{min-height:22px;font-weight:900;color:#8b4f4f}.story-success{color:#357548;font-weight:900}.code-puzzle{margin-top:12px}.code-puzzle-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.code-puzzle textarea{width:100%;min-height:260px;margin-top:8px;padding:14px;border:3px solid #3f4653;border-radius:7px;background:#181d24;color:#dbf5dd;font:13px/1.55 ui-monospace,monospace;resize:vertical}.story-hint{margin:8px 0;padding:9px 11px;background:#fff4cf;border-left:4px solid #b38a34;color:#43391f}.story-console{min-height:100px;padding:12px;background:#11161b;color:#9ee5aa;border:3px solid #39404b;border-radius:6px;white-space:pre-wrap}.terminal-success,.reward-card{padding:14px;border:3px solid #4e6753;border-radius:8px;background:#eaf7e8;color:#244a2e;font-weight:900}.story-complete-note{font-weight:900}.story-rpg-help{font-size:11px;color:#71677a}
