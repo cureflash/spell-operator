@@ -130,7 +130,7 @@
     setTimeout(()=>showDialog({speaker:"system",text:"グリッチスライムを倒した。\nルミエルが少し得意そうにこちらを見ている。"}),80);
   }
   function saveGame(){
-    const data={version:3,magic:G.serializeMagic(),field:{...model.snapshot(),enemyDefeated:fieldState.enemyDefeated,steps:fieldState.steps}};
+    const data={version:4,magic:G.serializeMagic(),party:G.serializeParty(),field:{...model.snapshot(),enemyDefeated:fieldState.enemyDefeated,steps:fieldState.steps}};
     localStorage.setItem("spell-operator-v03",JSON.stringify(data));
     showDialog({speaker:"system",text:"セーブしました。"});
   }
@@ -140,6 +140,7 @@
       if(!raw){showDialog({speaker:"system",text:"セーブデータがありません。"});return}
       const data=JSON.parse(raw);
       G.restoreMagic(data.magic||{});
+      G.restoreParty(data.party||{});
       model.restore(data.field||{});
       fieldState.enemyDefeated=Boolean(data.field?.enemyDefeated);
       fieldState.steps=Number(data.field?.steps||0);
