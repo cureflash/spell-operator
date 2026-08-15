@@ -1,4 +1,4 @@
-/* Sophie overworld sprite: 3 frames x 4 directions, DS-era RPG style. */
+/* Sophie overworld sprite: 3 frames x 4 directions, fixed 32x48 cells. */
 .sophie-field{
   overflow:visible;
   transform:none!important;
@@ -11,16 +11,17 @@
 .sophie-field::before{
   content:"";
   position:absolute;
-  left:11%;
-  bottom:-2%;
+  z-index:2;
+  left:50%;
+  bottom:-3%;
   width:calc(var(--tile-size)*.78);
   height:calc(var(--tile-size)*1.17);
-  background-image:url("../assets/characters/sophie_walk.png");
+  transform:translateX(-50%);
+  background-image:url("../assets/characters/sophie_walk.png?v=2");
   background-repeat:no-repeat;
   background-size:300% 400%;
   background-position:var(--sophie-frame-x,50%) var(--sophie-row-y,33.333333%);
   image-rendering:pixelated;
-  image-rendering:crisp-edges;
   filter:drop-shadow(0 2px 1px rgba(0,0,0,.22));
   pointer-events:none;
 }
