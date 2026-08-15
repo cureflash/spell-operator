@@ -50,14 +50,15 @@
   }
 
   function inventoryRow(key,item,count){
-    const meta=item.type==="equipment"?`${statLabel[item.stat]||item.stat} +${item.bonus}`:item.healHp?`HP +${item.healHp}`:`MP +${item.healMp}`;
-    let actions="";
-    if(item.type==="consumable"){
-      actions=`<button data-use-item="${key}" data-target="sophie">ソフィーに使う</button><button data-use-item="${key}" data-target="lumiere">ルミエルに使う</button>`;
-    }else{
+    let meta="重要アイテム",actions="";
+    if(item.type==="equipment"){
+      meta=`${statLabel[item.stat]||item.stat} +${item.bonus}`;
       actions=`<button data-equip-item="${key}" data-target="sophie">ソフィーに装備</button><button data-equip-item="${key}" data-target="lumiere">ルミエルに装備</button>`;
+    }else if(item.type==="consumable"){
+      meta=item.healHp?`HP +${item.healHp}`:`MP +${item.healMp}`;
+      actions=`<button data-use-item="${key}" data-target="sophie">ソフィーに使う</button><button data-use-item="${key}" data-target="lumiere">ルミエルに使う</button>`;
     }
-    return `<article class="inventory-item">
+    return `<article class="inventory-item${item.type==="key"?" key-item":""}">
       <div class="inventory-item-main"><div><strong>${item.name}</strong><span class="item-meta">${meta}</span></div><span class="item-count">×${count}</span></div>
       <p>${item.description}</p><div class="inventory-actions">${actions}</div>
     </article>`;
@@ -80,7 +81,7 @@
 
   function renderShop(){
     $("#shop-money").textContent=`${state.money} G`;
-    $("#shop-list").innerHTML=Object.entries(G.itemDefinitions).map(([key,item])=>shopCard(key,item)).join("");
+    $("#shop-list").innerHTML=Object.entries(G.itemDefinitions).filter(([,item])=>item.price>0).map(([key,item])=>shopCard(key,item)).join("");
     $("#shop-message").textContent=message;
     window.SpellMenu?.renderFieldMenu?.();
   }
