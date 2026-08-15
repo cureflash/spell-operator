@@ -1,4 +1,4 @@
-/* Sophie PC / grimoire specification library */
+/* Sophie PC / Python grimoire specification library */
 .computer-screen{--pc-cyan:#7ce0ff;--pc-green:#8ff0bb}
 .computer-screen .screen-heading,
 .computer-editor-screen .screen-heading{border-bottom:1px solid rgba(124,224,255,.24)}
@@ -14,19 +14,19 @@
 .spellbook-empty{grid-column:1/-1;margin:0;padding:18px;border:1px dashed rgba(255,255,255,.18);border-radius:8px;text-align:center;opacity:.62}
 .computer-screen .spell-card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(27,34,51,.98),rgba(20,25,39,.98));border-color:rgba(124,224,255,.28)}
 .computer-screen .spell-card.learned{border-color:rgba(143,240,187,.42)}
-.computer-screen .spell-card::after{content:"SPEC";position:absolute;right:10px;top:8px;font:700 10px/1 ui-monospace,monospace;color:rgba(124,224,255,.34);letter-spacing:.12em}
-.computer-screen .spell-card.learned::after{content:"LEARNED";color:rgba(143,240,187,.52)}
+.computer-screen .spell-card::after{content:"PY";position:absolute;right:10px;top:8px;font:700 10px/1 ui-monospace,monospace;color:rgba(124,224,255,.34);letter-spacing:.12em}
+.computer-screen .spell-card.learned::after{content:"AC";color:rgba(143,240,187,.52)}
 .computer-screen .spell-card h3{font-family:ui-monospace,"SFMono-Regular",Consolas,monospace}
 .computer-screen .spell-card .primary{background:linear-gradient(180deg,#2489a8,#17647d);border-color:#7ce0ff;color:#fff}
+.grimoire-problem{line-height:1.65}
 .grimoire-spec{margin:12px 0;padding:10px 12px;border-left:3px solid var(--pc-cyan);background:rgba(124,224,255,.07);font-size:13px}
-.grimoire-spec strong{display:block;margin-bottom:5px;color:var(--pc-cyan)}
-.grimoire-spec ul{margin:0;padding-left:20px}
-.grimoire-spec li+li{margin-top:4px}
-.spell-learned-note{display:block;margin-top:8px;color:var(--pc-green)}
+.grimoire-spec strong{display:block;margin-bottom:7px;color:var(--pc-cyan)}
+.grimoire-spec dl,.editor-problem dl{display:grid;gap:6px;margin:0}.grimoire-spec dl>div,.editor-problem dl>div{display:grid;grid-template-columns:54px 1fr;gap:8px}.grimoire-spec dt,.editor-problem dt{font-weight:800}.grimoire-spec dd,.editor-problem dd{margin:0}
+.grimoire-sample{display:grid;gap:7px;margin:10px 0;padding:10px;border:1px solid rgba(255,255,255,.12);border-radius:7px}.grimoire-sample>strong{color:#dff8ff}.grimoire-sample>div{display:grid;grid-template-columns:45px 1fr;gap:8px;align-items:start}.grimoire-sample span{font-size:12px;opacity:.72}.grimoire-sample pre,.editor-sample pre{margin:0;padding:7px 9px;border-radius:5px;background:#0b1118;color:#dff8ff;white-space:pre-wrap;font:12px/1.45 ui-monospace,"SFMono-Regular",Consolas,monospace}
+.spell-learned-note{display:block;margin-top:8px;color:var(--pc-green);line-height:1.5}
 .computer-screen .deploy-panel{border-color:rgba(143,240,187,.28)}
 .computer-editor-screen .editor-panel,.computer-editor-screen .console-panel{border-color:rgba(124,224,255,.25)}
-.computer-editor-screen #code-editor{background:#0d1118;color:#d7f3ff;border-color:#41687a;caret-color:#8ff0bb}
+.computer-editor-screen #code-editor{background:#0d1118;color:#d7f3ff;border-color:#41687a;caret-color:#8ff0bb;tab-size:4}
 .computer-editor-screen .console{background:#090d12;color:#bfead2}
-.computer-editor-screen .hint-box ul{margin:4px 0 8px;padding-left:20px}
-.computer-editor-screen .hint-box p{margin:6px 0 0}
-@media(max-width:760px){.spellbook-list{grid-template-columns:1fr}.spellbook-group-head{align-items:flex-start;flex-direction:column}.spellbook-group-head span{text-align:left}}
+.editor-problem{display:grid;gap:10px;line-height:1.55}.editor-problem p{margin:0}.editor-sample{display:grid;grid-template-columns:1fr 1fr;gap:8px}.editor-sample>div{display:grid;gap:5px}.editor-sample strong{font-size:12px}
+@media(max-width:760px){.spellbook-list{grid-template-columns:1fr}.spellbook-group-head{align-items:flex-start;flex-direction:column}.spellbook-group-head span{text-align:left}.editor-sample{grid-template-columns:1fr}}
