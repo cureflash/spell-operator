@@ -1,8 +1,7 @@
 /*
- * NPC sprites: PIPOYA free 32x32 character-chip sample sheet.
- * Source: https://pipoya.net/sozai/assets/charachip/character-chip-2/
- * Sheet layout used here: 16 x 16 cells, each cell 32px.
- * Each character occupies 3 columns x 4 rows: DOWN, LEFT, RIGHT, UP.
+ * NPC sprites: PIPOYA FREE RPG Character Sprites 32x32.
+ * Each source PNG is one character: 96x128px = 3 frames x 4 directions.
+ * Direction rows: DOWN / LEFT / RIGHT / UP. Idle uses the middle frame.
  */
 
 .story-npc .pixel-head,
@@ -19,40 +18,35 @@
   height:var(--tile-size);
   z-index:2;
   transform:none;
-  background-image:url("https://pipoya.net/sozai/wp-content/uploads/2018/07/dd229ada7af682fc86bf9c55acdf301d.png");
   background-repeat:no-repeat;
-  background-size:1600% 1600%;
-  background-position:var(--npc-x) var(--npc-y);
+  background-size:300% 400%;
+  background-position:50% var(--npc-y,0%);
   image-rendering:pixelated;
   pointer-events:none;
 }
 
-/* Middle walk frame of each selected character (3-frame walk cycle). */
-.npc-classmate{--npc-x:6.666667%;}
-.npc-librarian{--npc-x:26.666667%;}
-.npc-parts{--npc-x:6.666667%;}
-.npc-traveler{--npc-x:86.666667%;}
+/* Actual individual Pipoya character sheets, not the website preview atlas. */
+.npc-classmate::before{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/957e95e5f95ec41c54fda098f30d222733954ce1/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip001a.png");
+}
+.npc-librarian::before{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/957e95e5f95ec41c54fda098f30d222733954ce1/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip001b.png");
+}
+.npc-parts::before{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/957e95e5f95ec41c54fda098f30d222733954ce1/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip004.png");
+}
+.npc-traveler::before{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/957e95e5f95ec41c54fda098f30d222733954ce1/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip001.png");
+}
 
-/* Band 2: classmate. Rows 4..7 = DOWN / LEFT / RIGHT / UP. */
-.npc-classmate[data-facing="down"],.npc-classmate:not([data-facing]){--npc-y:26.666667%;}
-.npc-classmate[data-facing="left"]{--npc-y:33.333333%;}
-.npc-classmate[data-facing="right"]{--npc-y:40%;}
-.npc-classmate[data-facing="up"]{--npc-y:46.666667%;}
+/* 4-way facing. */
+.story-npc[data-facing="down"],
+.story-npc:not([data-facing]){--npc-y:0%;}
+.story-npc[data-facing="left"]{--npc-y:33.333333%;}
+.story-npc[data-facing="right"]{--npc-y:66.666667%;}
+.story-npc[data-facing="up"]{--npc-y:100%;}
 
-/* Band 3: librarian and parts-shop owner. Rows 8..11. */
-.npc-librarian[data-facing="down"],.npc-librarian:not([data-facing]),
-.npc-parts[data-facing="down"],.npc-parts:not([data-facing]){--npc-y:53.333333%;}
-.npc-librarian[data-facing="left"],.npc-parts[data-facing="left"]{--npc-y:60%;}
-.npc-librarian[data-facing="right"],.npc-parts[data-facing="right"]{--npc-y:66.666667%;}
-.npc-librarian[data-facing="up"],.npc-parts[data-facing="up"]{--npc-y:73.333333%;}
-
-/* Band 1: traveler. Rows 0..3. */
-.npc-traveler[data-facing="down"],.npc-traveler:not([data-facing]){--npc-y:0%;}
-.npc-traveler[data-facing="left"]{--npc-y:6.666667%;}
-.npc-traveler[data-facing="right"]{--npc-y:13.333333%;}
-.npc-traveler[data-facing="up"]{--npc-y:20%;}
-
-/* Quest marker stays above the imported sprite. */
+/* Quest marker stays above the character sprite. */
 .story-npc .entity-tag{
   z-index:5;
 }
