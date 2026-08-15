@@ -59,7 +59,7 @@
     if(story.scene==="library"){
       if(!story.libraryLearned){
         story.libraryLearned=true;
-        fieldDialog("ピジブル","文字はコンピュータの中ではUnicodeの番号として扱える。\n4文字ずつ区切って16進数から整数へ変換し、暗号化で足された1977を引く。それを chr() で文字へ戻すんだ。\n\nルミエル「同じ処理の繰り返し。ループ向きだね」,"system");
+        fieldDialog("ピジブル","文字はコンピュータの中ではUnicodeの番号として扱える。\n4文字ずつ区切って16進数から整数へ変換し、暗号化で足された1977を引く。それを chr() で文字へ戻すんだ。\n\nルミエル「同じ処理の繰り返し。ループ向きだね」","system");
         window.SpellField?.updateObjective?.();
       }else fieldDialog("ピジブル","4文字ずつ、16進数、1977を引く、chr()。この4つを覚えておけばいい。","system");
       return;
