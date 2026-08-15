@@ -92,6 +92,7 @@
     if(same(f,door)){G.openWorkshop();return}
     if(same(f,npc)){showDialog({speaker:"traveler",text:"東の草むらには変な魔物がいるよ。魔法を準備してから行った方がいい。"});return}
     if(same(f,sign)){showDialog({speaker:"sign",text:"← 魔法工房　　東の草むら →"});return}
+    // 何もない場所では完全に無反応。
   }
 
   function tryMove(direction){
@@ -144,16 +145,24 @@
     }
   }
 
+  function isSpaceKey(e){
+    return e.code==="Space"||e.key===" "||e.key==="Spacebar";
+  }
+
+  function isEnterKey(e){
+    return e.key==="Enter"||e.code==="Enter"||e.code==="NumpadEnter";
+  }
+
   function keydown(e){
     if(!G.screens.field.classList.contains("active"))return;
     const map={ArrowUp:"up",w:"up",W:"up",ArrowDown:"down",s:"down",S:"down",ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right"};
     if(map[e.key]){e.preventDefault();tryMove(map[e.key]);return}
-    if(e.code==="Space"){
+    if(isSpaceKey(e)){
       e.preventDefault();
       talkToLumiere();
       return;
     }
-    if(e.key==="Enter"){
+    if(isEnterKey(e)){
       e.preventDefault();
       interact();
     }
