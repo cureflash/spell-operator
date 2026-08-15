@@ -20,6 +20,7 @@
     .then(()=>load("js/game03-story.js?v=5"))
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/game03-field.js?v=15"))
+    .then(()=>load("js/python-polish.js?v=1"))
     .then(()=>load("js/npc-facing.js?v=1"))
     .then(()=>load("js/z-escape.js?v=2"))
     .then(()=>{
