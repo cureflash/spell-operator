@@ -2,18 +2,22 @@
 
 Browser RPG prototype for **Spell Operator**.
 
-## Prototype 0.2
+## Prototype 0.3
 
-The current vertical slice verifies this loop:
+The current vertical slice now connects field exploration, spell development, and battle:
 
-1. Develop multiple spells in a restricted Python-like language.
-2. Run and debug each spell before registration.
-3. Execution steps determine MP cost.
-4. Register Fire and Heal into a spellbook.
-5. Use the registered spells in a JRPG-style turn battle.
-6. Clear two consecutive encounters while HP/MP carry over.
+1. Control Sophie on a top-down tile field.
+2. Lumiere follows one tile behind by moving through Sophie's previous positions.
+3. Turn toward Lumiere and interact to talk to her.
+4. Enter the spell workshop from the field.
+5. Develop Fire and Heal in a restricted Python-like language.
+6. Run and debug each spell before registration.
+7. Execution steps determine MP cost.
+8. Return to the field and touch an enemy to enter battle.
+9. Fight in a Pokémon-like face-off layout with Dragon Quest-like party command flow.
+10. Return to the same field after victory.
 
-The battle presentation intentionally mixes a **Pokémon-like face-off layout** with a **Dragon Quest-like party command flow**.
+The field uses original placeholder CSS graphics rather than Pokémon assets or other copyrighted game assets.
 
 ### Fire
 
@@ -37,6 +41,13 @@ if hp < 20:
     cast("heal")
 ```
 
+## Field controls
+
+- Move: Arrow keys / WASD
+- Interact: Enter / Space
+- Touch controls are shown on narrow screens
+- SAVE / LOAD use browser local storage
+
 ## Run locally
 
 No build step and no dependencies are required.
@@ -47,15 +58,16 @@ python3 -m http.server 8000
 
 Open `http://localhost:8000/`.
 
-## Test
+## Tests
 
 ```bash
 node tests/interpreter.test.js
+node tests/field-model.test.js
 ```
 
 ## Prototype language
 
-Supported in 0.2:
+Supported in 0.3:
 
 - `spell <name>`
 - numeric variable assignment
