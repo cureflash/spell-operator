@@ -1,8 +1,8 @@
 /*
- * NPC sprites: PIPOYA free 32x32 character-chip material.
+ * NPC sprites: PIPOYA free 32x32 character-chip sample sheet.
  * Source: https://pipoya.net/sozai/assets/charachip/character-chip-2/
- * Material image used directly from Pipoya's official site.
- * The NPCs are stationary for now, so a front-facing idle frame is selected for each.
+ * Sheet layout used here: 16 x 16 cells, each cell 32px.
+ * Each character occupies 3 columns x 4 rows: DOWN, LEFT, RIGHT, UP.
  */
 
 .story-npc .pixel-head,
@@ -13,48 +13,46 @@
 .story-npc::before{
   content:"";
   position:absolute;
-  left:50%;
-  bottom:1px;
-  width:32px;
-  height:32px;
+  left:0;
+  bottom:0;
+  width:var(--tile-size);
+  height:var(--tile-size);
   z-index:2;
-  transform:translateX(-50%) scale(1.18);
-  transform-origin:50% 100%;
+  transform:none;
   background-image:url("https://pipoya.net/sozai/wp-content/uploads/2018/07/dd229ada7af682fc86bf9c55acdf301d.png");
   background-repeat:no-repeat;
-  background-size:512px 512px;
+  background-size:1600% 1600%;
+  background-position:var(--npc-x) var(--npc-y);
   image-rendering:pixelated;
   pointer-events:none;
 }
 
-/* The source image is composed of 32px frames, 3 walk frames per character. */
-.npc-classmate::before{
-  /* young female-looking character */
-  background-position:-32px -128px;
-}
+/* Middle walk frame of each selected character (3-frame walk cycle). */
+.npc-classmate{--npc-x:6.666667%;}
+.npc-librarian{--npc-x:26.666667%;}
+.npc-parts{--npc-x:6.666667%;}
+.npc-traveler{--npc-x:86.666667%;}
 
-.npc-librarian::before{
-  /* purple-robed / scholar-looking character */
-  background-position:-128px -256px;
-}
+/* Band 2: classmate. Rows 4..7 = DOWN / LEFT / RIGHT / UP. */
+.npc-classmate[data-facing="down"],.npc-classmate:not([data-facing]){--npc-y:26.666667%;}
+.npc-classmate[data-facing="left"]{--npc-y:33.333333%;}
+.npc-classmate[data-facing="right"]{--npc-y:40%;}
+.npc-classmate[data-facing="up"]{--npc-y:46.666667%;}
 
-.npc-parts::before{
-  /* hat / merchant-looking character */
-  background-position:-32px -256px;
-}
+/* Band 3: librarian and parts-shop owner. Rows 8..11. */
+.npc-librarian[data-facing="down"],.npc-librarian:not([data-facing]),
+.npc-parts[data-facing="down"],.npc-parts:not([data-facing]){--npc-y:53.333333%;}
+.npc-librarian[data-facing="left"],.npc-parts[data-facing="left"]{--npc-y:60%;}
+.npc-librarian[data-facing="right"],.npc-parts[data-facing="right"]{--npc-y:66.666667%;}
+.npc-librarian[data-facing="up"],.npc-parts[data-facing="up"]{--npc-y:73.333333%;}
 
-.npc-traveler::before{
-  /* green adventurer-looking character */
-  background-position:-416px 0;
-}
+/* Band 1: traveler. Rows 0..3. */
+.npc-traveler[data-facing="down"],.npc-traveler:not([data-facing]){--npc-y:0%;}
+.npc-traveler[data-facing="left"]{--npc-y:6.666667%;}
+.npc-traveler[data-facing="right"]{--npc-y:13.333333%;}
+.npc-traveler[data-facing="up"]{--npc-y:20%;}
 
-/* Keep quest marker above the imported sprite. */
+/* Quest marker stays above the imported sprite. */
 .story-npc .entity-tag{
   z-index:5;
-}
-
-@media(max-width:760px){
-  .story-npc::before{
-    transform:translateX(-50%) scale(1.08);
-  }
 }
