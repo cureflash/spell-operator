@@ -1,6 +1,33 @@
-/* RPG town field override. Story progression now happens by walking to NPCs. */
+/* RPG town field override. The map is a scrolling world; Sophie stays centered in the viewport. */
 .field-window{max-width:860px;}
-.field-map{--tile-size:clamp(17px,4vw,40px);display:grid!important;grid-template-columns:repeat(20,var(--tile-size))!important;grid-template-rows:repeat(14,var(--tile-size))!important;width:calc(20 * var(--tile-size))!important;height:calc(14 * var(--tile-size))!important;background:#78b55b!important;background-image:none!important;position:relative;overflow:hidden;}
+.field-map{
+  --tile-size:clamp(30px,5vw,48px);
+  display:block!important;
+  position:relative;
+  z-index:1;
+  width:min(100%,760px)!important;
+  height:calc(10 * var(--tile-size))!important;
+  max-height:68vh;
+  margin:auto;
+  overflow:hidden!important;
+  background:#78b55b!important;
+  background-image:linear-gradient(135deg,#80bd60 0 50%,#79b65a 50% 100%)!important;
+  image-rendering:pixelated;
+}
+.field-world{
+  position:absolute;
+  left:0;
+  top:0;
+  display:grid;
+  grid-template-columns:repeat(20,var(--tile-size));
+  grid-template-rows:repeat(14,var(--tile-size));
+  width:calc(20 * var(--tile-size));
+  height:calc(14 * var(--tile-size));
+  z-index:1;
+  transform:translate3d(0,0,0);
+  transition:transform .095s linear;
+  will-change:transform;
+}
 .field-tile{width:var(--tile-size);height:var(--tile-size);position:relative;background:#79b95b!important;border:0!important;box-shadow:inset -1px -1px rgba(42,95,43,.09)!important;}
 .field-tile::before,.field-tile::after{display:block!important;content:""!important;}
 .field-tile.grass{background:linear-gradient(135deg,#80bd60 0 50%,#79b65a 50% 100%)!important;}
@@ -9,18 +36,87 @@
 .field-tile.tree{background:linear-gradient(#4b9748 0 58%,#35773a 58% 100%)!important;}
 .field-tile.tree::before{position:absolute;inset:8% 9% 24%;border-radius:46%;background:#2d7b3d;box-shadow:inset 0 4px #60ad50,2px 2px #286132;}
 .field-tile.water{background:repeating-linear-gradient(0deg,#5fa8d1 0 5px,#7bc0df 5px 9px)!important;box-shadow:none!important;}
-.field-tile.flower{background:#7fbd60!important;}.field-tile.flower::after{position:absolute;left:38%;top:32%;width:6px;height:6px;border-radius:50%;background:#fff4a8;box-shadow:-4px 0 #f5a6c9,4px 0 #f5a6c9,0 -4px #f5a6c9,0 4px #f5a6c9;}
+.field-tile.flower{background:#7fbd60!important;}
+.field-tile.flower::after{position:absolute;left:38%;top:32%;width:6px;height:6px;border-radius:50%;background:#fff4a8;box-shadow:-4px 0 #f5a6c9,4px 0 #f5a6c9,0 -4px #f5a6c9,0 4px #f5a6c9;}
 .field-tile.building{background:#d9c9ab!important;border-left:1px solid rgba(80,61,46,.18)!important;border-right:1px solid rgba(80,61,46,.18)!important;}
 .field-tile.roof{background:repeating-linear-gradient(135deg,#7d668d 0 7px,#9177a1 7px 14px)!important;box-shadow:inset 0 -3px #644f72!important;}
 .field-tile.door{background:#6f4c35!important;box-shadow:inset 3px 0 #9d754d,inset -3px 0 #4f3527!important;}
-.field-tile.school-roof{background:repeating-linear-gradient(135deg,#806b9a 0 7px,#957dad 7px 14px)!important}.field-tile.school-building{background:#e3d5bd!important}
+.field-tile.school-roof{background:repeating-linear-gradient(135deg,#6d527f 0 7px,#8d6ca0 7px 14px)!important;box-shadow:inset 0 -4px #503b61!important;}
+.field-tile.school-building{background:#efe0bd!important;}
+.field-tile.school-door{background:#69442f!important;box-shadow:inset 4px 0 #aa8059,inset -4px 0 #473024,0 0 0 2px #f1d27b!important;}
 .field-tile.workshop-roof{background:repeating-linear-gradient(135deg,#77536d 0 7px,#8e667f 7px 14px)!important}.field-tile.workshop-building{background:#d5c1aa!important}
 .field-tile.library-roof{background:repeating-linear-gradient(135deg,#4d718b 0 7px,#6389a3 7px 14px)!important}.field-tile.library-building{background:#ddd6bd!important}
 .field-tile.parts-roof{background:repeating-linear-gradient(135deg,#8c5d43 0 7px,#a87555 7px 14px)!important}.field-tile.parts-building{background:#d4bea0!important}
 .field-tile.shop-roof{background:repeating-linear-gradient(135deg,#4f7f68 0 7px,#65967d 7px 14px)!important}.field-tile.shop-building{background:#d5cfad!important}
-.field-map-label{position:absolute;left:calc(var(--x)*var(--tile-size));top:calc(var(--y)*var(--tile-size));width:calc(var(--w)*var(--tile-size));z-index:4;text-align:center;color:#fff;font:900 clamp(7px,1.25vw,12px)/1 ui-monospace,"Noto Sans JP",monospace;text-shadow:1px 1px 0 #333,-1px 0 #333,0 -1px #333;pointer-events:none;}
+
+.field-map-label{
+  position:absolute;
+  left:calc(var(--x)*var(--tile-size));
+  top:calc(var(--y)*var(--tile-size));
+  width:calc(var(--w)*var(--tile-size));
+  z-index:4;
+  text-align:center;
+  color:#fff;
+  font:900 clamp(8px,1.25vw,12px)/1 ui-monospace,"Noto Sans JP",monospace;
+  text-shadow:1px 1px 0 #333,-1px 0 #333,0 -1px #333;
+  pointer-events:none;
+}
+.field-map-label.school-label{
+  z-index:16;
+  width:calc(var(--w)*var(--tile-size));
+  padding:5px 2px;
+  border:2px solid #5b431e;
+  border-radius:4px;
+  background:#fff2a8;
+  color:#4d3614;
+  font-size:clamp(12px,1.6vw,17px);
+  text-shadow:none;
+  box-shadow:0 2px 0 rgba(0,0,0,.25);
+}
+.school-marker{
+  position:absolute;
+  left:calc(var(--x)*var(--tile-size));
+  top:calc(var(--y)*var(--tile-size));
+  z-index:17;
+  min-width:calc(var(--tile-size)*2.2);
+  padding:5px 8px;
+  transform:translateY(-15%);
+  border:2px solid #49371e;
+  border-radius:5px;
+  background:#fff9d6;
+  color:#3e2f1a;
+  font:900 clamp(10px,1.3vw,14px)/1 ui-monospace,"Noto Sans JP",monospace;
+  text-align:center;
+  box-shadow:0 3px 0 rgba(0,0,0,.22);
+  pointer-events:none;
+}
+
 .field-entity{transition:left .095s linear,top .095s linear;}
-.story-npc .entity-tag:empty{display:none}.story-npc.quest-target{filter:drop-shadow(0 0 5px rgba(255,242,128,.8)) drop-shadow(0 3px 1px rgba(0,0,0,.25));}.story-npc.quest-target .entity-tag{bottom:72%;right:2%;width:16px;height:16px;border-radius:50%;background:#fff4a6;color:#9a5b11;border:2px solid #6c4a1a;font-size:10px;animation:questBob .7s ease-in-out infinite alternate}.npc-classmate .pixel-body{background:#c47b69}.npc-librarian .pixel-head{box-shadow:inset 0 7px #675a85}.npc-librarian .pixel-body{background:#6c83b5}.npc-parts .pixel-head{box-shadow:inset 0 7px #58402e}.npc-parts .pixel-body{background:#9a6a4d}.npc-traveler .pixel-body{background:#5e9c76}@keyframes questBob{to{transform:translateY(-4px)}}
+#field-player{pointer-events:none;}
+#field-follower{z-index:24!important;}
+.story-npc .entity-tag:empty{display:none}
+.story-npc.quest-target{filter:drop-shadow(0 0 5px rgba(255,242,128,.8)) drop-shadow(0 3px 1px rgba(0,0,0,.25));}
+.story-npc.quest-target .entity-tag{bottom:72%;right:2%;width:16px;height:16px;border-radius:50%;background:#fff4a6;color:#9a5b11;border:2px solid #6c4a1a;font-size:10px;animation:questBob .7s ease-in-out infinite alternate}
+.npc-classmate .pixel-body{background:#c47b69}.npc-librarian .pixel-head{box-shadow:inset 0 7px #675a85}.npc-librarian .pixel-body{background:#6c83b5}.npc-parts .pixel-head{box-shadow:inset 0 7px #58402e}.npc-parts .pixel-body{background:#9a6a4d}.npc-traveler .pixel-body{background:#5e9c76}
+@keyframes questBob{to{transform:translateY(-4px)}}
 .field-shop{z-index:7}.shop-icon{display:grid;place-items:center;width:65%;height:65%;border-radius:5px;background:#f4e7a6;border:2px solid #725f37;color:#5c7043;font-size:calc(var(--tile-size)*.42);box-shadow:0 2px rgba(0,0,0,.2)}
-.field-story-overlay{position:absolute;inset:46px 0 0;z-index:60;display:grid;place-items:center;padding:3%;background:rgba(20,24,28,.72);backdrop-filter:blur(2px)}.field-story-card{position:relative;width:min(680px,94%);max-height:94%;overflow:auto;padding:20px;background:#fffef2;color:#202128;border:4px solid #333946;border-radius:8px;box-shadow:inset 0 0 0 2px #adb5c4,0 16px 32px rgba(0,0,0,.35);font-family:ui-monospace,"Noto Sans JP",monospace}.field-story-card h3{margin:5px 34px 12px 0;font-size:20px}.field-story-card p{line-height:1.7}.field-story-close{position:absolute;right:10px;top:10px;width:34px;height:34px;border:2px solid #4c5360;border-radius:5px;background:#fff;color:#252a34;font-size:22px;font-weight:900}.field-story-card .cipher-card{margin:14px 0;padding:14px;background:#242a35;color:#f7f3df;border-radius:6px;display:grid;gap:6px}.field-story-card .cipher-card code{font-size:clamp(16px,3vw,24px);word-break:break-all;color:#fff}.field-story-card .cipher-card small{color:#c6cfdd}.field-story-card .story-input-label{display:grid;gap:6px;font-weight:800}.field-story-card .story-input-label input{padding:10px;border:2px solid #626a78;border-radius:5px;font:inherit}.field-story-card .story-result{min-height:1.5em;color:#a24a3d;font-weight:800}.field-story-card .story-actions{display:flex;justify-content:flex-end;margin-top:12px}.field-story-card .code-puzzle{display:grid;gap:8px}.field-story-card .code-puzzle-head{display:flex;justify-content:space-between;align-items:center}.field-story-card #story-code{width:100%;min-height:190px;padding:12px;resize:vertical;background:#12161e;color:#e7edff;border:2px solid #596274;border-radius:6px;font:13px/1.5 "SFMono-Regular",Consolas,monospace}.field-story-card .story-hint{padding:10px;background:#ece6ca;border-radius:5px;font-size:12px}.field-story-card .story-console{min-height:92px;margin:0;padding:10px;background:#151a21;color:#dce6f5;border-radius:5px;white-space:pre-wrap;font:12px/1.55 "SFMono-Regular",Consolas,monospace}
-@media(max-width:760px){.field-story-overlay{inset:46px 0 0}.field-story-card{padding:14px}.field-story-card #story-code{min-height:150px}.story-npc.quest-target .entity-tag{bottom:65%}}
+
+.field-story-overlay{position:absolute;inset:46px 0 0;z-index:60;display:grid;place-items:center;padding:3%;background:rgba(20,24,28,.72);backdrop-filter:blur(2px)}
+.field-story-card{position:relative;width:min(680px,94%);max-height:94%;overflow:auto;padding:20px;background:#fffef2;color:#202128;border:4px solid #333946;border-radius:8px;box-shadow:inset 0 0 0 2px #adb5c4,0 16px 32px rgba(0,0,0,.35);font-family:ui-monospace,"Noto Sans JP",monospace}
+.field-story-card h3{margin:5px 34px 12px 0;font-size:20px}.field-story-card p{line-height:1.7}
+.field-story-close{position:absolute;right:10px;top:10px;width:34px;height:34px;border:2px solid #4c5360;border-radius:5px;background:#fff;color:#252a34;font-size:22px;font-weight:900}
+.field-story-card .cipher-card{margin:14px 0;padding:14px;background:#242a35;color:#f7f3df;border-radius:6px;display:grid;gap:6px}.field-story-card .cipher-card code{font-size:clamp(16px,3vw,24px);word-break:break-all;color:#fff}.field-story-card .cipher-card small{color:#c6cfdd}
+.field-story-card .story-input-label{display:grid;gap:6px;font-weight:800}.field-story-card .story-input-label input{padding:10px;border:2px solid #626a78;border-radius:5px;font:inherit}
+.field-story-card .story-result{min-height:1.5em;color:#a24a3d;font-weight:800}.field-story-card .story-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.field-story-card .code-puzzle{display:grid;gap:8px}.field-story-card .code-puzzle-head{display:flex;justify-content:space-between;align-items:center}
+.field-story-card #story-code{width:100%;min-height:190px;padding:12px;resize:vertical;background:#12161e;color:#e7edff;border:2px solid #596274;border-radius:6px;font:13px/1.5 "SFMono-Regular",Consolas,monospace}
+.field-story-card .story-hint{padding:10px;background:#ece6ca;border-radius:5px;font-size:12px}.field-story-card .story-console{min-height:92px;margin:0;padding:10px;background:#151a21;color:#dce6f5;border-radius:5px;white-space:pre-wrap;font:12px/1.55 "SFMono-Regular",Consolas,monospace}
+
+@media(max-width:760px){
+  .field-map{--tile-size:clamp(30px,8vw,40px);height:calc(8 * var(--tile-size))!important;max-height:none}
+  .field-story-overlay{inset:46px 0 0}
+  .field-story-card{padding:14px}
+  .field-story-card #story-code{min-height:150px}
+  .story-npc.quest-target .entity-tag{bottom:65%}
+  .school-marker{font-size:10px}
+}
