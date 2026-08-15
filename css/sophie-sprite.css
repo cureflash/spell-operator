@@ -17,7 +17,7 @@
   width:calc(var(--tile-size)*.78);
   height:calc(var(--tile-size)*1.17);
   transform:translateX(-50%);
-  background-image:url("../assets/characters/sophie_walk.png?v=2");
+  background-image:url("../assets/characters/sophie_walk_v3.png");
   background-repeat:no-repeat;
   background-size:300% 400%;
   background-position:var(--sophie-frame-x,50%) var(--sophie-row-y,33.333333%);
