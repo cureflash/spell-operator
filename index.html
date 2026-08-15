@@ -20,7 +20,7 @@
       <div class="title-card panel">
         <p class="eyebrow">MAGIC IS CODE.</p>
         <h2>ソフィーとルミエルの二人旅。</h2>
-        <p>フィールドを歩き、魔法工房でコードを書き、自作した魔法で戦います。</p>
+        <p>フィールドを歩き、パソコンのエディタで魔導書を解析し、自作した魔法で戦います。</p>
         <button id="start-button" class="primary big">GAME START</button>
       </div>
     </section>
@@ -28,7 +28,7 @@
     <section id="screen-field" class="screen">
       <div class="game-window field-window">
         <div class="field-hud">
-          <div><span class="field-area">はじまりの平原</span><span id="field-objective">魔法工房へ行こう</span></div>
+          <div><span class="field-area">はじまりの平原</span><span id="field-objective">町を探索しよう</span></div>
           <div class="field-tools"><button id="field-save" class="mini-button">SAVE</button><button id="field-load" class="mini-button">LOAD</button></div>
         </div>
         <div id="field-map" class="field-map" aria-label="フィールドマップ">
@@ -48,38 +48,38 @@
     </section>
 
     <section id="screen-hub" class="screen">
-      <div class="screen-heading"><div><p class="kicker">SPELL WORKSHOP</p><h2>魔法工房</h2></div><div id="workshop-progress" class="badge muted">0 / 2 登録</div></div>
+      <div class="screen-heading"><div><p class="kicker">SOPHIE PC</p><h2>パソコン</h2></div><div id="workshop-progress" class="badge muted">0 / 1 解析済み</div></div>
       <div class="spell-grid">
         <article class="panel spell-card">
-          <div class="spell-card-head"><div><p class="eyebrow">LOOP / ATTACK</p><h3>Fire</h3></div><span id="fire-status" class="badge muted">未登録</span></div>
-          <p>ループを必要な回数まで削り、オーバーヒートを避けて攻撃魔法を完成させる。</p>
-          <dl class="spell-spec"><div><dt>効果</dt><dd>威力60（特攻で変動）</dd></div><div><dt>主題</dt><dd>for / 計算量</dd></div></dl>
-          <button id="develop-fire" class="primary">Fireを開発</button>
+          <div class="spell-card-head"><div><p class="eyebrow">GRIMOIRE / LOOP</p><h3>Fire</h3></div><span id="fire-status" class="badge muted">未解析</span></div>
+          <p>最初からPCに保存されている攻撃魔法の魔導書。ループの不具合を直して解析する。</p>
+          <dl class="spell-spec"><div><dt>効果</dt><dd>威力60</dd></div><div><dt>主題</dt><dd>for / 計算量</dd></div></dl>
+          <button id="develop-fire" class="primary">エディタで開く</button>
         </article>
         <article class="panel spell-card">
-          <div class="spell-card-head"><div><p class="eyebrow">IF / SUPPORT</p><h3>Heal</h3></div><span id="heal-status" class="badge muted">未登録</span></div>
-          <p>HPを変数に入れ、条件を満たしたときだけ回復処理を実行する。</p>
-          <dl class="spell-spec"><div><dt>効果</dt><dd>味方1人を20回復</dd></div><div><dt>主題</dt><dd>変数 / if</dd></div></dl>
-          <button id="develop-heal" class="primary">Healを開発</button>
+          <div class="spell-card-head"><div><p class="eyebrow">GRIMOIRE / IF</p><h3>Repair</h3></div><span id="repair-status" class="badge muted">未保存</span></div>
+          <p>パーツ屋の端末から入手できる修復魔法の魔導書。条件分岐を直して解析する。</p>
+          <dl class="spell-spec"><div><dt>効果</dt><dd>HPを20修復</dd></div><div><dt>主題</dt><dd>変数 / if</dd></div></dl>
+          <button id="develop-repair" class="primary" disabled>未保存</button>
         </article>
       </div>
-      <section class="panel deploy-panel"><div><p class="eyebrow">FIELD</p><h3>フィールドへ戻る</h3><p>FireとHealを登録したら、東側にいる魔物へ向かってください。</p></div><button id="return-field" class="primary big">フィールドへ</button></section>
+      <section class="panel deploy-panel"><div><p class="eyebrow">LOG OUT</p><h3>パソコンを閉じる</h3><p>編集内容は下書きとして保存されます。解析済みの魔法は実戦登録枠へセットできます。</p></div><button id="return-field" class="primary big">フィールドへ戻る</button></section>
     </section>
 
     <section id="screen-debug" class="screen">
-      <div class="screen-heading"><div><p class="kicker">DEBUG ROOM</p><h2 id="debug-title">魔法開発</h2></div><div id="spell-badge" class="badge muted">未登録</div></div>
+      <div class="screen-heading"><div><p class="kicker">CODE EDITOR</p><h2 id="debug-title">エディタ</h2></div><div id="spell-badge" class="badge muted">未解析</div></div>
       <div class="debug-grid">
         <section class="panel editor-panel">
           <div class="panel-title-row"><h3>Spell Source</h3><button id="reset-code" class="secondary compact">初期コード</button></div>
           <textarea id="code-editor" spellcheck="false" aria-label="魔法コード"></textarea>
           <div class="hint-box"><strong>課題</strong><span id="debug-hint"></span></div>
-          <div class="button-row wrap"><button id="run-code" class="primary">▶ 実行</button><button id="register-spell" class="secondary" disabled>実戦登録</button><button id="back-workshop" class="secondary">工房へ戻る</button></div>
+          <div class="button-row wrap"><button id="run-code" class="primary">▶ 実行</button><button id="register-spell" class="secondary" disabled>実戦登録</button><button id="back-workshop" class="secondary">パソコンへ戻る</button></div>
         </section>
         <section class="panel console-panel">
           <div class="panel-title-row"><h3>Debug Console</h3><span id="run-state" class="status neutral">READY</span></div>
           <pre id="console-output" class="console">コードを実行してください。</pre>
           <dl class="metrics"><div><dt>実行ステップ</dt><dd id="metric-steps">—</dd></div><div><dt>推定MP</dt><dd id="metric-mp">—</dd></div><div><dt>結果</dt><dd id="metric-result">未実行</dd></div></dl>
-          <div class="manual"><h4>Prototype 0.3 命令</h4><p><code>spell</code> / 変数代入 / <code>for</code> / <code>if</code> / <code>print()</code> / <code>cast()</code></p><p>1000ステップを超えると <strong>OVERHEAT</strong>。少ないステップほどMP消費も小さくなります。</p></div>
+          <div class="manual"><h4>エディタで使える命令</h4><p><code>spell</code> / 変数代入 / <code>for</code> / <code>if</code> / <code>print()</code> / <code>cast()</code></p><p>1000ステップを超えると <strong>OVERHEAT</strong>。少ないステップほどMP消費も小さくなります。</p></div>
         </section>
       </div>
     </section>
@@ -100,19 +100,19 @@
           <div class="battle-menu-wrap">
             <div id="sophie-menu" class="command-grid"><button id="sophie-fight" class="command">たたかう</button><button id="sophie-defend" class="command">ぼうぎょ</button></div>
             <div id="lumiere-menu" class="command-grid hidden"><button id="lumiere-magic" class="command">まほう</button><button id="lumiere-defend" class="command">ぼうぎょ</button></div>
-            <div id="magic-menu" class="command-grid hidden"><button id="cast-fire" class="command magic-command">Fire <span id="fire-cost">MP —</span></button><button id="cast-heal" class="command magic-command">Heal <span id="heal-cost">MP —</span></button><button id="magic-back" class="command">もどる</button></div>
+            <div id="magic-menu" class="command-grid hidden"><button id="cast-fire" class="command magic-command">Fire <span id="fire-cost">MP —</span></button><button id="cast-heal" class="command magic-command">Repair <span id="heal-cost">MP —</span></button><button id="magic-back" class="command">もどる</button></div>
             <div id="heal-target-menu" class="command-grid hidden"><button id="heal-sophie" class="command">ソフィー</button><button id="heal-lumiere" class="command">ルミエル</button><button id="heal-back" class="command">もどる</button></div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="screen-clear" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE WON</p><h2>勝利！</h2><p>自作した魔法を実戦で使えました。フィールドへ戻ります。</p><dl class="clear-summary"><div><dt>Fire MP</dt><dd id="clear-fire-mp">—</dd></div><div><dt>Heal MP</dt><dd id="clear-heal-mp">—</dd></div></dl><button id="clear-field" class="primary">フィールドへ戻る</button></div></section>
+    <section id="screen-clear" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE WON</p><h2>勝利！</h2><p>自作した魔法を実戦で使えました。フィールドへ戻ります。</p><dl class="clear-summary"><div><dt>Fire MP</dt><dd id="clear-fire-mp">—</dd></div><div><dt>Repair MP</dt><dd id="clear-heal-mp">—</dd></div></dl><button id="clear-field" class="primary">フィールドへ戻る</button></div></section>
 
-    <section id="screen-defeat" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE FAILED</p><h2>戦闘不能</h2><p>再戦するか、魔法工房へ戻ってコードを見直せます。</p><div class="button-row center"><button id="retry-battle" class="primary">再戦</button><button id="defeat-workshop" class="secondary">魔法工房へ</button></div></div></section>
+    <section id="screen-defeat" class="screen"><div class="title-card panel clear-card"><p class="eyebrow">BATTLE FAILED</p><h2>戦闘不能</h2><p>再戦するか、パソコンへ戻ってコードを見直せます。</p><div class="button-row center"><button id="retry-battle" class="primary">再戦</button><button id="defeat-workshop" class="secondary">パソコンへ</button></div></div></section>
   </main>
   <script src="js/interpreter.js"></script>
   <script src="js/field-model.js"></script>
-  <script src="js/game.js?v=22"></script>
+  <script src="js/game.js?v=23"></script>
 </body>
 </html>
