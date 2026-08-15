@@ -53,22 +53,45 @@
   function same(a,b){return a.x===b.x&&a.y===b.y}
   function front(){return model.front(model.player)}
 
+  function lumiereText(){
+    return fieldState.enemyDefeated
+      ?"……今の戦い、悪くなかった。自分で書いた魔法がちゃんと動くと、ちょっと気分いいね。"
+      :G.magicReady()
+        ?"Fire と Heal は登録できた。あとは実戦で挙動を見るだけ。"
+        :"先に工房。戦闘中にコードを書くわけじゃないから、使う魔法はここで準備しておこう。";
+  }
+
+  function directionToward(from,to){
+    const dx=to.x-from.x,dy=to.y-from.y;
+    if(dx===0&&dy===0)return from.facing||"down";
+    if(Math.abs(dx)>Math.abs(dy))return dx>0?"right":"left";
+    return dy>0?"down":"up";
+  }
+
+  function opposite(direction){
+    return {up:"down",down:"up",left:"right",right:"left"}[direction]||"down";
+  }
+
+  function faceLumiere(){
+    const direction=directionToward(model.player,model.follower);
+    model.player.facing=direction;
+    model.follower.facing=opposite(direction);
+    render();
+  }
+
+  function talkToLumiere(){
+    if(fieldState.dialogOpen){closeDialog();return}
+    faceLumiere();
+    showDialog({speaker:"lumiere",text:lumiereText()});
+  }
+
   function interact(){
     if(fieldState.dialogOpen){closeDialog();return}
     const f=front();
-    if(same(f,model.follower)){
-      const text=fieldState.enemyDefeated
-        ?"……今の戦い、悪くなかった。自分で書いた魔法がちゃんと動くと、ちょっと気分いいね。"
-        :G.magicReady()
-          ?"Fire と Heal は登録できた。あとは実戦で挙動を見るだけ。"
-          :"先に工房。戦闘中にコードを書くわけじゃないから、使う魔法はここで準備しておこう。";
-      showDialog({speaker:"lumiere",text});
-      return;
-    }
+    if(same(f,model.follower)){showDialog({speaker:"lumiere",text:lumiereText()});return}
     if(same(f,door)){G.openWorkshop();return}
     if(same(f,npc)){showDialog({speaker:"traveler",text:"東の草むらには変な魔物がいるよ。魔法を準備してから行った方がいい。"});return}
     if(same(f,sign)){showDialog({speaker:"sign",text:"← 魔法工房　　東の草むら →"});return}
-    // 前方に会話・調査対象がない場合は何もしない。
   }
 
   function tryMove(direction){
@@ -125,7 +148,12 @@
     if(!G.screens.field.classList.contains("active"))return;
     const map={ArrowUp:"up",w:"up",W:"up",ArrowDown:"down",s:"down",S:"down",ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right"};
     if(map[e.key]){e.preventDefault();tryMove(map[e.key]);return}
-    if(e.code==="Space"||e.key==="Enter"){
+    if(e.code==="Space"){
+      e.preventDefault();
+      talkToLumiere();
+      return;
+    }
+    if(e.key==="Enter"){
       e.preventDefault();
       interact();
     }
