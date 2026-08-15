@@ -17,9 +17,9 @@
     const fieldWindow=document.querySelector("#screen-field .field-window");
     if(fieldWindow&&!$("#field-main-menu")){
       const menu=document.createElement("div");menu.id="field-main-menu";menu.className="field-main-menu hidden";menu.setAttribute("role","menu");menu.setAttribute("aria-label","フィールドメニュー");
-      menu.innerHTML=`<div class="field-main-menu-title">MENU</div><div id="field-menu-money" class="field-main-menu-money">0 G</div><div id="field-main-menu-items" class="field-main-menu-items"></div><div class="field-main-menu-help">↑↓ 選択　Enter 決定　Z 閉じる</div>`;fieldWindow.appendChild(menu);
+      menu.innerHTML=`<div class="field-main-menu-title">MENU</div><div id="field-menu-money" class="field-main-menu-money">0 G</div><div id="field-main-menu-items" class="field-main-menu-items"></div><div class="field-main-menu-help">↑↓ 選択　Z 決定　Enter 閉じる</div>`;fieldWindow.appendChild(menu);
     }
-    const help=document.querySelector("#screen-field .field-help");if(help&&!help.querySelector("[data-menu-help]")){const span=document.createElement("span");span.dataset.menuHelp="1";span.textContent="メニュー：Z";help.appendChild(span)}
+    const help=document.querySelector("#screen-field .field-help");if(help&&!help.querySelector("[data-menu-help]")){const span=document.createElement("span");span.dataset.menuHelp="1";span.textContent="メニュー：Enter";help.appendChild(span)}
     const main=document.querySelector("main.shell");
     if(main&&!$("#screen-status")){
       const section=document.createElement("section");section.id="screen-status";section.className="screen";
@@ -42,8 +42,9 @@
 
   function fieldScreenActive(){return Boolean(G.screens.field?.classList.contains("active"))}
   function dialogIsOpen(){const dialog=$("#field-dialog");return Boolean(dialog&&!dialog.classList.contains("hidden"))}
+  function storyOverlayIsOpen(){return Boolean(window.SpellStory?.isOverlayOpen?.())}
   function isOpen(){return fieldMenuOpen}
-  function openFieldMenu(){if(!fieldScreenActive()||dialogIsOpen())return;fieldMenuOpen=true;fieldMenuIndex=0;renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
+  function openFieldMenu(){if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen())return;fieldMenuOpen=true;fieldMenuIndex=0;renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
   function closeFieldMenu(){fieldMenuOpen=false;$("#field-main-menu")?.classList.add("hidden")}
   function toggleFieldMenu(){fieldMenuOpen?closeFieldMenu():openFieldMenu()}
   function moveFieldMenu(delta){fieldMenuIndex=(fieldMenuIndex+delta+fieldMenuItems.length)%fieldMenuItems.length;renderFieldMenu()}
@@ -73,15 +74,19 @@
   function openStatus(){renderStatus();G.showScreen("status")}
   function closeStatus(){G.showScreen("field")}
   function isZKey(event){return event.code==="KeyZ"||event.key==="z"||event.key==="Z"}
+  function isEnterKey(event){return event.key==="Enter"||event.code==="Enter"||event.code==="NumpadEnter"}
   function onFieldMenuKeydown(event){
+    if(storyOverlayIsOpen())return;
     if(fieldMenuOpen){
-      if(isZKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}
+      if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}
       if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}
       if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}
-      if(event.key==="Enter"||event.code==="Enter"||event.code==="NumpadEnter"){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}
+      if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}
       event.preventDefault();event.stopImmediatePropagation();return;
     }
-    if(fieldScreenActive()&&isZKey(event)&&!dialogIsOpen()){event.preventDefault();event.stopImmediatePropagation();openFieldMenu()}
+    if(!fieldScreenActive())return;
+    if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}
+    if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}
   }
 
   ensureUi();
