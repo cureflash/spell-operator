@@ -68,7 +68,7 @@
     if(same(f,door)){G.openWorkshop();return}
     if(same(f,npc)){showDialog({speaker:"traveler",text:"東の草むらには変な魔物がいるよ。魔法を準備してから行った方がいい。"});return}
     if(same(f,sign)){showDialog({speaker:"sign",text:"← 魔法工房　　東の草むら →"});return}
-    showDialog({speaker:"sophie",text:"特に何もなさそう。"});
+    // 前方に会話・調査対象がない場合は何もしない。
   }
 
   function tryMove(direction){
@@ -121,7 +121,15 @@
     }
   }
 
-  function keydown(e){if(!G.screens.field.classList.contains("active"))return;const map={ArrowUp:"up",w:"up",W:"up",ArrowDown:"down",s:"down",S:"down",ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right"};if(map[e.key]){e.preventDefault();tryMove(map[e.key]);return}if(e.key==="Enter"||e.key===" "){e.preventDefault();interact()}}
+  function keydown(e){
+    if(!G.screens.field.classList.contains("active"))return;
+    const map={ArrowUp:"up",w:"up",W:"up",ArrowDown:"down",s:"down",S:"down",ArrowLeft:"left",a:"left",A:"left",ArrowRight:"right",d:"right",D:"right"};
+    if(map[e.key]){e.preventDefault();tryMove(map[e.key]);return}
+    if(e.code==="Space"||e.key==="Enter"){
+      e.preventDefault();
+      interact();
+    }
+  }
   buildMap();render();document.addEventListener("keydown",keydown);document.querySelectorAll("[data-dir]").forEach(b=>b.addEventListener("click",()=>tryMove(b.dataset.dir)));$("#field-action").addEventListener("click",interact);$("#field-save").addEventListener("click",saveGame);$("#field-load").addEventListener("click",loadGame);
   window.SpellField={startNewGame,returnFromWorkshop,onBattleWon,showDialog,updateObjective,saveGame,loadGame};
 })();
