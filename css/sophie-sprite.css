@@ -1,44 +1,36 @@
 /* Pipoya 32x32 character sheets: 3 frames x 4 directions, rows DOWN / LEFT / RIGHT / UP. */
-.sophie-field,.lumiere-field{
-  overflow:visible;
-  --sprite-frame-x:50%;
-}
-.sophie-field .pixel-head,.sophie-field .pixel-body,.sophie-field .entity-tag,
-.lumiere-field .pixel-head,.lumiere-field .pixel-body,.lumiere-field .entity-tag{display:none!important;}
+#field-map .sophie-field,#field-map .lumiere-field{overflow:visible!important;--sprite-frame-x:50%}
+#field-map .sophie-field .pixel-head,#field-map .sophie-field .pixel-body,#field-map .sophie-field .entity-tag,
+#field-map .lumiere-field .pixel-head,#field-map .lumiere-field .pixel-body,#field-map .lumiere-field .entity-tag{display:none!important}
 
-.sophie-field::before,.lumiere-field::before{
-  content:"";
-  position:absolute;
-  z-index:2;
-  left:50%;
-  bottom:0;
-  width:var(--tile-size);
-  height:var(--tile-size);
-  transform:translateX(-50%);
-  background-repeat:no-repeat;
-  background-size:300% 400%;
-  background-position:var(--sprite-frame-x) var(--sprite-row-y,0%);
-  image-rendering:pixelated;
-  filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));
-  pointer-events:none;
-}
-.sophie-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip002.png");}
-.lumiere-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png");}
-
-#field-player{
+#field-map .sophie-field::before,#field-map .lumiere-field::before{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  z-index:2!important;
   left:50%!important;
-  top:50%!important;
-  transform:translate(-50%,-50%)!important;
-  transition:none!important;
-  z-index:45!important;
+  bottom:0!important;
+  width:var(--tile-size)!important;
+  height:var(--tile-size)!important;
+  transform:translateX(-50%)!important;
+  background-repeat:no-repeat!important;
+  background-size:300% 400%!important;
+  background-position:var(--sprite-frame-x) var(--sprite-row-y,0%)!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))!important;
+  pointer-events:none!important;
 }
-#field-follower{z-index:24!important;}
+#field-map .sophie-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip002.png")!important}
+#field-map .lumiere-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important}
 
-.sophie-field[data-frame="0"],.lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
-.sophie-field[data-frame="1"],.lumiere-field[data-frame="1"]{--sprite-frame-x:50%}
-.sophie-field[data-frame="2"],.lumiere-field[data-frame="2"]{--sprite-frame-x:100%}
+#field-player{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;transition:none!important;z-index:45!important}
+#field-follower{z-index:24!important}
 
-.sophie-field[data-facing="down"],.lumiere-field[data-facing="down"]{--sprite-row-y:0%}
-.sophie-field[data-facing="left"],.lumiere-field[data-facing="left"]{--sprite-row-y:33.333333%}
-.sophie-field[data-facing="right"],.lumiere-field[data-facing="right"]{--sprite-row-y:66.666667%}
-.sophie-field[data-facing="up"],.lumiere-field[data-facing="up"]{--sprite-row-y:100%}
+#field-map .sophie-field[data-frame="0"],#field-map .lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
+#field-map .sophie-field[data-frame="1"],#field-map .lumiere-field[data-frame="1"]{--sprite-frame-x:50%}
+#field-map .sophie-field[data-frame="2"],#field-map .lumiere-field[data-frame="2"]{--sprite-frame-x:100%}
+
+#field-map .sophie-field[data-facing="down"],#field-map .lumiere-field[data-facing="down"]{--sprite-row-y:0%}
+#field-map .sophie-field[data-facing="left"],#field-map .lumiere-field[data-facing="left"]{--sprite-row-y:33.333333%}
+#field-map .sophie-field[data-facing="right"],#field-map .lumiere-field[data-facing="right"]{--sprite-row-y:66.666667%}
+#field-map .sophie-field[data-facing="up"],#field-map .lumiere-field[data-facing="up"]{--sprite-row-y:100%}
