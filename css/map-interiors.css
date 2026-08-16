@@ -16,4 +16,11 @@
 .field-key-item{z-index:20!important;display:grid!important;place-items:center!important}
 .unicode-chart-item .unicode-sheet{display:grid;place-items:center;width:78%;height:72%;border:2px solid #66543b;border-radius:3px;background:#fff4cf;color:#4c3c29;font:900 calc(var(--tile-size)*.28)/1 ui-monospace,monospace;box-shadow:0 3px 0 rgba(0,0,0,.22)}
 .unicode-chart-item .entity-tag{position:absolute;right:-3px;top:-10px;display:grid;width:17px;height:17px;place-items:center;border:2px solid #6c4a1a;border-radius:50%;background:#fff4a6;color:#9a5b11;font-size:10px;animation:questBob .7s ease-in-out infinite alternate}
+
+/* Map change: fade completely to black before rebuilding the destination map. */
+#screen-field .field-window{position:relative}
+.field-transition-fade{position:absolute;inset:0;z-index:200;background:#000;opacity:0;pointer-events:none;transition:opacity .22s ease;will-change:opacity}
+.field-transition-fade.active{opacity:1;pointer-events:auto}
+html.field-transitioning #screen-field .touch-controls{pointer-events:none}
+@media(prefers-reduced-motion:reduce){.field-transition-fade{transition-duration:.08s}}
 @media(max-width:760px){.field-map-label.interior-label{font-size:12px}.map-exit-marker,.library-marker{font-size:9px}}
