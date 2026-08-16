@@ -38,6 +38,9 @@
 .npc-traveler::before{
   background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/957e95e5f95ec41c54fda098f30d222733954ce1/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip001.png");
 }
+.npc-mother::before{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip005.png");
+}
 
 /* 4-way facing. */
 .story-npc[data-facing="down"],
