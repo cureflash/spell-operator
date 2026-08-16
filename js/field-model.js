@@ -7,7 +7,22 @@
     inBounds(x,y){ return x>=0&&y>=0&&x<this.width&&y<this.height; }
     front(entity=this.player){ const d=DIRS[entity.facing]||DIRS.down; return {x:entity.x+d.x,y:entity.y+d.y}; }
     canMoveTo(x,y){ return this.inBounds(x,y)&&!this.blocked.has(key(x,y)); }
-    tryMove(direction){ const d=DIRS[direction]; if(!d)return {moved:false,reason:"direction"}; this.player.facing=direction; const next={x:this.player.x+d.x,y:this.player.y+d.y}; if(!this.canMoveTo(next.x,next.y))return {moved:false,reason:"blocked",next}; const previous={...this.player}; this.player.x=next.x; this.player.y=next.y; this.follower.x=previous.x; this.follower.y=previous.y; this.follower.facing=direction; return {moved:true,previous,next:{...this.player},follower:{...this.follower}}; }
+    tryMove(direction){
+      const d=DIRS[direction];
+      if(!d)return {moved:false,reason:"direction"};
+      this.player.facing=direction;
+      this.follower.facing=direction;
+      const next={x:this.player.x+d.x,y:this.player.y+d.y};
+      if(!this.canMoveTo(next.x,next.y))return {moved:false,reason:"blocked",next};
+      const previous={...this.player};
+      const followerPrevious={...this.follower};
+      this.player.x=next.x;
+      this.player.y=next.y;
+      /* Party formation: Lumiere moves on the same input tick as Sophie. */
+      this.follower.x+=d.x;
+      this.follower.y+=d.y;
+      return {moved:true,previous,followerPrevious,next:{...this.player},follower:{...this.follower}};
+    }
     snapshot(){ return {player:{...this.player},follower:{...this.follower}}; }
     restore(snapshot){ if(snapshot?.player)Object.assign(this.player,snapshot.player); if(snapshot?.follower)Object.assign(this.follower,snapshot.follower); }
   }
