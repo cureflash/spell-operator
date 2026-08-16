@@ -23,9 +23,9 @@
   display:none!important;
 }
 
-/* Sophie: user-provided 3x4 sheet, normalized to 96x128 PNG. */
+/* Sophie: user-provided 3x4 sheet rebuilt as twelve aligned 32x32 cells. */
 #field-map #field-player.sophie-field{
-  background-image:url("../assets/characters/sophie_walk_3x4.png?v=1")!important;
+  background-image:url("../assets/characters/sophie_walk_3x4.png?v=2")!important;
 }
 
 /* Lumiere: Pipoya-style 3x4 sheet. */
