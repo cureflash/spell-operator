@@ -3,37 +3,63 @@
 #field-map .lumiere-field{
   overflow:visible!important;
   --sprite-frame-x:50%;
+  --sprite-row-y:0%;
   opacity:1!important;
   visibility:visible!important;
   display:flex!important;
+}
+
+/* Keep the logical actor itself at exactly one tile. Sophie is drawn by the
+   existing .pixel-head span as a separate visual layer so it can be larger
+   without changing movement/collision coordinates. */
+#field-map #field-player.sophie-field{
+  background:none!important;
+  filter:none!important;
+}
+#field-map #field-player.sophie-field .pixel-head{
+  display:block!important;
+  position:absolute!important;
+  z-index:60!important;
+  width:118%!important;
+  height:118%!important;
+  left:50%!important;
+  top:auto!important;
+  bottom:-5%!important;
+  transform:translateX(-50%)!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background-color:transparent!important;
+  background-image:url("../assets/characters/sophie_walk_3x4_hd.png?v=1")!important;
   background-repeat:no-repeat!important;
   background-size:300% 400%!important;
-  background-position:var(--sprite-frame-x) var(--sprite-row-y,0%)!important;
+  background-position:var(--sprite-frame-x) var(--sprite-row-y)!important;
+  image-rendering:pixelated!important;
+  filter:drop-shadow(0 2px 1px rgba(0,0,0,.22))!important;
+  pointer-events:none!important;
+}
+#field-map #field-player.sophie-field .pixel-body,
+#field-map #field-player.sophie-field .entity-tag{
+  display:none!important;
+}
+
+/* Lumiere remains the normal Pipoya 3x4 background on the one-tile actor. */
+#field-map #field-follower.lumiere-field{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important;
+  background-repeat:no-repeat!important;
+  background-size:300% 400%!important;
+  background-position:var(--sprite-frame-x) var(--sprite-row-y)!important;
   background-color:transparent!important;
   image-rendering:pixelated!important;
   filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))!important;
 }
-
-#field-map .sophie-field .pixel-head,
-#field-map .sophie-field .pixel-body,
-#field-map .sophie-field .entity-tag,
-#field-map .lumiere-field .pixel-head,
-#field-map .lumiere-field .pixel-body,
-#field-map .lumiere-field .entity-tag{
+#field-map #field-follower.lumiere-field .pixel-head,
+#field-map #field-follower.lumiere-field .pixel-body,
+#field-map #field-follower.lumiere-field .entity-tag{
   display:none!important;
 }
 
-/* Sophie: user-provided 3x4 sheet rebuilt as twelve aligned 32x32 cells. */
-#field-map #field-player.sophie-field{
-  background-image:url("../assets/characters/sophie_walk_3x4.png?v=2")!important;
-}
-
-/* Lumiere: Pipoya-style 3x4 sheet. */
-#field-map #field-follower.lumiere-field{
-  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important;
-}
-
-/* Do not render either actor through pseudo-elements. */
+/* Do not use pseudo-elements for either actor. */
 #field-map .sophie-field::before,
 #field-map .lumiere-field::before{
   content:none!important;
