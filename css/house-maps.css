@@ -1,0 +1,120 @@
+/* Sophie's house interiors.
+ * Visual source: Pipoya/WOLF expansion room sets.
+ * 1F uses the western room set sample; 2F uses the cute room set sample.
+ * The field grid remains 20x15 (16px source grid scaled to --tile-size).
+ */
+
+.field-world[data-map="house1"],
+.field-world[data-map="house2"]{
+  background-repeat:no-repeat!important;
+  background-position:0 0!important;
+  background-size:100% 100%!important;
+  image-rendering:pixelated!important;
+}
+.field-world[data-map="house1"]{
+  background-color:#b68f67!important;
+  background-image:url("https://pipoya.net/rpg/wp-content/uploads/2019/11/heya_sample.jpg")!important;
+}
+.field-world[data-map="house2"]{
+  background-color:#f0bfd2!important;
+  background-image:url("https://pipoya.net/rpg/wp-content/uploads/2019/11/kawaiiheya_sample.jpg")!important;
+}
+
+/* The Pipoya room image supplies floor/walls/furniture. Grid cells only carry collision. */
+.field-world[data-map="house1"] .field-tile.house-floor,
+.field-world[data-map="house2"] .field-tile.house-floor{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+.field-world[data-map="house1"] .field-tile::before,
+.field-world[data-map="house1"] .field-tile::after,
+.field-world[data-map="house2"] .field-tile::before,
+.field-world[data-map="house2"] .field-tile::after{
+  display:none!important;
+  content:none!important;
+}
+
+.field-map-label.house-label{
+  z-index:18;
+  padding:5px 7px;
+  border:2px solid rgba(91,55,45,.78);
+  border-radius:6px;
+  background:rgba(255,247,229,.92);
+  color:#5c3d35;
+  text-shadow:none;
+  font-size:13px;
+  box-shadow:0 2px 0 rgba(0,0,0,.18);
+}
+.field-world[data-map="house2"] .field-map-label.house-label{
+  border-color:#a45d78;
+  background:rgba(255,236,246,.94);
+  color:#8c4563;
+}
+
+.house-marker{
+  position:absolute;
+  left:calc(var(--x)*var(--tile-size));
+  top:calc(var(--y)*var(--tile-size));
+  z-index:19;
+  min-width:calc(var(--tile-size)*1.6);
+  padding:4px 6px;
+  border:2px solid #7a5840;
+  border-radius:5px;
+  background:rgba(255,248,224,.94);
+  color:#4a3528;
+  font:900 10px/1 ui-monospace,"Noto Sans JP",monospace;
+  text-align:center;
+  box-shadow:0 2px 0 rgba(0,0,0,.2);
+  pointer-events:none;
+}
+.field-world[data-map="house2"] .house-marker{
+  border-color:#a35e7e;
+  background:rgba(255,232,245,.96);
+  color:#87425f;
+}
+.house-pc-marker{
+  background:rgba(228,239,255,.96)!important;
+  border-color:#576e9b!important;
+  color:#3f5680!important;
+}
+
+.npc-mother{
+  z-index:22!important;
+}
+.npc-mother .entity-tag{display:none!important;}
+
+/* Decorative soft tint keeps the second floor recognisably "cute" without obscuring the pixel art. */
+.field-world[data-map="house2"]::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:linear-gradient(rgba(255,225,240,.08),rgba(255,245,252,.05));
+}
+.field-world[data-map="house1"] .field-tile,
+.field-world[data-map="house2"] .field-tile,
+.field-world[data-map="house1"] .field-entity,
+.field-world[data-map="house2"] .field-entity,
+.field-world[data-map="house1"] .field-map-label,
+.field-world[data-map="house2"] .field-map-label,
+.field-world[data-map="house1"] .house-marker,
+.field-world[data-map="house2"] .house-marker{
+  position:relative;
+  z-index:2;
+}
+/* Restore absolute positioning for world overlays/entities after the tint rule above. */
+.field-world[data-map="house1"] .field-entity,
+.field-world[data-map="house2"] .field-entity,
+.field-world[data-map="house1"] .field-map-label,
+.field-world[data-map="house2"] .field-map-label,
+.field-world[data-map="house1"] .house-marker,
+.field-world[data-map="house2"] .house-marker{
+  position:absolute;
+}
+
+@media(max-width:760px){
+  .field-map-label.house-label{font-size:11px;padding:4px 5px}
+  .house-marker{font-size:9px;padding:3px 5px}
+}
