@@ -32,7 +32,14 @@
   transition:none!important;
   z-index:45!important;
 }
-#field-follower{z-index:24!important;}
+#field-follower{
+  z-index:24!important;
+  transition-property:left,top!important;
+  transition-duration:95ms,95ms!important;
+  transition-timing-function:linear,linear!important;
+  transition-delay:0ms,0ms!important;
+  will-change:left,top;
+}
 
 .sophie-field[data-frame="0"],.lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
 .sophie-field[data-frame="1"],.lumiere-field[data-frame="1"]{--sprite-frame-x:14.285714%}
