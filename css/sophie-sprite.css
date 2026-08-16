@@ -1,27 +1,30 @@
 /* Pipoya-style 32x32 character sheets: 3 frames x 4 directions, rows DOWN / LEFT / RIGHT / UP. */
-#field-map .sophie-field,#field-map .lumiere-field{overflow:visible!important;--sprite-frame-x:50%}
-#field-map .sophie-field .pixel-head,#field-map .sophie-field .pixel-body,#field-map .sophie-field .entity-tag,
-#field-map .lumiere-field .pixel-head,#field-map .lumiere-field .pixel-body,#field-map .lumiere-field .entity-tag{display:none!important}
-
-#field-map .sophie-field::before,#field-map .lumiere-field::before{
-  content:""!important;
-  display:block!important;
-  position:absolute!important;
-  z-index:2!important;
-  left:50%!important;
-  bottom:0!important;
-  width:var(--tile-size)!important;
-  height:var(--tile-size)!important;
-  transform:translateX(-50%)!important;
+#field-map .sophie-field,#field-map .lumiere-field{
+  overflow:visible!important;
+  --sprite-frame-x:50%;
   background-repeat:no-repeat!important;
   background-size:300% 400%!important;
   background-position:var(--sprite-frame-x) var(--sprite-row-y,0%)!important;
   image-rendering:pixelated!important;
   filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))!important;
-  pointer-events:none!important;
+  background-color:transparent!important;
 }
-#field-map .sophie-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip002.png")!important}
-#field-map .lumiere-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important}
+#field-map .sophie-field .pixel-head,#field-map .sophie-field .pixel-body,#field-map .sophie-field .entity-tag,
+#field-map .lumiere-field .pixel-head,#field-map .lumiere-field .pixel-body,#field-map .lumiere-field .entity-tag{display:none!important}
+
+/* Draw the sheet on the actor element itself. This deliberately avoids ::before,
+   which was leaving Sophie transparent while Lumiere still rendered. */
+#field-map #field-player.sophie-field{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip002.png")!important;
+}
+#field-map #field-follower.lumiere-field{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important;
+}
+#field-map .sophie-field::before,#field-map .lumiere-field::before{
+  content:none!important;
+  display:none!important;
+  background-image:none!important;
+}
 
 /* Both actors always occupy real coordinates inside field-world.
    On large maps field-world itself moves so Sophie remains visually centred.
