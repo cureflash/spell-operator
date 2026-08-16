@@ -1,11 +1,13 @@
 (() => {
   "use strict";
-  const IDLE_FRAME=3;
+  const IDLE_FRAME=1;
+  const WALK_FRAMES=[0,2];
   const player=document.getElementById("field-player");
   const follower=document.getElementById("field-follower");
   const actors=[player,follower].filter(Boolean);
   if(!player||!actors.length)return;
 
+  let walkIndex=0;
   let frame=IDLE_FRAME;
   let idleTimer=null;
   let lastPlayer=readPosition(player);
@@ -19,12 +21,11 @@
     for(const el of actors)el.dataset.frame=String(frame);
   }
 
-  function setIdle(){
-    applyFrame(IDLE_FRAME);
-  }
+  function setIdle(){applyFrame(IDLE_FRAME);}
 
   function animateSharedStep(){
-    applyFrame((frame+1)%8);
+    applyFrame(WALK_FRAMES[walkIndex]);
+    walkIndex=(walkIndex+1)%WALK_FRAMES.length;
     clearTimeout(idleTimer);
     idleTimer=setTimeout(setIdle,135);
   }
@@ -42,8 +43,5 @@
   });
   observer.observe(player,{attributes:true,attributeFilter:["style"]});
 
-  window.SpellSpriteSync={
-    syncFrame:()=>applyFrame(frame),
-    setIdle
-  };
+  window.SpellSpriteSync={syncFrame:()=>applyFrame(frame),setIdle};
 })();
