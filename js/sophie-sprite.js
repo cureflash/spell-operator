@@ -1,39 +1,49 @@
 (() => {
   "use strict";
   const IDLE_FRAME=3;
-  const actors=[document.getElementById("field-player"),document.getElementById("field-follower")].filter(Boolean);
-  const state=new WeakMap();
+  const player=document.getElementById("field-player");
+  const follower=document.getElementById("field-follower");
+  const actors=[player,follower].filter(Boolean);
+  if(!player||!actors.length)return;
+
+  let frame=IDLE_FRAME;
+  let idleTimer=null;
+  let lastPlayer=readPosition(player);
 
   function readPosition(el){
     return{x:Number(el.style.getPropertyValue("--x")||0),y:Number(el.style.getPropertyValue("--y")||0)};
   }
 
-  function setIdle(el,s){
-    s.frame=IDLE_FRAME;
-    el.dataset.frame=String(IDLE_FRAME);
+  function applyFrame(next){
+    frame=next;
+    for(const el of actors)el.dataset.frame=String(frame);
   }
 
-  function animateStep(el){
-    const s=state.get(el);if(!s)return;
-    s.frame=(s.frame+1)%8;
-    el.dataset.frame=String(s.frame);
-    clearTimeout(s.idleTimer);
-    s.idleTimer=setTimeout(()=>setIdle(el,s),135);
+  function setIdle(){
+    applyFrame(IDLE_FRAME);
   }
 
-  actors.forEach(el=>{
-    const s={...readPosition(el),frame:IDLE_FRAME,idleTimer:null};
-    state.set(el,s);
+  function animateSharedStep(){
+    applyFrame((frame+1)%8);
+    clearTimeout(idleTimer);
+    idleTimer=setTimeout(setIdle,135);
+  }
+
+  for(const el of actors){
     el.dataset.frame=String(IDLE_FRAME);
     if(!el.dataset.facing)el.dataset.facing="down";
+  }
 
-    const observer=new MutationObserver(()=>{
-      const p=readPosition(el);
-      if(p.x!==s.x||p.y!==s.y){
-        animateStep(el);
-        s.x=p.x;s.y=p.y;
-      }
-    });
-    observer.observe(el,{attributes:true,attributeFilter:["style"]});
+  const observer=new MutationObserver(()=>{
+    const current=readPosition(player);
+    if(current.x===lastPlayer.x&&current.y===lastPlayer.y)return;
+    lastPlayer=current;
+    animateSharedStep();
   });
+  observer.observe(player,{attributes:true,attributeFilter:["style"]});
+
+  window.SpellSpriteSync={
+    syncFrame:()=>applyFrame(frame),
+    setIdle
+  };
 })();
