@@ -11,9 +11,11 @@
   const same=(a,b)=>Boolean(a&&b&&a.x===b.x&&a.y===b.y);
   const DIRS={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
   const TRANSITION_TILES={
-    town:[{x:3,y:3},{x:13,y:3}],
+    town:[{x:3,y:3},{x:13,y:3},{x:2,y:8}],
     school:[{x:7,y:11}],
-    library:[{x:7,y:11}]
+    library:[{x:7,y:11}],
+    house1:[{x:9,y:14},{x:17,y:2}],
+    house2:[{x:17,y:13}]
   };
 
   function fieldActive(){return Boolean($("#screen-field")?.classList.contains("active"));}
@@ -70,11 +72,6 @@
     finally{bypass=false;}
   }
 
-  function closeAutomaticMoveMessage(){
-    const dialog=$("#field-dialog"),text=$("#field-dialog-text")?.textContent?.trim()||"";
-    if(dialog&&!dialog.classList.contains("hidden")&&/へ移動した。$/.test(text))dispatchInteract();
-  }
-
   async function performTransition(kind,direction){
     if(transitioning)return;
     const fade=ensureFade();
@@ -86,7 +83,6 @@
       await wait(FADE_MS);
       if(kind==="move")dispatchMove(direction);else dispatchInteract();
       await nextPaint();
-      closeAutomaticMoveMessage();
       await wait(40);
       fade.classList.remove("active");
       await wait(FADE_MS);
