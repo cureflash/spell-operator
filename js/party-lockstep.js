@@ -2,13 +2,15 @@
   "use strict";
   const MOVE_MS=95;
   const fieldMap=document.getElementById("field-map");
+  const world=document.getElementById("field-world");
   const player=document.getElementById("field-player");
   const follower=document.getElementById("field-follower");
-  if(!fieldMap||!player||!follower)return;
+  if(!fieldMap||!world||!player||!follower)return;
 
   const style=document.createElement("style");
   style.textContent=`
-    #field-follower.party-lockstep{
+    /* Scrolling maps: Sophie is camera-centred and Lumiere is drawn relative to her. */
+    #field-map > #field-follower.party-lockstep{
       left:calc(50% + var(--party-offset-x,-40px))!important;
       top:calc(50% + var(--party-offset-y,0px))!important;
       transform:translate(-50%,-50%)!important;
@@ -18,7 +20,23 @@
       transition-delay:0ms,0ms!important;
       will-change:left,top!important;
     }
-    html.field-transitioning #field-follower.party-lockstep{
+
+    /* Compact house maps: the room itself no longer scrolls, so both party members
+       must actually occupy their logical tile coordinates inside the world. */
+    #field-world[data-map="house1"] > #field-player.room-grid-position,
+    #field-world[data-map="house2"] > #field-player.room-grid-position,
+    #field-world[data-map="house1"] > #field-follower.room-grid-position,
+    #field-world[data-map="house2"] > #field-follower.room-grid-position{
+      left:calc(var(--x) * var(--tile-size))!important;
+      top:calc(var(--y) * var(--tile-size))!important;
+      transform:none!important;
+      transition:left ${MOVE_MS}ms linear,top ${MOVE_MS}ms linear!important;
+      will-change:left,top!important;
+    }
+
+    html.field-transitioning #field-follower.party-lockstep,
+    html.field-transitioning #field-player.room-grid-position,
+    html.field-transitioning #field-follower.room-grid-position{
       transition:none!important;
     }
   `;
@@ -32,29 +50,49 @@
   function tileSize(){
     return parseFloat(getComputedStyle(fieldMap).getPropertyValue("--tile-size"))||40;
   }
-  function keepOnPartyLayer(){
-    if(follower.parentElement!==fieldMap)fieldMap.appendChild(follower);
+  function isCompactRoom(){
+    return world.dataset.map==="house1"||world.dataset.map==="house2";
   }
-  function syncVisual({instant=false}={}){
-    keepOnPartyLayer();
-    const tile=tileSize();
-    const dx=read(follower,"--x")-read(player,"--x");
-    const dy=read(follower,"--y")-read(player,"--y");
-    const x=`${dx*tile}px`,y=`${dy*tile}px`;
-    if(follower.style.getPropertyValue("--party-offset-x")!==x)follower.style.setProperty("--party-offset-x",x);
-    if(follower.style.getPropertyValue("--party-offset-y")!==y)follower.style.setProperty("--party-offset-y",y);
-    if(instant){
-      follower.style.setProperty("transition","none","important");
-      void follower.offsetWidth;
-      follower.style.removeProperty("transition");
-    }
+  function forceNoTransition(elements,callback){
+    for(const el of elements)el.style.setProperty("transition","none","important");
+    callback();
+    void fieldMap.offsetWidth;
+    for(const el of elements)el.style.removeProperty("transition");
   }
 
-  /*
-   * Both logical positions are written in the same render call. MutationObserver
-   * runs before the next paint, so Lumiere's 95 ms screen movement starts in the
-   * exact same rendered frame as the 95 ms camera movement.
-   */
+  function syncScrollingVisual({instant=false}={}){
+    const work=()=>{
+      if(player.parentElement!==fieldMap)fieldMap.appendChild(player);
+      if(follower.parentElement!==fieldMap)fieldMap.appendChild(follower);
+      player.classList.remove("room-grid-position");
+      follower.classList.remove("room-grid-position");
+      const tile=tileSize();
+      const dx=read(follower,"--x")-read(player,"--x");
+      const dy=read(follower,"--y")-read(player,"--y");
+      follower.style.setProperty("--party-offset-x",`${dx*tile}px`);
+      follower.style.setProperty("--party-offset-y",`${dy*tile}px`);
+    };
+    if(instant)forceNoTransition([player,follower],work);else work();
+  }
+
+  function syncRoomVisual({instant=false}={}){
+    const work=()=>{
+      player.classList.add("room-grid-position");
+      follower.classList.add("room-grid-position");
+      if(player.parentElement!==world)world.appendChild(player);
+      if(follower.parentElement!==world)world.appendChild(follower);
+    };
+    if(instant)forceNoTransition([player,follower],work);else work();
+  }
+
+  function syncVisual({instant=false}={}){
+    if(isCompactRoom())syncRoomVisual({instant});
+    else syncScrollingVisual({instant});
+  }
+
+  /* Logical --x/--y updates happen together in render(). In a scrolling map we
+     convert Lumiere's logical delta to a screen offset before the next paint.
+     In a compact room the browser animates both world-coordinate positions. */
   let queued=false;
   function queueSync(){
     if(queued)return;
@@ -68,16 +106,23 @@
   positionObserver.observe(player,{attributes:true,attributeFilter:["style"]});
   positionObserver.observe(follower,{attributes:true,attributeFilter:["style"]});
 
-  const parentObserver=new MutationObserver(()=>{
-    if(follower.parentElement!==fieldMap){
-      keepOnPartyLayer();
+  const mapObserver=new MutationObserver(mutations=>{
+    if(mutations.some(m=>m.type==="attributes"&&m.attributeName==="data-map")){
       syncVisual({instant:true});
+    }
+  });
+  mapObserver.observe(world,{attributes:true,attributeFilter:["data-map"]});
+
+  const parentObserver=new MutationObserver(()=>{
+    if(isCompactRoom()){
+      if(player.parentElement!==world||follower.parentElement!==world)syncRoomVisual({instant:true});
+    }else if(player.parentElement!==fieldMap||follower.parentElement!==fieldMap){
+      syncScrollingVisual({instant:true});
     }
   });
   parentObserver.observe(fieldMap,{childList:true,subtree:true});
 
   window.addEventListener("resize",()=>syncVisual({instant:true}));
-  keepOnPartyLayer();
   syncVisual({instant:true});
-  window.SpellPartyLockstep={sync:syncVisual};
+  window.SpellPartyLockstep={sync:syncVisual,isCompactRoom};
 })();
