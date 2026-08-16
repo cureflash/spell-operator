@@ -1,6 +1,5 @@
 (() => {
   "use strict";
-
   const world=document.getElementById("field-world");
   if(!world)return;
 
@@ -16,55 +15,45 @@
     return el;
   }
 
+  // 11x9: intentionally close to Pokémon Ruby/Sapphire's 11x9 player-house 1F.
   function build1F(layer){
-    piece(layer,"house-shell from-room-set",1,1,18,13);
-    piece(layer,"house-top-wall from-room-set",1.34,1.34,17.32,1.78);
+    piece(layer,"house-shell from-room-set",0,0,11,9);
+    piece(layer,"house-top-wall from-room-set",.34,.34,10.32,1.28);
 
-    /* Kitchen: normal room set structure, cute set accents. */
-    piece(layer,"kitchen-zone from-room-set",1.34,3.12,7.25,3.55);
-    piece(layer,"kitchen-counter from-room-set",2,2,5,2);
-    piece(layer,"fridge from-room-set",5.88,2.05,1.02,1.9);
-    piece(layer,"flower-pot from-cute-set",8.85,3.2,.72,.72);
+    piece(layer,"kitchen-zone from-room-set",.55,1.28,4.55,2.05);
+    piece(layer,"kitchen-counter from-room-set",1,1,4,2);
+    piece(layer,"fridge from-room-set",4.15,1.02,.82,1.78);
 
-    /* Dining: wooden furniture with pink/fancy textile accents. */
-    piece(layer,"dining-rug from-cute-set",3.18,6.42,6.65,3.55);
-    piece(layer,"dining-table from-room-set",4,7,5,2);
+    piece(layer,"dining-rug from-cute-set",1.25,3.35,4.5,3.1);
+    piece(layer,"dining-table from-room-set",2,4,3,2);
 
-    /* Living area: classic furniture plus cute upholstery. */
-    piece(layer,"living-rug from-room-set",10.35,5.28,6.45,3.65);
-    piece(layer,"sofa from-cute-set",11,6,5,2);
-    piece(layer,"cabinet from-room-set",15,4,4,2);
+    piece(layer,"living-rug from-room-set",5.65,2.65,3.7,2.25);
+    piece(layer,"sofa from-cute-set",6,3,3,1.35);
+    piece(layer,"cabinet from-room-set",8,1,2,1.2);
+    piece(layer,"flower-pot from-cute-set",9.12,2.15,.58,.58);
 
-    piece(layer,"stairs from-room-set",17,2,1,2);
-    piece(layer,"entry-mat from-room-set",8.0,12.35,3,1.05);
-
-    /* Light visual zoning without blocking additional walkable cells. */
-    piece(layer,"room-divider",9.72,3.1,.16,3.55);
+    piece(layer,"stairs from-room-set",9,1.72,1,1.3);
+    piece(layer,"entry-mat from-room-set",4.05,7.12,2.9,.72);
   }
 
+  // 12x9: FRLG-style bedroom footprint, widened only enough for two occupants.
   function build2F(layer){
-    piece(layer,"house-shell from-cute-set",1,1,18,13);
-    piece(layer,"house-top-wall from-cute-set",1.34,1.34,17.32,1.78);
+    piece(layer,"house-shell from-cute-set",0,0,12,9);
+    piece(layer,"house-top-wall from-cute-set",.34,.34,11.32,1.28);
 
-    /* Two clearly separate sleeping spaces. */
-    piece(layer,"bed sophie-bed from-cute-set",2,2,4,3);
-    piece(layer,"name-plaque",2.45,4.18,3.1,.62,"SOPHIE");
-    piece(layer,"bed lumiere-bed from-cute-set",7,2,4,3);
-    piece(layer,"name-plaque",7.35,4.18,3.3,.62,"LUMIERE");
+    piece(layer,"bed sophie-bed from-cute-set",1,1,3,3);
+    piece(layer,"bed lumiere-bed from-cute-set",4,1,3,3);
 
-    /* Normal room-set wood furniture keeps the room from becoming uniformly pink. */
-    piece(layer,"study-desk from-room-set",13,2,5,2);
-    piece(layer,"bookcase from-room-set",11.25,1.42,1.45,1.45);
-    piece(layer,"dresser from-cute-set",2,8,3,2);
-    piece(layer,"wardrobe from-room-set",15,7,3,3);
+    piece(layer,"study-desk from-room-set",8,1,3,2);
+    piece(layer,"bookcase from-room-set",7.05,1.02,.82,1.72);
 
-    /* Walkable cute center area. */
-    piece(layer,"cute-rug from-cute-set",6,7,7,4);
-    piece(layer,"wall-picture from-cute-set",5.45,1.47,1.05,1.05);
-    piece(layer,"curtain from-cute-set",9.0,1.4,1.65,1.35);
+    piece(layer,"dresser from-cute-set",1,5,2,1.25);
+    piece(layer,"wardrobe from-room-set",9,4,2,2);
+    piece(layer,"cute-rug from-cute-set",4,4,4,2.65);
+    piece(layer,"plushie from-cute-set",7.45,5.65,.72,.72,"★");
+    piece(layer,"wall-picture from-cute-set",6.95,.82,.8,.8);
 
-    /* Stairs are kept exactly on the transition position. */
-    piece(layer,"stairs from-room-set",17,12.05,1,1.95);
+    piece(layer,"stairs from-room-set",10,6.7,1,1.3);
   }
 
   function render(){
@@ -82,7 +71,6 @@
   });
   observer.observe(world,{attributes:true,attributeFilter:["data-map"]});
 
-  /* buildMap() clears selected map children, so also re-render when a new tile grid arrives. */
   const childObserver=new MutationObserver(()=>{
     const map=world.dataset.map;
     if((map==="house1"||map==="house2")&&!world.querySelector(".house-room-layer"))requestAnimationFrame(render);
