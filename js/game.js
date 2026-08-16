@@ -14,7 +14,7 @@
   addStyle("css/house-maps.css?v=1");
   addStyle("css/house-rooms-v2.css?v=1");
   addStyle("css/pokemon-house-compact.css?v=1");
-  addStyle("css/sophie-sprite.css?v=16");
+  addStyle("css/sophie-sprite.css?v=17");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   load("js/python-runner.js?v=1")
     .then(()=>load("js/interpreter.js?v=3"))
