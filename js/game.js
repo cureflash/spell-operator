@@ -10,12 +10,11 @@
   addStyle("css/map-interiors.css?v=2");
   addStyle("css/npc-pipoya.css?v=4");
   addStyle("css/computer.css?v=3");
-  /* Visual source of truth: Pipoya world tiles, house interiors, then character sprites. */
   addStyle("css/pipoya-map.css?v=2");
   addStyle("css/house-maps.css?v=1");
   addStyle("css/house-rooms-v2.css?v=1");
   addStyle("css/pokemon-house-compact.css?v=1");
-  addStyle("css/sophie-sprite.css?v=10");
+  addStyle("css/sophie-sprite.css?v=11");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   load("js/python-runner.js?v=1")
     .then(()=>load("js/interpreter.js?v=3"))
@@ -30,7 +29,7 @@
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/game03-field.js?v=18"))
     .then(()=>load("js/house-room-layout.js?v=2"))
-    .then(()=>load("js/party-lockstep.js?v=3"))
+    .then(()=>load("js/party-lockstep.js?v=4"))
     .then(()=>load("js/map-scroll-fix.js?v=1"))
     .then(()=>load("js/python-polish.js?v=1"))
     .then(()=>load("js/npc-facing.js?v=1"))
