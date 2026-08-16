@@ -1,0 +1,16 @@
+/* Compact player-home presentation based on classic Pokemon interior scale. */
+#field-map:has(.field-world[data-map="house1"]),
+#field-map:has(.field-world[data-map="house2"]){
+  background:#11151a!important;
+  background-image:none!important;
+}
+.field-world[data-map="house1"],
+.field-world[data-map="house2"]{
+  box-shadow:0 0 0 4px #20242a,0 8px 20px rgba(0,0,0,.38);
+}
+.field-world[data-map="house1"] .field-map-label,
+.field-world[data-map="house2"] .field-map-label,
+.field-world[data-map="house1"] .house-marker,
+.field-world[data-map="house2"] .house-marker{
+  display:none!important;
+}
