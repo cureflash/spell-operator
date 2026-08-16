@@ -48,7 +48,8 @@
     piece(layer,"bookcase from-room-set",7.05,1.02,.82,1.72);
 
     piece(layer,"dresser from-cute-set",1,5,2,1.25);
-    piece(layer,"wardrobe from-room-set",9,4,2,2);
+    /* Keep x=10 clear above the stair landing. */
+    piece(layer,"wardrobe from-room-set",9,4,1,2);
     piece(layer,"cute-rug from-cute-set",4,4,4,2.65);
     piece(layer,"plushie from-cute-set",7.45,5.65,.72,.72,"★");
     piece(layer,"wall-picture from-cute-set",6.95,.82,.8,.8);
