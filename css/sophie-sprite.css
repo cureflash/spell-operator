@@ -20,7 +20,7 @@
   filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))!important;
   pointer-events:none!important;
 }
-#field-map .sophie-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip002.png")!important}
+#field-map .sophie-field::before{background-image:url("../assets/characters/sophie_walk.png?v=2")!important}
 #field-map .lumiere-field::before{background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important}
 
 #field-player{left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;transition:none!important;z-index:45!important}
