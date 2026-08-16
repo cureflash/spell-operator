@@ -7,6 +7,7 @@
   addStyle("css/rpg-systems.css?v=2");
   addStyle("css/items.css?v=2");
   addStyle("css/story.css?v=1");
+  addStyle("css/friend-conversation.css?v=1");
   addStyle("css/rpg-field-v1.css?v=3");
   addStyle("css/map-interiors.css?v=2");
   addStyle("css/npc-pipoya.css?v=3");
@@ -20,6 +21,7 @@
     .then(()=>load("js/game03-items.js?v=3"))
     .then(()=>load("js/game03-menu.js?v=8"))
     .then(()=>load("js/game03-story.js?v=6"))
+    .then(()=>load("js/friend-conversation.js?v=1"))
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/game03-field.js?v=16"))
     .then(()=>load("js/party-lockstep.js?v=2"))
