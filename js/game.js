@@ -13,6 +13,7 @@
   /* Visual source of truth: Pipoya world tiles, house interiors, then character sprites. */
   addStyle("css/pipoya-map.css?v=2");
   addStyle("css/house-maps.css?v=1");
+  addStyle("css/house-rooms-v2.css?v=1");
   addStyle("css/sophie-sprite.css?v=9");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   load("js/python-runner.js?v=1")
@@ -26,6 +27,7 @@
     .then(()=>load("js/friend-conversation.js?v=1"))
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/game03-field.js?v=17"))
+    .then(()=>load("js/house-room-layout.js?v=1"))
     .then(()=>load("js/party-lockstep.js?v=2"))
     .then(()=>load("js/map-scroll-fix.js?v=1"))
     .then(()=>load("js/python-polish.js?v=1"))
