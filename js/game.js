@@ -1,8 +1,6 @@
 (() => {
   "use strict";
   const addStyle=href=>{const style=document.createElement("link");style.rel="stylesheet";style.href=href;document.head.appendChild(style);};
-  addStyle("css/sophie-sprite.css?v=8");
-  addStyle("css/field-assets-v8.css?v=8");
   addStyle("css/dialog-portrait-layout-v3.css?v=3");
   addStyle("css/rpg-systems.css?v=2");
   addStyle("css/items.css?v=2");
@@ -10,9 +8,11 @@
   addStyle("css/friend-conversation.css?v=1");
   addStyle("css/rpg-field-v1.css?v=3");
   addStyle("css/map-interiors.css?v=2");
-  addStyle("css/pipoya-map.css?v=1");
   addStyle("css/npc-pipoya.css?v=3");
   addStyle("css/computer.css?v=3");
+  /* Visual source of truth: these two must stay last. */
+  addStyle("css/pipoya-map.css?v=2");
+  addStyle("css/sophie-sprite.css?v=9");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   load("js/python-runner.js?v=1")
     .then(()=>load("js/interpreter.js?v=3"))
