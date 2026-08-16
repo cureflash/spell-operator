@@ -1,85 +1,63 @@
-/* Character rendering. Sophie uses the known-good local 8x4 sheet; Lumiere keeps the Pipoya 3x4 sheet. */
+/* 3x4 overworld character sheets. Rows: DOWN / LEFT / RIGHT / UP. Columns: walk A / idle / walk B. */
 #field-map .sophie-field,
 #field-map .lumiere-field{
   overflow:visible!important;
-  image-rendering:pixelated!important;
-}
-
-#field-map #field-player.sophie-field{
-  opacity:1!important;
-  visibility:visible!important;
-  display:flex!important;
-  background:none!important;
-  filter:none!important;
-}
-#field-map #field-player.sophie-field .pixel-head,
-#field-map #field-player.sophie-field .pixel-body,
-#field-map #field-player.sophie-field .entity-tag,
-#field-map #field-follower.lumiere-field .pixel-head,
-#field-map #field-follower.lumiere-field .pixel-body,
-#field-map #field-follower.lumiere-field .entity-tag{
-  display:none!important;
-}
-
-/* Sophie: this is the rendering path that was used when the registered
-   2048x1024 (8 columns x 4 rows) Sophie sheet was known to display correctly. */
-#field-map #field-player.sophie-field::before{
-  content:""!important;
-  display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  position:absolute!important;
-  z-index:60!important;
-  left:50%!important;
-  bottom:-22%!important;
-  width:calc(var(--tile-size) * 1.55)!important;
-  height:calc(var(--tile-size) * 1.55)!important;
-  transform:translateX(-50%)!important;
-  background-image:url("../assets/characters/sophie_walk_4dir_8frames.png?v=3")!important;
-  background-repeat:no-repeat!important;
-  background-size:800% 400%!important;
-  background-position:var(--sophie-frame-x,0%) var(--sophie-row-y,0%)!important;
-  image-rendering:pixelated!important;
-  filter:drop-shadow(0 2px 1px rgba(0,0,0,.24))!important;
-  pointer-events:none!important;
-}
-
-/* Current animation controller emits frames 0,1,2. Map those to the first
-   three cells of the known-good 8-frame sheet. */
-#field-map #field-player.sophie-field[data-frame="0"]{--sophie-frame-x:0%}
-#field-map #field-player.sophie-field[data-frame="1"]{--sophie-frame-x:14.285714%}
-#field-map #field-player.sophie-field[data-frame="2"]{--sophie-frame-x:28.571429%}
-
-/* Registered Sophie sheet row order: DOWN / UP / LEFT / RIGHT. */
-#field-map #field-player.sophie-field[data-facing="down"]{--sophie-row-y:0%}
-#field-map #field-player.sophie-field[data-facing="up"]{--sophie-row-y:33.333333%}
-#field-map #field-player.sophie-field[data-facing="left"]{--sophie-row-y:66.666667%}
-#field-map #field-player.sophie-field[data-facing="right"]{--sophie-row-y:100%}
-
-/* Lumiere remains a 96x128 Pipoya-style 3x4 sheet. */
-#field-map #field-follower.lumiere-field{
   --sprite-frame-x:50%;
   opacity:1!important;
   visibility:visible!important;
   display:flex!important;
-  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important;
   background-repeat:no-repeat!important;
   background-size:300% 400%!important;
   background-position:var(--sprite-frame-x) var(--sprite-row-y,0%)!important;
   background-color:transparent!important;
+  image-rendering:pixelated!important;
   filter:drop-shadow(0 2px 1px rgba(0,0,0,.18))!important;
 }
-#field-map #field-follower.lumiere-field::before{
-  content:none!important;
+
+#field-map .sophie-field .pixel-head,
+#field-map .sophie-field .pixel-body,
+#field-map .sophie-field .entity-tag,
+#field-map .lumiere-field .pixel-head,
+#field-map .lumiere-field .pixel-body,
+#field-map .lumiere-field .entity-tag{
   display:none!important;
 }
-#field-map #field-follower.lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
-#field-map #field-follower.lumiere-field[data-frame="1"]{--sprite-frame-x:50%}
-#field-map #field-follower.lumiere-field[data-frame="2"]{--sprite-frame-x:100%}
-#field-map #field-follower.lumiere-field[data-facing="down"]{--sprite-row-y:0%}
-#field-map #field-follower.lumiere-field[data-facing="left"]{--sprite-row-y:33.333333%}
-#field-map #field-follower.lumiere-field[data-facing="right"]{--sprite-row-y:66.666667%}
-#field-map #field-follower.lumiere-field[data-facing="up"]{--sprite-row-y:100%}
+
+/* Sophie: user-provided 3x4 sheet, normalized to 96x128 PNG. */
+#field-map #field-player.sophie-field{
+  background-image:url("../assets/characters/sophie_walk_3x4.png?v=1")!important;
+}
+
+/* Lumiere: Pipoya-style 3x4 sheet. */
+#field-map #field-follower.lumiere-field{
+  background-image:url("https://raw.githubusercontent.com/eil941/rpg-a/main/assets/%E3%81%B4%E3%81%BD%E3%82%84/%E3%82%AD%E3%83%A3%E3%83%A9%E3%83%81%E3%83%83%E3%83%97/pipo-charachip003.png")!important;
+}
+
+/* Do not render either actor through pseudo-elements. */
+#field-map .sophie-field::before,
+#field-map .lumiere-field::before{
+  content:none!important;
+  display:none!important;
+  background-image:none!important;
+}
+
+/* Animation columns: walk A / idle / walk B. */
+#field-map .sophie-field[data-frame="0"],
+#field-map .lumiere-field[data-frame="0"]{--sprite-frame-x:0%}
+#field-map .sophie-field[data-frame="1"],
+#field-map .lumiere-field[data-frame="1"]{--sprite-frame-x:50%}
+#field-map .sophie-field[data-frame="2"],
+#field-map .lumiere-field[data-frame="2"]{--sprite-frame-x:100%}
+
+/* Direction rows: DOWN / LEFT / RIGHT / UP. */
+#field-map .sophie-field[data-facing="down"],
+#field-map .lumiere-field[data-facing="down"]{--sprite-row-y:0%}
+#field-map .sophie-field[data-facing="left"],
+#field-map .lumiere-field[data-facing="left"]{--sprite-row-y:33.333333%}
+#field-map .sophie-field[data-facing="right"],
+#field-map .lumiere-field[data-facing="right"]{--sprite-row-y:66.666667%}
+#field-map .sophie-field[data-facing="up"],
+#field-map .lumiere-field[data-facing="up"]{--sprite-row-y:100%}
 
 /* One coordinate system for both actors. */
 #field-world > #field-player,
