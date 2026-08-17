@@ -16,9 +16,9 @@
     {speaker:"友達",portrait:"friend",text:"ソフィー、ちょうどいいところに来た！　今、暗号を考えてたんだ。"},
     {speaker:"ソフィー",portrait:"sophie",text:"暗号？"},
     {speaker:"友達",portrait:"friend",text:"うん。『シーザー暗号』っていうやつ。アルファベットを全部、決まった数だけ横にずらして別の文字にするんだ。"},
-    {speaker:"友達",portrait:"friend",text:"たとえば3文字先にずらすなら、AはD、BはE……XはA、YはB、ZはCになる。"},
+    {speaker:"友達",portrait:"friend",text:"たとえば鍵が3なら、AはD、BはE……XはA、YはB、ZはCになる。"},
     {speaker:"ソフィー",portrait:"sophie",text:"なるほど。元に戻すなら、逆向きに同じ数だけずらせばいいんだね。"},
-    {speaker:"友達",portrait:"friend",text:"その通り！　じゃあこれはどう？　『FDW』。全部3文字先にずらしてあるよ。"},
+    {speaker:"友達",portrait:"friend",text:"その通り！　じゃあこれはどう？　『FDW』。鍵は3、全部3文字先にずらしてあるよ。"},
     {speaker:"ソフィー",portrait:"sophie",text:"面白そう！　解いてみる！"}
   ];
 
@@ -84,8 +84,8 @@
       const small=content.querySelector(".cipher-card small");
       if(eyebrow)eyebrow.textContent="CIPHER BREAK";
       if(title)title.textContent="暗号解読";
-      if(intro)intro.textContent="友達が作ったシーザー暗号を解読しよう。";
-      if(small)small.textContent="全部3文字先にずらしてある。3文字前へ戻せば元の単語になる。";
+      if(intro)intro.textContent="友達が作ったシーザー暗号を解読しよう。鍵は3。矢印は1回につき1文字動く。";
+      if(small)small.textContent="鍵：3　↓を3回押せば、暗号文を3文字前へ戻せる。";
     });
   }
 
