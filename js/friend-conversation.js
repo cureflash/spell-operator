@@ -16,9 +16,9 @@
     {speaker:"友達",portrait:"friend",text:"ソフィー、ちょうどいいところに来た！　今、暗号を考えてたんだ。"},
     {speaker:"ソフィー",portrait:"sophie",text:"暗号？"},
     {speaker:"友達",portrait:"friend",text:"うん。『シーザー暗号』っていうやつ。アルファベットを全部、決まった数だけ横にずらして別の文字にするんだ。"},
-    {speaker:"友達",portrait:"friend",text:"たとえば1文字先にずらすなら、AはB、BはC……ZはAになる。"},
+    {speaker:"友達",portrait:"friend",text:"たとえば3文字先にずらすなら、AはD、BはE……XはA、YはB、ZはCになる。"},
     {speaker:"ソフィー",portrait:"sophie",text:"なるほど。元に戻すなら、逆向きに同じ数だけずらせばいいんだね。"},
-    {speaker:"友達",portrait:"friend",text:"その通り！　じゃあこれはどう？　『DBU』。全部1文字先にずらしてあるよ。"},
+    {speaker:"友達",portrait:"friend",text:"その通り！　じゃあこれはどう？　『FDW』。全部3文字先にずらしてあるよ。"},
     {speaker:"ソフィー",portrait:"sophie",text:"面白そう！　解いてみる！"}
   ];
 
@@ -85,7 +85,7 @@
       if(eyebrow)eyebrow.textContent="CIPHER BREAK";
       if(title)title.textContent="暗号解読";
       if(intro)intro.textContent="友達が作ったシーザー暗号を解読しよう。";
-      if(small)small.textContent="全部1文字先にずらしてある。1文字前へ戻せば元の単語になる。";
+      if(small)small.textContent="全部3文字先にずらしてある。3文字前へ戻せば元の単語になる。";
     });
   }
 
