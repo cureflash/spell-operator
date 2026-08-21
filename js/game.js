@@ -30,6 +30,7 @@
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/follower-normalize.js?v=1"))
     .then(()=>load("js/game03-field.js?v=19"))
+    .then(()=>load("js/dialog-typewriter.js?v=1"))
     .then(()=>load("js/house-room-layout.js?v=4"))
     .then(()=>load("js/party-lockstep.js?v=6"))
     .then(()=>load("js/map-scroll-fix.js?v=1"))
