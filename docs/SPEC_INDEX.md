@@ -17,7 +17,7 @@ The Notion wiki contains the structured databases for chapters, walkthrough step
 
 - `PROJECT_HANDOFF.md` — ChatGPT Project startup rules, current design context, and handoff material.
 - `GAME_SPEC.md` — game-wide implementation rules and stable global specifications.
-- `chapters/CHAPTER_01.md` — Chapter 1 implementation-facing specification.
+- `chapters/CHAPTER_01.md` — Chapter 1 implementation-facing specification when created.
 - Future chapters use the same pattern: `chapters/CHAPTER_02.md`, etc.
 
 ## Synchronization rule
@@ -30,6 +30,6 @@ The Notion wiki contains the structured databases for chapters, walkthrough step
 
 ## Status
 
-The Notion database structure has been created. Detailed records will be populated as specifications are decided.
+The Notion database structure has been created and is populated as specifications are decided.
 
-`GAME_SPEC.md` and `chapters/CHAPTER_01.md` are planned but not yet created. Do not assume they exist until they are actually added.
+`GAME_SPEC.md` exists and contains current game-wide confirmed specifications. Chapter-specific specification files are added as chapter specifications are formalized.
