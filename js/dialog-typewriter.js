@@ -13,12 +13,13 @@
     allowSkip:true,
     instant:false
   };
+  const OBSERVER_OPTIONS={childList:true,characterData:true,subtree:true};
 
   let defaults={...DEFAULTS};
   let preparedConfig=null;
   let timer=null;
   let runId=0;
-  let internalWrite=false;
+  let textObserver=null;
   let state={
     fullText:"",
     chars:[],
@@ -61,10 +62,12 @@
   };
 
   const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
+  const observeText=()=>textObserver?.observe(textEl,OBSERVER_OPTIONS);
   const write=value=>{
-    internalWrite=true;
+    /* Never observe our own typewriter writes as a new line of dialog. */
+    textObserver?.disconnect();
     textEl.textContent=value;
-    queueMicrotask(()=>{internalWrite=false;});
+    observeText();
   };
   const pauseMsAt=index=>{
     const pause=state.config.pauses.find(item=>item.at===index);
@@ -160,14 +163,13 @@
     return{...defaults,pauses:[...defaults.pauses],stopAt:[...defaults.stopAt]};
   }
 
-  const textObserver=new MutationObserver(()=>{
-    if(internalWrite)return;
+  textObserver=new MutationObserver(()=>{
     const fullText=textEl.textContent||"";
     const config=preparedConfig;
     preparedConfig=null;
     start(fullText,config);
   });
-  textObserver.observe(textEl,{childList:true,characterData:true,subtree:true});
+  observeText();
 
   const dialogObserver=new MutationObserver(()=>{
     if(!dialog.classList.contains("hidden"))return;
@@ -190,6 +192,7 @@
   window.SpellDialogTyping={
     prepare,
     configureDefaults,
+    start,
     finish,
     resume,
     handleAdvance,
