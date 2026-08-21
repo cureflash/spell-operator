@@ -33,9 +33,30 @@
   function renderLoadout(){$("#spell-loadout")?.remove()}
   function openStatus(){renderStatus();G.showScreen("status")}
   function closeStatus(){G.showScreen("field")}
+  function openPluginPrompt(){
+    if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen()||fieldMenuOpen)return false;
+    const dialog=$("#field-dialog");
+    if(!dialog||!window.SpellField?.showDialog)return false;
+    dialog.dataset.pluginPrompt="1";
+    window.SpellField.showDialog({
+      speaker:"sophie",
+      text:"プラグイン！ルミエル.EXE トランスミッション！",
+      typing:{charMs:30,startDelayMs:0,allowSkip:true}
+    });
+    return true;
+  }
+  function continuePlugin(){
+    const dialog=$("#field-dialog");
+    if(!dialog||dialog.dataset.pluginPrompt!=="1"||!dialogIsOpen())return false;
+    delete dialog.dataset.pluginPrompt;
+    $("#field-action")?.click();
+    G.openComputer?.();
+    return true;
+  }
   function isZKey(e){return e.code==="KeyZ"||e.key==="z"||e.key==="Z"}
+  function isXKey(e){return e.code==="KeyX"||e.key==="x"||e.key==="X"}
   function isEnterKey(e){return e.key==="Enter"||e.code==="Enter"||e.code==="NumpadEnter"}
-  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
+  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isXKey(event)){if(openPluginPrompt()){event.preventDefault();event.stopImmediatePropagation()}return}if(isZKey(event)&&window.SpellDialogTyping?.handleAdvance?.()){event.preventDefault();event.stopImmediatePropagation();return}if(isZKey(event)&&continuePlugin()){event.preventDefault();event.stopImmediatePropagation();return}if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
   ensureUi();
   $("#field-menu")?.addEventListener("click",toggleFieldMenu);$("#field-main-menu")?.addEventListener("click",event=>{const b=event.target.closest("[data-field-menu-index]");if(!b)return;fieldMenuIndex=Number(b.dataset.fieldMenuIndex)||0;activateFieldMenu(fieldMenuIndex)});$("#status-back")?.addEventListener("click",closeStatus);document.addEventListener("keydown",onFieldMenuKeydown,true);
   window.SpellMenu={renderStatus,renderLoadout,renderFieldMenu,openStatus,openFieldMenu,closeFieldMenu,toggleFieldMenu,isOpen};
