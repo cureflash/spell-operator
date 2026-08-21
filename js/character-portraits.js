@@ -4,10 +4,12 @@
   const DEFAULT_EXPRESSION = "neutral";
   const portraits = {
     sophie: {
-      neutral: "assets/characters/portraits/sophie/neutral.jpg"
+      neutral: "assets/characters/portraits/sophie/neutral.jpg?v=2",
+      smile: "assets/characters/portraits/sophie/smile.jpg?v=1"
     },
     lumiere: {
-      neutral: "assets/characters/portraits/lumiere/neutral.jpg"
+      neutral: "assets/characters/portraits/lumiere/neutral.jpg?v=2",
+      smile: "assets/characters/portraits/lumiere/smile.jpg?v=1"
     }
   };
 
