@@ -41,7 +41,7 @@
     window.SpellField.showDialog({
       speaker:"sophie",
       text:"プラグイン！ルミエル.EXE トランスミッション！",
-      typing:{charMs:30,startDelayMs:0,allowSkip:true}
+      typing:{allowSkip:true}
     });
     return true;
   }

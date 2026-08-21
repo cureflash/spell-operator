@@ -5,28 +5,45 @@
   const textEl=document.getElementById("field-dialog-text");
   if(!dialog||!textEl)return;
 
+  const DEFAULT_PUNCTUATION_PAUSES={
+    "、":90,
+    "，":90,
+    ",":90,
+    "。":180,
+    "．":180,
+    ".":180,
+    "！":160,
+    "!":160,
+    "？":160,
+    "?":160,
+    "…":110,
+    "\n":120
+  };
   const DEFAULTS={
-    charMs:30,
+    charMs:55,
+    stepChars:1,
     startDelayMs:0,
     pauses:[],
     stopAt:[],
+    punctuationPauses:{...DEFAULT_PUNCTUATION_PAUSES},
     allowSkip:true,
     instant:false
   };
   const OBSERVER_OPTIONS={childList:true,characterData:true,subtree:true};
 
-  let defaults={...DEFAULTS};
+  let defaults={...DEFAULTS,punctuationPauses:{...DEFAULT_PUNCTUATION_PAUSES}};
   let preparedConfig=null;
   let timer=null;
   let runId=0;
   let textObserver=null;
+  let stepListener=null;
   let state={
     fullText:"",
     chars:[],
     index:0,
     typing:false,
     paused:false,
-    config:{...DEFAULTS},
+    config:{...DEFAULTS,punctuationPauses:{...DEFAULT_PUNCTUATION_PAUSES}},
     consumedStops:new Set()
   };
 
@@ -40,6 +57,7 @@
   };
 
   const finiteNonNegative=(value,fallback)=>Number.isFinite(Number(value))&&Number(value)>=0?Number(value):fallback;
+  const positiveInteger=(value,fallback)=>Number.isInteger(Number(value))&&Number(value)>0?Number(value):fallback;
   const normalizeStops=value=>{
     const list=Array.isArray(value)?value:(value==null?[]:[value]);
     return [...new Set(list.map(Number).filter(v=>Number.isInteger(v)&&v>0))].sort((a,b)=>a-b);
@@ -48,14 +66,26 @@
     const list=Array.isArray(value)?value:[];
     return list.map(item=>({at:Number(item?.at),ms:Number(item?.ms)})).filter(item=>Number.isInteger(item.at)&&item.at>0&&Number.isFinite(item.ms)&&item.ms>=0);
   };
+  const normalizePunctuationPauses=value=>{
+    const source=value&&typeof value==="object"?value:{};
+    const out={};
+    Object.entries(source).forEach(([char,ms])=>{
+      const delay=Number(ms);
+      if(char&&Number.isFinite(delay)&&delay>=0)out[char]=delay;
+    });
+    return out;
+  };
   const normalizeConfig=value=>{
-    if(value===false)return{...defaults,instant:true};
+    if(value===false)return{...defaults,punctuationPauses:{...defaults.punctuationPauses},instant:true};
     const input=value&&typeof value==="object"?value:{};
+    const punctuationSource=input.punctuationPauses==null?defaults.punctuationPauses:{...defaults.punctuationPauses,...input.punctuationPauses};
     return{
       charMs:finiteNonNegative(input.charMs,defaults.charMs),
+      stepChars:positiveInteger(input.stepChars,defaults.stepChars),
       startDelayMs:finiteNonNegative(input.startDelayMs,defaults.startDelayMs),
       pauses:normalizePauses(input.pauses??defaults.pauses),
       stopAt:normalizeStops(input.stopAt??defaults.stopAt),
+      punctuationPauses:normalizePunctuationPauses(punctuationSource),
       allowSkip:input.allowSkip==null?defaults.allowSkip:Boolean(input.allowSkip),
       instant:input.instant==null?defaults.instant:Boolean(input.instant)
     };
@@ -64,7 +94,6 @@
   const clearTimer=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
   const observeText=()=>textObserver?.observe(textEl,OBSERVER_OPTIONS);
   const write=value=>{
-    /* Never observe our own typewriter writes as a new line of dialog. */
     textObserver?.disconnect();
     textEl.textContent=value;
     observeText();
@@ -74,6 +103,18 @@
     return pause?pause.ms:null;
   };
   const shouldStopAt=index=>state.config.stopAt.includes(index)&&!state.consumedStops.has(index);
+  const nextCueIndex=(from,to)=>{
+    const cueIndexes=[
+      ...state.config.stopAt.filter(index=>index>from&&index<=to),
+      ...state.config.pauses.map(item=>item.at).filter(index=>index>from&&index<=to)
+    ];
+    return cueIndexes.length?Math.min(...cueIndexes):to;
+  };
+  const punctuationExtra=chunk=>{
+    let extra=0;
+    chunk.forEach(char=>{extra=Math.max(extra,state.config.punctuationPauses[char]??0);});
+    return extra;
+  };
 
   function schedule(ms,id){
     clearTimer();
@@ -91,8 +132,16 @@
     if(id!==runId||!state.typing||state.paused)return;
     if(state.index>=state.chars.length){complete();return;}
 
-    state.index+=1;
+    const from=state.index;
+    const desired=Math.min(state.chars.length,from+state.config.stepChars);
+    const to=nextCueIndex(from,desired);
+    const chunk=state.chars.slice(from,to);
+    state.index=to;
     write(state.chars.slice(0,state.index).join(""));
+
+    if(chunk.length&&typeof stepListener==="function"){
+      try{stepListener({chunk:[...chunk],index:state.index,fullText:state.fullText});}catch(error){console.error("SpellDialogTyping step listener failed",error);}
+    }
 
     if(state.index>=state.chars.length){complete();return;}
     if(shouldStopAt(state.index)){
@@ -102,8 +151,9 @@
       return;
     }
 
-    const pause=pauseMsAt(state.index);
-    schedule(pause??state.config.charMs,id);
+    const explicitPause=pauseMsAt(state.index);
+    const delay=explicitPause??(state.config.charMs+punctuationExtra(chunk));
+    schedule(delay,id);
   }
 
   function start(fullText,config){
@@ -154,13 +204,20 @@
     return true;
   }
 
-  function prepare(config){
-    preparedConfig=config;
-  }
+  function prepare(config){preparedConfig=config;}
 
   function configureDefaults(config={}){
     defaults=normalizeConfig({...defaults,...config});
-    return{...defaults,pauses:[...defaults.pauses],stopAt:[...defaults.stopAt]};
+    return{
+      ...defaults,
+      pauses:[...defaults.pauses],
+      stopAt:[...defaults.stopAt],
+      punctuationPauses:{...defaults.punctuationPauses}
+    };
+  }
+
+  function setStepListener(listener){
+    stepListener=typeof listener==="function"?listener:null;
   }
 
   textObserver=new MutationObserver(()=>{
@@ -192,6 +249,7 @@
   window.SpellDialogTyping={
     prepare,
     configureDefaults,
+    setStepListener,
     start,
     finish,
     resume,
@@ -199,6 +257,11 @@
     isTyping:()=>state.typing,
     isPaused:()=>state.paused,
     visibleCharacters:()=>state.index,
-    getConfig:()=>({...state.config,pauses:[...state.config.pauses],stopAt:[...state.config.stopAt]})
+    getConfig:()=>({
+      ...state.config,
+      pauses:[...state.config.pauses],
+      stopAt:[...state.config.stopAt],
+      punctuationPauses:{...state.config.punctuationPauses}
+    })
   };
 })();
