@@ -45,6 +45,20 @@ SpellField.showDialog({
 SpellDialogTyping.resume();
 ```
 
+## Character portraits
+
+- Sophie and Lumiere use square character portraits in dialogue UI.
+- Portraits are selected by a character ID plus an expression ID.
+- The default expression ID is `neutral`.
+- If a requested expression is not registered, the character's `neutral` portrait is used as the fallback.
+- Portrait assets follow `assets/characters/portraits/<character>/<expression>.jpg`.
+- Current neutral portraits are:
+  - `assets/characters/portraits/sophie/neutral.jpg`
+  - `assets/characters/portraits/lumiere/neutral.jpg`
+- `SpellField.showDialog()` accepts an optional `expression` property. Existing dialogue that omits it uses `neutral`.
+- Additional expressions can be registered without changing the dialogue layout through `SpellPortraits.register(character, expression, src)`.
+- `SpellPortraits.prepare(expression)` can prepare an expression for the next field-dialog portrait update when existing internal field code invokes its local dialog function directly.
+
 ## Plug-in
 
 - "Plug-in" means Sophie connects to the computer inside Lumiere so Sophie can write programs into Lumiere.

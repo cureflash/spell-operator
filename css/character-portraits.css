@@ -1,0 +1,12 @@
+/* Square character portrait assets. Character/expression selection is handled by js/character-portraits.js. */
+.dialog-portrait.has-character-portrait,
+.friend-conversation-portrait.has-character-portrait {
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+  image-rendering: auto !important;
+}
+
+.friend-conversation-portrait.has-character-portrait::before {
+  display: none !important;
+}

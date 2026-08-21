@@ -2,6 +2,7 @@
   "use strict";
   const addStyle=href=>{const style=document.createElement("link");style.rel="stylesheet";style.href=href;document.head.appendChild(style);};
   addStyle("css/dialog-portrait-layout-v3.css?v=3");
+  addStyle("css/character-portraits.css?v=1");
   addStyle("css/rpg-systems.css?v=2");
   addStyle("css/items.css?v=2");
   addStyle("css/story.css?v=2");
@@ -30,6 +31,7 @@
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/follower-normalize.js?v=1"))
     .then(()=>load("js/game03-field.js?v=19"))
+    .then(()=>load("js/character-portraits.js?v=1"))
     .then(()=>load("js/dialog-typewriter.js?v=1"))
     .then(()=>load("js/house-room-layout.js?v=4"))
     .then(()=>load("js/party-lockstep.js?v=6"))
