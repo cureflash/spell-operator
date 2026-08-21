@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const G=window.SpellGame03,$=G.$,state=G.state;
-  let fieldMenuOpen=false,fieldMenuIndex=0,pluginPromptOpen=false;
+  let fieldMenuOpen=false,fieldMenuIndex=0;
   const fieldMenuItems=[
     {label:"ステータス",action:()=>{closeFieldMenu();openStatus();}},
     {label:"リュック",action:()=>{closeFieldMenu();window.SpellItems?.openBackpack?.();}},
@@ -33,12 +33,9 @@
   function renderLoadout(){$("#spell-loadout")?.remove()}
   function openStatus(){renderStatus();G.showScreen("status")}
   function closeStatus(){G.showScreen("field")}
-  function openPluginPrompt(){if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen())return;pluginPromptOpen=true;window.SpellField?.showDialog?.({speaker:"sophie",text:"プラグイン！ルミエル.EXE トランスミッション！"})}
-  function continuePlugin(){if(!pluginPromptOpen||!dialogIsOpen())return false;pluginPromptOpen=false;$("#field-action")?.click();G.openComputer?.();return true}
   function isZKey(e){return e.code==="KeyZ"||e.key==="z"||e.key==="Z"}
-  function isXKey(e){return e.code==="KeyX"||e.key==="x"||e.key==="X"}
   function isEnterKey(e){return e.key==="Enter"||e.code==="Enter"||e.code==="NumpadEnter"}
-  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isXKey(event)){event.preventDefault();event.stopImmediatePropagation();openPluginPrompt();return}if(isZKey(event)&&pluginPromptOpen){if(dialogIsOpen()){event.preventDefault();event.stopImmediatePropagation();continuePlugin();return}pluginPromptOpen=false}if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
+  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
   ensureUi();
   $("#field-menu")?.addEventListener("click",toggleFieldMenu);$("#field-main-menu")?.addEventListener("click",event=>{const b=event.target.closest("[data-field-menu-index]");if(!b)return;fieldMenuIndex=Number(b.dataset.fieldMenuIndex)||0;activateFieldMenu(fieldMenuIndex)});$("#status-back")?.addEventListener("click",closeStatus);document.addEventListener("keydown",onFieldMenuKeydown,true);
   window.SpellMenu={renderStatus,renderLoadout,renderFieldMenu,openStatus,openFieldMenu,closeFieldMenu,toggleFieldMenu,isOpen};
