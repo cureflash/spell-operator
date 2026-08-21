@@ -38,7 +38,11 @@
     const dialog=$("#field-dialog");
     if(!dialog||!window.SpellField?.showDialog)return false;
     dialog.dataset.pluginPrompt="1";
-    window.SpellField.showDialog({speaker:"sophie",text:"プラグイン！ルミエル.EXE トランスミッション！"});
+    window.SpellField.showDialog({
+      speaker:"sophie",
+      text:"プラグイン！ルミエル.EXE トランスミッション！",
+      typing:{charMs:30,startDelayMs:0,allowSkip:true}
+    });
     return true;
   }
   function continuePlugin(){
