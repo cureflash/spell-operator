@@ -28,9 +28,9 @@ Follow `tests/plugin-transition-smoke.md`.
 
 1. Enter opens the field menu.
 2. Z confirms a menu item; Enter/Escape backs out of submenus.
-3. `パソコン` opens the grimoire list without Kirayuki or plug-in SE.
-4. Z from the grimoire list returns to the field.
-5. Z from the editor returns to the grimoire list unless the code textarea owns keyboard input.
+3. `パソコン` opens the plug-in menu without Kirayuki or plug-in SE.
+4. Z from the plug-in menu returns to the field.
+5. Z from the editor returns to the plug-in menu unless the code textarea owns keyboard input.
 6. Status, backpack, and shop can return to the field with Z.
 
 ## イードウ
