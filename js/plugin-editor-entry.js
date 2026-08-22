@@ -39,7 +39,7 @@
         });
       })
       .catch(error=>{
-        console.warn("Direct plug-in SE preload failed",error);
+        console.warn("Original plug-in SE preload failed",error);
         directSeReady=false;
         return false;
       });
@@ -66,32 +66,29 @@
     document.getElementById("field-action")?.click();
   }
 
-  function playSeOnGesture(){
-    const transition=window.SpellPluginTransition;
-    transition?.unlockAudioFromGesture?.();
+  function playOriginalSeOnGesture(){
     const volume=currentSfxVolume();
     if(volume<=0)return;
 
-    if(directSeReady||directSe.readyState>=2){
-      try{
-        directSe.pause();
-        directSe.currentTime=0;
-        directSe.volume=volume;
-        const promise=directSe.play();
-        if(promise?.catch){
-          promise.catch(error=>{
-            console.warn("Direct plug-in SE playback failed",error);
-            transition?.testSound?.();
-          });
-        }
-        return;
-      }catch(error){
-        console.warn("Direct plug-in SE playback failed",error);
-      }
+    if(!(directSeReady||directSe.readyState>=2)){
+      console.warn("Original plug-in SE is not ready; no fallback sound will be played.");
+      preloadDirectSe();
+      return;
     }
 
-    transition?.testSound?.();
-    preloadDirectSe();
+    try{
+      directSe.pause();
+      directSe.currentTime=0;
+      directSe.volume=volume;
+      const promise=directSe.play();
+      if(promise?.catch){
+        promise.catch(error=>{
+          console.warn("Original plug-in SE playback failed; fallback is disabled.",error);
+        });
+      }
+    }catch(error){
+      console.warn("Original plug-in SE playback failed; fallback is disabled.",error);
+    }
   }
 
   async function playPluginTransition(){
@@ -118,9 +115,7 @@
   function onKeydown(event){
     if(!isZKey(event)||!pluginPromptReady())return;
 
-    // The final Z is intercepted here at window-capture level. Start audio
-    // before stopping propagation so Safari/Chrome treat it as user-initiated.
-    playSeOnGesture();
+    playOriginalSeOnGesture();
     event.preventDefault();
     event.stopImmediatePropagation();
     closePluginDialog();
