@@ -1,15 +1,22 @@
 (() => {
   "use strict";
   const G=window.SpellGame03,$=G.$,state=G.state;
-  let fieldMenuOpen=false,fieldMenuIndex=0;
+  let fieldMenuOpen=false,fieldMenuIndex=0,fieldMenuMode="main";
   const fieldMenuItems=[
     {label:"ステータス",action:()=>{closeFieldMenu();openStatus();}},
     {label:"リュック",action:()=>{closeFieldMenu();window.SpellItems?.openBackpack?.();}},
     {label:"パソコン",action:()=>{closeFieldMenu();G.openComputer?.();}},
+    {label:"移動",action:()=>openTravelMenu()},
     {label:"セーブ",action:()=>{closeFieldMenu();window.SpellField?.saveGame?.();}},
     {label:"とじる",action:()=>closeFieldMenu()}
   ];
+  const travelMenuItems=[
+    {label:"フルール村",action:()=>warpTo("town")},
+    {label:"ラメールシティ",action:()=>warpTo("la_mer_city")},
+    {label:"もどる",action:()=>{fieldMenuMode="main";fieldMenuIndex=0;renderFieldMenu();}}
+  ];
 
+  function activeFieldMenuItems(){return fieldMenuMode==="travel"?travelMenuItems:fieldMenuItems}
   function ensureUi(){
     const tools=document.querySelector(".field-tools");if(tools&&!$("#field-menu")){const b=document.createElement("button");b.id="field-menu";b.className="mini-button";b.textContent="MENU";tools.insertBefore(b,tools.firstChild)}
     const fieldWindow=document.querySelector("#screen-field .field-window");if(fieldWindow&&!$("#field-main-menu")){const menu=document.createElement("div");menu.id="field-main-menu";menu.className="field-main-menu hidden";menu.setAttribute("role","menu");menu.innerHTML=`<div class="field-main-menu-title">MENU</div><div id="field-menu-money" class="field-main-menu-money">0 G</div><div id="field-main-menu-items" class="field-main-menu-items"></div><div class="field-main-menu-help">↑↓ 選択　Z 決定　Enter 閉じる</div>`;fieldWindow.appendChild(menu)}
@@ -17,16 +24,18 @@
     const main=document.querySelector("main.shell");if(main&&!$("#screen-status")){const section=document.createElement("section");section.id="screen-status";section.className="screen";section.innerHTML=`<div class="status-screen-wrap"><div class="status-toolbar"><div><p class="kicker">PARTY STATUS</p><h2>ステータス</h2></div><button id="status-back" class="secondary">フィールドへ戻る</button></div><div id="status-grid" class="status-grid"></div></div>`;main.insertBefore(section,$("#screen-hub")||null);G.screens.status=section}
     $("#spell-loadout")?.remove();
   }
-  function renderFieldMenu(){const box=$("#field-main-menu-items");if(!box)return;const money=$("#field-menu-money");if(money)money.textContent=`${state.money} G`;box.innerHTML=fieldMenuItems.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("")}
+  function renderFieldMenu(){const box=$("#field-main-menu-items");if(!box)return;const items=activeFieldMenuItems(),money=$("#field-menu-money"),title=$("#field-main-menu .field-main-menu-title");if(money)money.textContent=`${state.money} G`;if(title)title.textContent=fieldMenuMode==="travel"?"移動":"MENU";box.innerHTML=items.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("")}
   function fieldScreenActive(){return Boolean(G.screens.field?.classList.contains("active"))}
   function dialogIsOpen(){const d=$("#field-dialog");return Boolean(d&&!d.classList.contains("hidden"))}
   function storyOverlayIsOpen(){return Boolean(window.SpellStory?.isOverlayOpen?.())}
   function isOpen(){return fieldMenuOpen}
-  function openFieldMenu(){if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen())return;fieldMenuOpen=true;fieldMenuIndex=0;renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
-  function closeFieldMenu(){fieldMenuOpen=false;$("#field-main-menu")?.classList.add("hidden")}
+  function openFieldMenu(){if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen())return;fieldMenuOpen=true;fieldMenuMode="main";fieldMenuIndex=0;renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
+  function closeFieldMenu(){fieldMenuOpen=false;fieldMenuMode="main";fieldMenuIndex=0;$("#field-main-menu")?.classList.add("hidden")}
   function toggleFieldMenu(){fieldMenuOpen?closeFieldMenu():openFieldMenu()}
-  function moveFieldMenu(delta){fieldMenuIndex=(fieldMenuIndex+delta+fieldMenuItems.length)%fieldMenuItems.length;renderFieldMenu()}
-  function activateFieldMenu(index=fieldMenuIndex){fieldMenuItems[index]?.action?.()}
+  function openTravelMenu(){fieldMenuMode="travel";fieldMenuIndex=0;renderFieldMenu()}
+  function warpTo(mapId){closeFieldMenu();window.SpellField?.activateMap?.(mapId,{from:"warp"})}
+  function moveFieldMenu(delta){const items=activeFieldMenuItems();fieldMenuIndex=(fieldMenuIndex+delta+items.length)%items.length;renderFieldMenu()}
+  function activateFieldMenu(index=fieldMenuIndex){activeFieldMenuItems()[index]?.action?.()}
   function statRows(stats,key){const p=state.party[key],rows=[["HP",`${p.hp} / ${stats.hp}`],["MP",`${p.mp} / ${G.maxMpFor(stats,p.level)}`],["攻撃",stats.attack],["防御",stats.defense],["特攻",stats.spAttack],["特防",stats.spDefense],["素早さ",stats.speed]];return rows.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join("")}
   function memberCard(key){const progress=state.party[key],species=G.partySpecies[key],stats=G.getMemberStats(key),next=G.expToNext(progress.level),pct=Math.max(0,Math.min(100,(progress.exp/next)*100)),equipKey=state.equipment[key],equip=G.itemDefinitions[equipKey],equipText=equip?`${equip.name}（${equip.description}）`:"装備なし";return `<article class="status-card"><div class="status-card-head"><h3>${species.name}</h3><span class="status-level">Lv.${progress.level}</span></div><dl class="status-stats">${statRows(stats,key)}</dl><div class="status-equipment"><strong>装備</strong><span>${equipText}</span></div><div class="status-exp"><div class="status-exp-row"><span>EXP</span><span>${progress.exp} / ${next}</span></div><div class="exp-bar"><div class="exp-bar-fill" style="width:${pct}%"></div></div></div></article>`}
   function renderStatus(){const grid=$("#status-grid");if(grid)grid.innerHTML=memberCard("sophie")+memberCard("lumiere")}
