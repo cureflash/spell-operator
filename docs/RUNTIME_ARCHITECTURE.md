@@ -71,18 +71,32 @@ It owns:
 
 After the transition, the controller stops at the plug-in menu. It does not choose or open a Python grimoire automatically.
 
-`js/plugin-workspace.js` owns the plug-in/computer workspace UI after entry:
+`js/plugin-workspace.js` owns the base plug-in/computer workspace UI after entry:
 
 - three-part plug-in menu layout with Lumiere, menu, and dialogue pane
 - `エディタ` and `チュートリアル` menu behavior
 - reserved disabled `カスタム` item
-- editor / saved-code grimoire / execution / shared output layout
+- editor / saved-code grimoire / execution layout
 - clipboard copy of saved code without automatic insertion
 - draggable pane boundaries
 - the no-browser-scroll active workspace state
 - replay of the external tutorial script from `data/plugin-tutorial-dialogues.json`
 
-The Python test logic remains owned by `js/python-grimoire.js`; the workspace reuses and relocates the existing editor/run/output DOM controls rather than duplicating Python execution behavior.
+`js/plugin-editor-assistant.js` owns editor-side presentation after Python execution:
+
+- a dedicated `実行結果 / 出力` pane inside the execution area
+- keeping technical execution output separate from Lumiere's bottom dialogue
+- short contextual Lumiere reactions for running, failed, passed, and error states
+- the `ヒントを聞く` editor control
+
+`js/plugin-hints.js` owns hint retrieval and hint-use policy:
+
+- loads problem-specific hint text from `data/python-hints.json`
+- currently allows free hint use
+- exposes separate `canUse` and `consume` policy hooks so a future inventory item requirement can be added without changing the editor UI
+- must not hardcode a future hint-item type or quantity until that design is confirmed
+
+The Python test logic remains owned by `js/python-grimoire.js`; workspace and assistant modules reuse the existing editor/run/output DOM controls rather than duplicating Python execution behavior.
 
 Diagnostics:
 
@@ -92,6 +106,8 @@ SpellPlugin.testSound()
 SpellPluginWorkspace.sync()
 SpellPluginWorkspace.renderCodeLibrary()
 SpellPluginTutorial.play()
+SpellPluginEditorAssistant.sync()
+SpellPluginHints.status()
 ```
 
 ## Field input and scene ownership
