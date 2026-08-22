@@ -9,8 +9,14 @@
   const ZONE_H = 26;
   const WIDTH = ZONE_W * 4;
   const HEIGHT = ZONE_H * 4;
+  const VIEW_W = 32;
+  const VIEW_H = 24;
+  const SAFE_X = 6;
+  const SAFE_Y = 5;
   const key = FieldModel.key;
   let expandingLaMer = false;
+  let renderedWindow = null;
+  let renderQueued = false;
 
   const inRect = (x,y,x1,y1,x2,y2) => x>=x1&&x<=x2&&y>=y1&&y<=y2;
   const mountain = () => "tree la-mer-mountain";
@@ -25,6 +31,16 @@
   const building = (kind="la-mer-shop") => `building ${kind}`;
   const roof = (kind="la-mer-shop") => `roof ${kind}`;
   const door = (kind="la-mer-shop") => `door ${kind}`;
+
+  const virtualStyle=document.createElement("style");
+  virtualStyle.textContent=`
+    #field-world[data-map="la_mer_city"] .la-mer-virtual-tile{
+      position:absolute!important;
+      left:calc(var(--tile-x) * var(--tile-size));
+      top:calc(var(--tile-y) * var(--tile-size));
+    }
+  `;
+  document.head.appendChild(virtualStyle);
 
   function rokkoTile(x,y){
     if(y>=5&&y<=8&&x>=9&&x<=26)return road();
@@ -138,7 +154,6 @@
     const row=Math.floor(y/ZONE_H),col=Math.floor(x/ZONE_W),lx=x%ZONE_W,ly=y%ZONE_H;
     const verticalEdge=lx===0||lx===ZONE_W-1;
     const horizontalEdge=ly===0||ly===ZONE_H-1;
-
     if(row===2&&verticalEdge){
       if((col===0&&lx===ZONE_W-1)||(col===1&&lx===0))return !(ly>=12&&ly<=14);
       if((col===1&&lx===ZONE_W-1)||(col===2&&lx===0))return !(ly>=13&&ly<=16);
@@ -180,12 +195,62 @@
 
   function addLabel(world,text,x,y,w=8){
     const el=document.createElement("div");
-    el.className="field-map-label interior-label";
+    el.className="field-map-label interior-label la-mer-static-label";
     el.textContent=text;
     el.style.setProperty("--x",x);
     el.style.setProperty("--y",y);
     el.style.setProperty("--w",w);
     world.appendChild(el);
+  }
+
+  function entityCoord(name,fallback){
+    const el=document.getElementById(name);
+    if(!el)return fallback;
+    const value=Number.parseFloat(el.style.getPropertyValue(name==="field-player"?"--x":"--y"));
+    return Number.isFinite(value)?value:fallback;
+  }
+  function playerPosition(){
+    const player=document.getElementById("field-player");
+    if(!player)return spawn.player;
+    const x=Number.parseFloat(player.style.getPropertyValue("--x"));
+    const y=Number.parseFloat(player.style.getPropertyValue("--y"));
+    return {x:Number.isFinite(x)?x:spawn.player.x,y:Number.isFinite(y)?y:spawn.player.y};
+  }
+  const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+  function windowFor(x,y){
+    const x1=clamp(Math.floor(x-VIEW_W/2),0,WIDTH-VIEW_W);
+    const y1=clamp(Math.floor(y-VIEW_H/2),0,HEIGHT-VIEW_H);
+    return{x1,y1,x2:x1+VIEW_W-1,y2:y1+VIEW_H-1};
+  }
+  function isSafeInRendered(x,y){
+    if(!renderedWindow)return false;
+    const {x1,y1,x2,y2}=renderedWindow;
+    return x>=x1+SAFE_X&&x<=x2-SAFE_X&&y>=y1+SAFE_Y&&y<=y2-SAFE_Y;
+  }
+  function renderVisibleTiles(force=false){
+    const world=document.getElementById("field-world");
+    if(!world||world.dataset.map!=="la_mer_city")return;
+    const p=playerPosition();
+    if(!force&&isSafeInRendered(p.x,p.y))return;
+    const next=windowFor(p.x,p.y);
+    renderedWindow=next;
+    world.querySelectorAll(".la-mer-virtual-tile").forEach(el=>el.remove());
+    const frag=document.createDocumentFragment();
+    for(let y=next.y1;y<=next.y2;y++)for(let x=next.x1;x<=next.x2;x++){
+      const tile=document.createElement("div");
+      tile.className=`field-tile la-mer-virtual-tile ${tileAt(x,y)}`;
+      tile.dataset.x=x;
+      tile.dataset.y=y;
+      tile.style.setProperty("--tile-x",x);
+      tile.style.setProperty("--tile-y",y);
+      frag.appendChild(tile);
+    }
+    world.insertBefore(frag,world.firstChild);
+  }
+  function scheduleVisibleTiles(force=false){
+    if(renderQueued&&!force)return;
+    renderQueued=true;
+    requestAnimationFrame(()=>{renderQueued=false;renderVisibleTiles(force);});
   }
 
   function rebuildWorld(){
@@ -196,15 +261,10 @@
     world.style.gridTemplateRows=`repeat(${HEIGHT},var(--tile-size))`;
     world.style.width=`calc(${WIDTH} * var(--tile-size))`;
     world.style.height=`calc(${HEIGHT} * var(--tile-size))`;
-    const frag=document.createDocumentFragment();
-    for(let y=0;y<HEIGHT;y++)for(let x=0;x<WIDTH;x++){
-      const tile=document.createElement("div");
-      tile.className=`field-tile ${tileAt(x,y)}`;
-      tile.dataset.x=x;
-      tile.dataset.y=y;
-      frag.appendChild(tile);
-    }
-    world.insertBefore(frag,world.firstChild);
+    world.style.position="relative";
+    world.style.willChange="transform";
+    renderedWindow=null;
+    renderVisibleTiles(true);
 
     addLabel(world,"六甲山（ダンジョン）",ZONE_W*2+11,5,14);
     addLabel(world,"外国人居留地",ZONE_W*2+12,ZONE_H+8,12);
@@ -249,7 +309,17 @@
     const observer=new MutationObserver(()=>{if(world.dataset.map==="la_mer_city")queueMicrotask(rebuildWorld);});
     observer.observe(world,{attributes:true,attributeFilter:["data-map"]});
   }
+  const player=document.getElementById("field-player");
+  if(player){
+    const observer=new MutationObserver(()=>{
+      if(document.getElementById("field-world")?.dataset.map==="la_mer_city")scheduleVisibleTiles(false);
+    });
+    observer.observe(player,{attributes:true,attributeFilter:["style"]});
+  }
   document.getElementById("field-load")?.addEventListener("click",()=>queueMicrotask(()=>{if(Field.currentMap?.()==="la_mer_city")rebuildWorld();}));
 
-  window.SpellLaMerExpanded={width:WIDTH,height:HEIGHT,tileAt,rebuildWorld,spawn,blockedCount:blocked.size};
+  window.SpellLaMerExpanded={
+    width:WIDTH,height:HEIGHT,tileAt,rebuildWorld,spawn,blockedCount:blocked.size,
+    renderedTileBudget:VIEW_W*VIEW_H,renderVisibleTiles
+  };
 })();
