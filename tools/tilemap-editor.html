@@ -3,26 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Spell Operator Tilemap Editor</title>
+<title>Spell Operator Tilemap Editor - house2</title>
 <style>
-:root{--bg:#11131c;--panel:#1c2030;--line:#48506a;--text:#f3f4fa;--muted:#aeb6cc;--accent:#9d83d7;--danger:#e96d7d;--cell:32px}
+:root{--bg:#11131c;--panel:#1c2030;--line:#48506a;--text:#f3f4fa;--muted:#aeb6cc;--accent:#9d83d7;--danger:#e96d7d}
 *{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:ui-monospace,"Noto Sans JP",monospace;overflow:hidden}
-button,input,select{font:inherit}button{cursor:pointer}
-.app{height:100vh;display:grid;grid-template-rows:auto 1fr}
-header{height:58px;display:flex;align-items:center;gap:14px;padding:8px 14px;border-bottom:1px solid #30364a;background:#171a26}
-header h1{margin:0;font-size:18px}.status{margin-left:auto;color:var(--muted);font-size:12px}
-.main{min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 260px;gap:10px;padding:10px}
+button,input{font:inherit}button{cursor:pointer}.app{height:100vh;display:grid;grid-template-rows:auto 1fr}
+header{height:58px;display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1px solid #30364a;background:#171a26}
+header h1{margin:0;font-size:18px}.badge{padding:4px 7px;border-radius:999px;background:#4b3e70;color:#eee3ff;font-size:11px}.status{margin-left:auto;color:var(--muted);font-size:12px}
+.main{min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr) 270px;gap:10px;padding:10px}
 .panel{min-height:0;background:var(--panel);border:1px solid #30364a;border-radius:10px;padding:10px;overflow:hidden}
-.left{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:10px}.right{overflow:auto}
-.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.column{display:grid;gap:7px}.label{font-size:11px;color:var(--muted)}
-button,.button{border:1px solid #69728e;background:#262b3d;color:#fff;border-radius:6px;padding:7px 9px}.primary{background:#665293;border-color:#a48adc}.danger{background:#693945;border-color:#a65a69}.active{outline:2px solid #c9b6fa;background:#5e4d87}
-input[type=file]{width:100%;font-size:11px;color:var(--muted)} select,input[type=text]{background:#111522;color:#fff;border:1px solid #4d566f;border-radius:5px;padding:6px}
-a{color:#cdbdf5}
+.left{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:10px}.right{overflow:auto}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.column{display:grid;gap:7px}
+.label{font-size:11px;color:var(--muted)}button,.button{border:1px solid #69728e;background:#262b3d;color:#fff;border-radius:6px;padding:7px 9px}.primary{background:#665293;border-color:#a48adc}.danger{background:#693945;border-color:#a65a69}.active{outline:2px solid #c9b6fa;background:#5e4d87}
+input[type=file]{width:100%;font-size:11px;color:var(--muted)}a{color:#cdbdf5}
 .palette-wrap{min-height:0;overflow:auto;border:1px solid #414a63;background:#10131b;border-radius:6px;padding:4px}.palette-stage{position:relative;width:256px;min-height:1120px}.palette-stage canvas{display:block;image-rendering:pixelated}.palette-cursor{position:absolute;width:32px;height:32px;border:3px solid #fff;box-shadow:0 0 0 2px #6a4ca9;pointer-events:none;display:none}
-.center{min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px}.toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.map-scroll{min-height:0;overflow:auto;display:grid;place-items:center;background:#0c0e15;border:1px solid #30364a;border-radius:8px;padding:18px}
+.center{min-width:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:8px}.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.map-scroll{min-height:0;overflow:auto;display:grid;place-items:center;background:#0c0e15;border:1px solid #30364a;border-radius:8px;padding:18px}
 .map-frame{position:relative;box-shadow:0 12px 35px #0008}#mapCanvas{display:block;width:768px;height:576px;image-rendering:pixelated;background:#181b28;cursor:crosshair}.map-help{font-size:11px;color:var(--muted)}
-.legend{display:grid;gap:7px;font-size:12px}.swatch{display:inline-block;width:13px;height:13px;margin-right:6px;border:1px solid #fff4;vertical-align:-2px}.red{background:#d8445577}.cyan{background:#5fd7e588}.yellow{background:#e9c45d99}
-.info{font-size:12px;line-height:1.6;color:#d7dbeb}.note{padding:8px;border-left:3px solid #a68bdd;background:#151929;font-size:11px;color:#c9cfe0}.coords{font-weight:700;color:#fff}.sep{height:1px;background:#343a50;margin:8px 0}
+.note{padding:8px;border-left:3px solid #a68bdd;background:#151929;font-size:11px;color:#c9cfe0;line-height:1.55}.info{font-size:12px;line-height:1.6;color:#d7dbeb}.sep{height:1px;background:#343a50;margin:8px 0}.coords{font-weight:700}.legend{display:grid;gap:5px;font-size:12px}
+.swatch{display:inline-block;width:13px;height:13px;margin-right:6px;border:1px solid #fff4;vertical-align:-2px}.red{background:#d8445577}.cyan{background:#5fd7e588}.yellow{background:#e9c45d99}
 @media(max-width:1100px){.main{grid-template-columns:270px minmax(0,1fr) 220px}#mapCanvas{width:640px;height:480px}}
 </style>
 </head>
@@ -30,159 +27,157 @@ a{color:#cdbdf5}
 <div class="app">
 <header>
   <h1>Spell Operator Tilemap Editor</h1>
-  <span>house2 / 12×9 / 32px</span>
-  <a href="https://yms.main.jp/dotartworld/page2/tile-rooms01.html" target="_blank" rel="noopener">女の子用タイルセット素材ページ</a>
-  <span id="status" class="status">準備中</span>
+  <span class="badge">house2 仮案v1ベース</span>
+  <span>12×9 / 32px</span>
+  <a href="https://yms.main.jp/dotartworld/page2/tile-rooms01.html" target="_blank" rel="noopener">素材ページ</a>
+  <span id="status" class="status">読み込み中</span>
 </header>
 <div class="main">
-  <section class="panel left">
-    <div class="column">
-      <strong>1. タイルセット</strong>
-      <div class="note">素材サイトの規約上、元PNGはこの公開GitHubへ入れません。素材ページから「女の子用の部屋」256×1120 PNGを保存し、ここで読み込んでください。画像はこのブラウザ内だけに保存されます。</div>
-      <input id="tilesetFile" type="file" accept="image/png,image/gif,image/jpeg,image/webp">
-      <div class="row"><button id="forgetTileset">読み込み画像を忘れる</button><span id="tilesetInfo" class="label">未読込</span></div>
+<section class="panel left">
+  <div class="column">
+    <strong>1. 元タイルセット</strong>
+    <div class="note">開いた時点で仮案v1が表示されます。家具や床を変更するときだけ、保存してある <b>ST-Room-I02.png</b> をここへ読み込んでください。元素材PNGは公開GitHubには入れません。</div>
+    <input id="tilesetFile" type="file" accept="image/png,image/gif,image/jpeg,image/webp">
+    <div class="row"><button id="forgetTileset">読み込み画像を忘れる</button><span id="tilesetInfo" class="label">未読込</span></div>
+  </div>
+  <div class="column">
+    <strong>2. レイヤー</strong>
+    <div class="row" id="layerButtons">
+      <button data-layer="base" class="active">床・壁</button><button data-layer="object">家具</button><button data-layer="upper">上層</button><button data-layer="collision">当たり判定</button>
     </div>
-    <div class="column">
-      <strong>2. 描画レイヤー</strong>
-      <div class="row" id="layerButtons">
-        <button data-layer="base" class="active">床・壁</button>
-        <button data-layer="object">家具</button>
-        <button data-layer="upper">上層</button>
-        <button data-layer="collision">当たり判定</button>
-      </div>
-      <div class="row"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="clearLayer" class="danger">現在レイヤー消去</button></div>
-      <div class="label">左クリック/ドラッグ: 配置　右クリック: 消去　Shift+左クリック: スポイト</div>
-    </div>
-    <div class="palette-wrap">
-      <div class="palette-stage" id="paletteStage">
-        <canvas id="paletteCanvas" width="256" height="1120"></canvas>
-        <div id="paletteCursor" class="palette-cursor"></div>
-      </div>
-    </div>
-  </section>
+    <div class="row"><button id="undo">↶ Undo</button><button id="redo">↷ Redo</button><button id="resetBaseline">仮案v1に戻す</button><button id="clearLayer" class="danger">レイヤー消去</button></div>
+    <div class="label">左ドラッグ: 配置 / 右ドラッグ: 消去 / Shift+左: スポイト / Ctrl+Z: Undo</div>
+  </div>
+  <div class="palette-wrap"><div class="palette-stage" id="paletteStage"><canvas id="paletteCanvas" width="256" height="1120"></canvas><div id="paletteCursor" class="palette-cursor"></div></div></div>
+</section>
 
-  <section class="panel center">
-    <div class="toolbar">
-      <strong>3. マップ配置</strong>
-      <span>選択タイル: <span id="tileIndex" class="coords">—</span></span>
-      <span>セル: <span id="cellPos" class="coords">—</span></span>
-      <span class="map-help">赤=通行不可 / P=PC / S=階段</span>
-    </div>
-    <div class="map-scroll">
-      <div class="map-frame"><canvas id="mapCanvas" width="384" height="288"></canvas></div>
-    </div>
-  </section>
+<section class="panel center">
+  <div class="toolbar">
+    <strong>3. 仮案を改造</strong>
+    <span>選択: <span id="tileIndex" class="coords">—</span></span>
+    <span>セル: <span id="cellPos" class="coords">—</span></span>
+    <span class="map-help">赤=通行不可 / P=PC / S=階段</span>
+  </div>
+  <div class="map-scroll"><div class="map-frame"><canvas id="mapCanvas" width="384" height="288"></canvas></div></div>
+</section>
 
-  <aside class="panel right">
-    <div class="column">
-      <strong>4. ゲームへ反映</strong>
-      <button id="applyGame" class="primary">このブラウザのゲームへ反映</button>
-      <button id="openGame">ゲームを開く</button>
-      <button id="removeOverride">ゲーム反映を解除</button>
-      <div class="note">「ゲームへ反映」は完成した384×288の部屋画像と当たり判定だけを localStorage に保存します。元タイルセット自体はゲーム側へコピーしません。</div>
-      <div class="sep"></div>
-      <strong>保存・受け渡し</strong>
-      <button id="saveDraft">編集状態をブラウザ保存</button>
-      <button id="exportJson">ゲーム用JSONを書き出す</button>
-      <label class="button">JSONを読み込む<input id="importJson" type="file" accept="application/json" hidden></label>
-      <div class="sep"></div>
-      <strong>固定イベント</strong>
-      <div class="legend">
-        <div><span class="swatch cyan"></span>PC: (9, 2)</div>
-        <div><span class="swatch yellow"></span>階段: (10, 7)</div>
-        <div>開始: ソフィー (10, 6)</div>
-        <div>開始: ルミエル (10, 7)</div>
-      </div>
-      <div class="info">現行ゲームのイベント座標と互換性を保つため、PCと階段の位置は今は固定です。家具を置き直す場合も、この2マスは対応する見た目にしてください。</div>
-      <div class="sep"></div>
-      <strong>素材クレジット</strong>
-      <div class="info">ドット絵世界<br>http://yms.main.jp<br>対象: 「女の子用の部屋」</div>
-    </div>
-  </aside>
+<aside class="panel right">
+<div class="column">
+  <strong>4. 保存・反映</strong>
+  <button id="applyGame" class="primary">このブラウザのゲームへ反映</button>
+  <button id="openGame">ゲームを開く</button>
+  <button id="saveDraft">編集状態をブラウザ保存</button>
+  <button id="exportJson">JSONを書き出す</button>
+  <label class="button">JSONを読み込む<input id="importJson" type="file" accept="application/json" hidden></label>
+  <button id="removeOverride">ゲーム反映を解除</button>
+  <div class="note">仮案v1はGit側のデフォルトJSONから自動読込します。自分で編集した内容はブラウザ保存が優先されます。</div>
+  <div class="sep"></div>
+  <strong>固定イベント</strong>
+  <div class="legend">
+    <div><span class="swatch cyan"></span>PC: (9, 2)</div>
+    <div><span class="swatch yellow"></span>階段: (10, 7)</div>
+    <div>ソフィー開始: (10, 6)</div><div>ルミエル開始: (10, 7)</div>
+  </div>
+  <div class="info">イベント座標は現行ゲーム互換のため固定。見た目を動かす場合も、このマスにPC・階段相当を置いてください。</div>
+  <div class="sep"></div>
+  <strong>素材</strong>
+  <div class="info">ドット絵世界<br>「女の子用の部屋」<br>http://yms.main.jp</div>
+</div>
+</aside>
 </div>
 </div>
+
 <script>
 (() => {
-  "use strict";
-  const TILE=32,W=12,H=9,TILESET_W=256,TILESET_H=1120,COLS=8,ROWS=35;
-  const STORAGE_TILESET="spell-operator-editor-tileset:dotartworld-room-girl";
-  const STORAGE_DRAFT="spell-operator-tilemap-editor:house2";
-  const STORAGE_GAME="spell-operator-tilemap:house2";
-  const source={site:"ドット絵世界",page:"https://yms.main.jp/dotartworld/page2/tile-rooms01.html",credit:"ドット絵世界 / http://yms.main.jp",asset:"女の子用の部屋",originalSize:"256x1120"};
-  const fixedEvents={pc:{x:9,y:2},stairs:{x:10,y:7},playerStart:{x:10,y:6,facing:"up"},followerStart:{x:10,y:7,facing:"up"}};
-  const $=s=>document.querySelector(s);
-  const paletteCanvas=$("#paletteCanvas"),pctx=paletteCanvas.getContext("2d",{willReadFrequently:true});
-  const mapCanvas=$("#mapCanvas"),mctx=mapCanvas.getContext("2d");
-  const cursor=$("#paletteCursor"),status=$("#status");
-  let tilesetCanvas=null,tilesetImage=null,selectedTile=-1,currentLayer="base",painting=false,lastCell=-1;
-  let history=[],historyIndex=-1;
+"use strict";
+const TILE=32,W=12,H=9,COLS=8;
+const BASELINE_URL="../assets/maps/house2-layout.json?v=2";
+const STORAGE_TILESET="spell-operator-editor-tileset:dotartworld-room-girl";
+const STORAGE_DRAFT="spell-operator-tilemap-editor:house2";
+const STORAGE_GAME="spell-operator-tilemap:house2";
+const source={site:"ドット絵世界",page:"https://yms.main.jp/dotartworld/page2/tile-rooms01.html",credit:"ドット絵世界 / http://yms.main.jp",asset:"女の子用の部屋",originalSize:"256x1120"};
+const fixedEvents={pc:{x:9,y:2},stairs:{x:10,y:7},playerStart:{x:10,y:6,facing:"up"},followerStart:{x:10,y:7,facing:"up"}};
+const $=s=>document.querySelector(s), palette=$("#paletteCanvas"),pctx=palette.getContext("2d",{willReadFrequently:true}),map=$("#mapCanvas"),mctx=map.getContext("2d");
+const cursor=$("#paletteCursor"),status=$("#status");
+const empty=()=>Array(W*H).fill(-1);
+let state={layers:{base:empty(),object:empty(),upper:empty()},collision:Array(W*H).fill(0)};
+let baseline=null, previewImage=null, previewRenderedMap=null, tilesetCanvas=null, selectedTile=-1,currentLayer="base",painting=false,lastCell=-1,strokeChanged=false,visualDirty=false;
+let history=[],historyIndex=-1;
 
-  const emptyLayer=()=>Array(W*H).fill(-1);
-  function defaultCollision(){
-    const c=Array(W*H).fill(0),set=(x,y)=>c[y*W+x]=1;
-    for(let x=0;x<W;x++){set(x,0);set(x,H-1)}for(let y=1;y<H-1;y++){set(0,y);set(W-1,y)}
-    const rect=(x1,y1,x2,y2)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)set(x,y)};
-    rect(1,1,3,3);rect(4,1,6,3);rect(8,1,10,2);rect(1,5,2,5);rect(9,4,10,5);return c;
-  }
-  let state={layers:{base:emptyLayer(),object:emptyLayer(),upper:emptyLayer()},collision:defaultCollision()};
+function setStatus(t){status.textContent=t}
+function cloneState(){return JSON.parse(JSON.stringify(state))}
+function normalizeLayers(data){return {base:[...(data?.base||empty())],object:[...(data?.object||empty())],upper:[...(data?.upper||empty())]}}
+function snapshot(){return {state:cloneState(),visualDirty}}
+function pushHistory(){const s=snapshot();history=history.slice(0,historyIndex+1);history.push(s);if(history.length>100)history.shift();historyIndex=history.length-1;syncHistory()}
+function syncHistory(){$("#undo").disabled=historyIndex<=0;$("#redo").disabled=historyIndex>=history.length-1}
+function restoreHistory(i){if(i<0||i>=history.length)return;historyIndex=i;state=JSON.parse(JSON.stringify(history[i].state));visualDirty=!!history[i].visualDirty;drawMap();syncHistory()}
+function setPreview(dataUrl){previewRenderedMap=dataUrl||null;previewImage=null;if(!dataUrl){drawMap();return}const im=new Image();im.onload=()=>{previewImage=im;drawMap()};im.src=dataUrl}
+function applyData(data,{markDirty=false}={}){if(!data)return;state.layers=normalizeLayers(data.layers);state.collision=Array.isArray(data.collision)?[...data.collision]:Array(W*H).fill(0);visualDirty=markDirty;setPreview(data.renderedMap||null);drawMap()}
+async function loadBaseline(){const r=await fetch(BASELINE_URL,{cache:"no-store"});if(!r.ok)throw new Error("baseline");baseline=await r.json()}
+function restoreLocal(){try{return JSON.parse(localStorage.getItem(STORAGE_DRAFT))}catch{return null}}
+function resetToBaseline(){if(!baseline)return;applyData(baseline,{markDirty:false});selectedTile=-1;syncCursor();history=[];historyIndex=-1;pushHistory();setStatus("仮案v1に戻しました")}
 
-  function setStatus(text){status.textContent=text}
-  function cloneState(){return JSON.parse(JSON.stringify(state))}
-  function pushHistory(){const snap=cloneState();history=history.slice(0,historyIndex+1);history.push(snap);if(history.length>80)history.shift();historyIndex=history.length-1;updateHistoryButtons()}
-  function updateHistoryButtons(){$("#undo").disabled=historyIndex<=0;$("#redo").disabled=historyIndex>=history.length-1}
-  function restoreHistory(index){if(index<0||index>=history.length)return;historyIndex=index;state=JSON.parse(JSON.stringify(history[index]));drawMap();updateHistoryButtons()}
+function prepareTileset(img){
+ const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);
+ try{const d=x.getImageData(0,0,c.width,c.height),p=d.data;let alpha=false;for(let i=3;i<p.length;i+=4)if(p[i]<255){alpha=true;break}if(!alpha){const r=p[0],g=p[1],b=p[2];for(let i=0;i<p.length;i+=4)if(p[i]===r&&p[i+1]===g&&p[i+2]===b)p[i+3]=0;x.putImageData(d,0,0)}}catch(e){console.warn(e)}
+ tilesetCanvas=c;palette.width=c.width;palette.height=c.height;$("#paletteStage").style.width=c.width+"px";$("#paletteStage").style.minHeight=c.height+"px";drawPalette();$("#tilesetInfo").textContent=`${c.width}×${c.height}px / ${Math.floor(c.width/TILE)}×${Math.floor(c.height/TILE)}タイル`;drawMap();setStatus("元タイルセット読込済み");
+}
+function loadDataUrl(url,persist=true){const im=new Image();im.onload=()=>{prepareTileset(im);if(persist)try{localStorage.setItem(STORAGE_TILESET,url)}catch(e){console.warn(e)}};im.onerror=()=>setStatus("画像を読み込めませんでした");im.src=url}
+function drawPalette(){pctx.clearRect(0,0,palette.width,palette.height);if(tilesetCanvas)pctx.drawImage(tilesetCanvas,0,0);pctx.save();pctx.strokeStyle="rgba(255,255,255,.18)";for(let x=0;x<=palette.width;x+=TILE){pctx.beginPath();pctx.moveTo(x+.5,0);pctx.lineTo(x+.5,palette.height);pctx.stroke()}for(let y=0;y<=palette.height;y+=TILE){pctx.beginPath();pctx.moveTo(0,y+.5);pctx.lineTo(palette.width,y+.5);pctx.stroke()}pctx.restore()}
+function drawTile(ctx,idx,dx,dy){if(!tilesetCanvas||idx<0)return;const cols=Math.floor(tilesetCanvas.width/TILE),sx=(idx%cols)*TILE,sy=Math.floor(idx/cols)*TILE;ctx.drawImage(tilesetCanvas,sx,sy,TILE,TILE,dx,dy,TILE,TILE)}
+function compose(){const c=document.createElement("canvas");c.width=W*TILE;c.height=H*TILE;const x=c.getContext("2d");for(const layer of ["base","object","upper"])state.layers[layer].forEach((t,i)=>drawTile(x,t,(i%W)*TILE,Math.floor(i/W)*TILE));return c}
+function marker(p,label,color){const x=p.x*TILE,y=p.y*TILE;mctx.fillStyle=color;mctx.fillRect(x+5,y+5,22,22);mctx.fillStyle="#111";mctx.font="bold 14px monospace";mctx.textAlign="center";mctx.textBaseline="middle";mctx.fillText(label,x+16,y+16)}
+function drawMap(){
+ mctx.clearRect(0,0,map.width,map.height);mctx.fillStyle="#181b28";mctx.fillRect(0,0,map.width,map.height);
+ if(tilesetCanvas)mctx.drawImage(compose(),0,0);else if(previewImage)mctx.drawImage(previewImage,0,0,map.width,map.height);
+ state.collision.forEach((v,i)=>{if(v){mctx.fillStyle="rgba(216,68,85,.32)";mctx.fillRect((i%W)*TILE,Math.floor(i/W)*TILE,TILE,TILE)}});
+ mctx.save();mctx.strokeStyle="rgba(255,255,255,.23)";for(let x=0;x<=W*TILE;x+=TILE){mctx.beginPath();mctx.moveTo(x+.5,0);mctx.lineTo(x+.5,H*TILE);mctx.stroke()}for(let y=0;y<=H*TILE;y+=TILE){mctx.beginPath();mctx.moveTo(0,y+.5);mctx.lineTo(W*TILE,y+.5);mctx.stroke()}mctx.restore();
+ marker(fixedEvents.pc,"P","rgba(95,215,229,.72)");marker(fixedEvents.stairs,"S","rgba(233,196,93,.76)");
+}
+function syncCursor(){if(selectedTile<0){cursor.style.display="none";$("#tileIndex").textContent="—";return}const cols=tilesetCanvas?Math.floor(tilesetCanvas.width/TILE):COLS;cursor.style.display=tilesetCanvas?"block":"none";cursor.style.left=(selectedTile%cols)*TILE+"px";cursor.style.top=Math.floor(selectedTile/cols)*TILE+"px";$("#tileIndex").textContent=`${selectedTile} (${selectedTile%cols}, ${Math.floor(selectedTile/cols)})`}
+function cellOf(ev){const r=map.getBoundingClientRect(),x=Math.floor((ev.clientX-r.left)*map.width/r.width/TILE),y=Math.floor((ev.clientY-r.top)*map.height/r.height/TILE);return x>=0&&y>=0&&x<W&&y<H?{x,y,index:y*W+x}:null}
+function paint(c,erase=false,eyedrop=false){
+ if(!c)return;
+ if(eyedrop&&currentLayer!=="collision"){selectedTile=state.layers[currentLayer][c.index];syncCursor();return}
+ if(currentLayer==="collision"){const before=state.collision[c.index];state.collision[c.index]=erase?0:(before?0:1);strokeChanged ||= before!==state.collision[c.index]}
+ else{if(!tilesetCanvas){setStatus("家具・床を変えるには元タイルセットPNGを読み込んでください");return}const before=state.layers[currentLayer][c.index],after=erase?-1:selectedTile;if(after<0&&!erase)return;state.layers[currentLayer][c.index]=after;strokeChanged ||= before!==after;if(before!==after)visualDirty=true}
+ drawMap();
+}
 
-  function prepareTileset(img){
-    const c=document.createElement("canvas");c.width=img.naturalWidth;c.height=img.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(img,0,0);
-    try{
-      const data=x.getImageData(0,0,c.width,c.height),d=data.data;let hasAlpha=false;for(let i=3;i<d.length;i+=4){if(d[i]<255){hasAlpha=true;break}}
-      if(!hasAlpha&&d.length>=4){const r=d[0],g=d[1],b=d[2];for(let i=0;i<d.length;i+=4){if(d[i]===r&&d[i+1]===g&&d[i+2]===b)d[i+3]=0}x.putImageData(data,0,0)}
-    }catch(e){console.warn(e)}
-    tilesetCanvas=c;tilesetImage=img;paletteCanvas.width=c.width;paletteCanvas.height=c.height;$("#paletteStage").style.width=c.width+"px";$("#paletteStage").style.minHeight=c.height+"px";
-    drawPalette();$("#tilesetInfo").textContent=`${c.width}×${c.height}px / ${Math.floor(c.width/TILE)}×${Math.floor(c.height/TILE)}タイル`;setStatus("タイルセット読込済み");drawMap();
-  }
-  function loadDataUrl(dataUrl,persist=true){const img=new Image();img.onload=()=>{prepareTileset(img);if(persist){try{localStorage.setItem(STORAGE_TILESET,dataUrl)}catch(e){console.warn(e)}}};img.onerror=()=>setStatus("画像を読み込めませんでした");img.src=dataUrl}
+palette.addEventListener("click",ev=>{if(!tilesetCanvas)return;const r=palette.getBoundingClientRect(),x=Math.floor((ev.clientX-r.left)*palette.width/r.width/TILE),y=Math.floor((ev.clientY-r.top)*palette.height/r.height/TILE),cols=Math.floor(palette.width/TILE);selectedTile=y*cols+x;syncCursor()});
+map.addEventListener("contextmenu",e=>e.preventDefault());
+map.addEventListener("pointerdown",ev=>{const c=cellOf(ev);if(!c)return;painting=true;lastCell=c.index;strokeChanged=false;paint(c,ev.button===2,ev.shiftKey);map.setPointerCapture?.(ev.pointerId)});
+map.addEventListener("pointermove",ev=>{const c=cellOf(ev);$("#cellPos").textContent=c?`${c.x}, ${c.y}`:"—";if(!painting||!c||c.index===lastCell||ev.shiftKey)return;lastCell=c.index;if(currentLayer==="collision")return;paint(c,(ev.buttons&2)!==0,false)});
+window.addEventListener("pointerup",()=>{if(painting&&strokeChanged)pushHistory();painting=false;lastCell=-1;strokeChanged=false});
+window.addEventListener("keydown",ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==="z"){ev.preventDefault();restoreHistory(ev.shiftKey?historyIndex+1:historyIndex-1)}else if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==="y"){ev.preventDefault();restoreHistory(historyIndex+1)}});
 
-  function drawPalette(){
-    pctx.clearRect(0,0,paletteCanvas.width,paletteCanvas.height);if(tilesetCanvas)pctx.drawImage(tilesetCanvas,0,0);
-    pctx.save();pctx.strokeStyle="rgba(255,255,255,.2)";pctx.lineWidth=1;for(let x=0;x<=paletteCanvas.width;x+=TILE){pctx.beginPath();pctx.moveTo(x+.5,0);pctx.lineTo(x+.5,paletteCanvas.height);pctx.stroke()}for(let y=0;y<=paletteCanvas.height;y+=TILE){pctx.beginPath();pctx.moveTo(0,y+.5);pctx.lineTo(paletteCanvas.width,y+.5);pctx.stroke()}pctx.restore();
-  }
-  function drawTile(ctx,tileIndex,dx,dy){if(!tilesetCanvas||tileIndex<0)return;const cols=Math.floor(tilesetCanvas.width/TILE),sx=(tileIndex%cols)*TILE,sy=Math.floor(tileIndex/cols)*TILE;ctx.drawImage(tilesetCanvas,sx,sy,TILE,TILE,dx,dy,TILE,TILE)}
-  function composeCanvas(){const c=document.createElement("canvas");c.width=W*TILE;c.height=H*TILE;const x=c.getContext("2d");x.clearRect(0,0,c.width,c.height);for(const layer of ["base","object","upper"]){state.layers[layer].forEach((t,i)=>drawTile(x,t,(i%W)*TILE,Math.floor(i/W)*TILE))}return c}
-  function drawMap(){
-    mctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);mctx.fillStyle="#181b28";mctx.fillRect(0,0,mapCanvas.width,mapCanvas.height);mctx.drawImage(composeCanvas(),0,0);
-    state.collision.forEach((v,i)=>{if(!v)return;const x=(i%W)*TILE,y=Math.floor(i/W)*TILE;mctx.fillStyle="rgba(216,68,85,.35)";mctx.fillRect(x,y,TILE,TILE)});
-    mctx.save();mctx.strokeStyle="rgba(255,255,255,.23)";mctx.lineWidth=1;for(let x=0;x<=W*TILE;x+=TILE){mctx.beginPath();mctx.moveTo(x+.5,0);mctx.lineTo(x+.5,H*TILE);mctx.stroke()}for(let y=0;y<=H*TILE;y+=TILE){mctx.beginPath();mctx.moveTo(0,y+.5);mctx.lineTo(W*TILE,y+.5);mctx.stroke()}mctx.restore();
-    marker(fixedEvents.pc,"P","rgba(95,215,229,.72)");marker(fixedEvents.stairs,"S","rgba(233,196,93,.76)");
-  }
-  function marker(pos,label,color){const x=pos.x*TILE,y=pos.y*TILE;mctx.fillStyle=color;mctx.fillRect(x+5,y+5,TILE-10,TILE-10);mctx.fillStyle="#111";mctx.font="bold 14px monospace";mctx.textAlign="center";mctx.textBaseline="middle";mctx.fillText(label,x+TILE/2,y+TILE/2)}
-  function eventCell(ev){const r=mapCanvas.getBoundingClientRect(),x=Math.floor((ev.clientX-r.left)*mapCanvas.width/r.width/TILE),y=Math.floor((ev.clientY-r.top)*mapCanvas.height/r.height/TILE);if(x<0||y<0||x>=W||y>=H)return null;return{x,y,index:y*W+x}}
-  function paintCell(cell,erase=false,eyedrop=false){if(!cell)return;if(eyedrop&&currentLayer!=="collision"){selectedTile=state.layers[currentLayer][cell.index];syncCursorFromSelection();return}if(currentLayer==="collision"){state.collision[cell.index]=erase?0:(state.collision[cell.index]?0:1)}else state.layers[currentLayer][cell.index]=erase?-1:selectedTile;drawMap()}
-  function syncCursorFromSelection(){if(selectedTile<0){cursor.style.display="none";$("#tileIndex").textContent="—";return}const cols=tilesetCanvas?Math.floor(tilesetCanvas.width/TILE):COLS;cursor.style.display="block";cursor.style.left=(selectedTile%cols)*TILE+"px";cursor.style.top=Math.floor(selectedTile/cols)*TILE+"px";$("#tileIndex").textContent=`${selectedTile} (${selectedTile%cols}, ${Math.floor(selectedTile/cols)})`}
+$("#tilesetFile").addEventListener("change",ev=>{const f=ev.target.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>loadDataUrl(rd.result,true);rd.readAsDataURL(f)});
+$("#forgetTileset").addEventListener("click",()=>{localStorage.removeItem(STORAGE_TILESET);tilesetCanvas=null;selectedTile=-1;pctx.clearRect(0,0,palette.width,palette.height);$("#tilesetInfo").textContent="未読込";syncCursor();drawMap();setStatus("元タイルセットをブラウザから削除しました")});
+$("#layerButtons").addEventListener("click",ev=>{const b=ev.target.closest("[data-layer]");if(!b)return;currentLayer=b.dataset.layer;document.querySelectorAll("#layerButtons button").forEach(x=>x.classList.toggle("active",x===b))});
+$("#undo").onclick=()=>restoreHistory(historyIndex-1);$("#redo").onclick=()=>restoreHistory(historyIndex+1);$("#resetBaseline").onclick=resetToBaseline;
+$("#clearLayer").onclick=()=>{if(currentLayer==="collision")state.collision=Array(W*H).fill(0);else{if(!tilesetCanvas){setStatus("見た目を変えるには元タイルセットPNGを読み込んでください");return}state.layers[currentLayer]=empty();visualDirty=true}drawMap();pushHistory()};
 
-  paletteCanvas.addEventListener("click",ev=>{if(!tilesetCanvas)return;const r=paletteCanvas.getBoundingClientRect(),x=Math.floor((ev.clientX-r.left)*paletteCanvas.width/r.width/TILE),y=Math.floor((ev.clientY-r.top)*paletteCanvas.height/r.height/TILE),cols=Math.floor(paletteCanvas.width/TILE);selectedTile=y*cols+x;syncCursorFromSelection()});
-  mapCanvas.addEventListener("contextmenu",e=>e.preventDefault());
-  mapCanvas.addEventListener("pointerdown",ev=>{const cell=eventCell(ev);if(!cell)return;painting=true;lastCell=cell.index;pushHistory();paintCell(cell,ev.button===2,ev.shiftKey);mapCanvas.setPointerCapture?.(ev.pointerId)});
-  mapCanvas.addEventListener("pointermove",ev=>{const cell=eventCell(ev);$("#cellPos").textContent=cell?`${cell.x}, ${cell.y}`:"—";if(!painting||!cell||cell.index===lastCell||ev.shiftKey)return;lastCell=cell.index;if(currentLayer==="collision")return;paintCell(cell,(ev.buttons&2)!==0,false)});
-  window.addEventListener("pointerup",()=>{painting=false;lastCell=-1});
+function renderedForPackage(){if(tilesetCanvas)return compose().toDataURL("image/png");if(!visualDirty&&previewRenderedMap)return previewRenderedMap;return null}
+function packageData(){return{version:2,mapId:"house2",name:"ソフィーとルミエルの部屋",width:W,height:H,tileSize:TILE,source,renderedMap:renderedForPackage(),layers:state.layers,collision:state.collision,fixedEvents,updatedAt:new Date().toISOString()}}
+function saveDraft(){localStorage.setItem(STORAGE_DRAFT,JSON.stringify({state,selectedTile,currentLayer,visualDirty,previewRenderedMap}));setStatus("編集状態を保存しました")}
+$("#saveDraft").onclick=saveDraft;
+$("#applyGame").onclick=()=>{const data=packageData();if(!data.renderedMap){alert("見た目を変更したため、元タイルセットPNGを読み込んでから反映してください。");return}localStorage.setItem(STORAGE_GAME,JSON.stringify(data));saveDraft();setStatus("ゲームへ反映しました");alert("反映しました。ゲームを再読み込みすると house2 が更新されます。")};
+$("#openGame").onclick=()=>window.open("../?tilemap=house2&v=76","_blank");
+$("#removeOverride").onclick=()=>{localStorage.removeItem(STORAGE_GAME);setStatus("ゲーム反映を解除しました")};
+$("#exportJson").onclick=()=>{const data=packageData();if(!data.renderedMap){alert("見た目を変更したため、元タイルセットPNGを読み込んでから書き出してください。");return}const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="house2-layout.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+$("#importJson").addEventListener("change",ev=>{const f=ev.target.files?.[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(+d.width!==W||+d.height!==H)throw 0;applyData(d,{markDirty:!d.renderedMap});history=[];historyIndex=-1;pushHistory();setStatus("JSONを読み込みました")}catch{alert("12×9のhouse2用JSONではありません。")}};rd.readAsText(f)});
 
-  $("#tilesetFile").addEventListener("change",ev=>{const file=ev.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>loadDataUrl(reader.result,true);reader.readAsDataURL(file)});
-  $("#forgetTileset").addEventListener("click",()=>{localStorage.removeItem(STORAGE_TILESET);tilesetCanvas=null;tilesetImage=null;selectedTile=-1;pctx.clearRect(0,0,paletteCanvas.width,paletteCanvas.height);$("#tilesetInfo").textContent="未読込";syncCursorFromSelection();drawMap();setStatus("タイルセットを削除しました")});
-  $("#layerButtons").addEventListener("click",ev=>{const b=ev.target.closest("[data-layer]");if(!b)return;currentLayer=b.dataset.layer;document.querySelectorAll("#layerButtons button").forEach(x=>x.classList.toggle("active",x===b))});
-  $("#undo").addEventListener("click",()=>restoreHistory(historyIndex-1));$("#redo").addEventListener("click",()=>restoreHistory(historyIndex+1));
-  $("#clearLayer").addEventListener("click",()=>{pushHistory();if(currentLayer==="collision")state.collision=Array(W*H).fill(0);else state.layers[currentLayer]=emptyLayer();drawMap()});
-
-  function packageData(){const renderedMap=tilesetCanvas?composeCanvas().toDataURL("image/png"):null;return{version:1,mapId:"house2",name:"ソフィーとルミエルの部屋",width:W,height:H,tileSize:TILE,source,renderedMap,layers:state.layers,collision:state.collision,fixedEvents,updatedAt:new Date().toISOString()}}
-  function saveDraft(){localStorage.setItem(STORAGE_DRAFT,JSON.stringify({state,selectedTile,currentLayer}));setStatus("編集状態を保存しました")}
-  $("#saveDraft").addEventListener("click",saveDraft);
-  $("#applyGame").addEventListener("click",()=>{if(!tilesetCanvas){alert("先に女の子用タイルセットPNGを読み込んでください。");return}const data=packageData();localStorage.setItem(STORAGE_GAME,JSON.stringify(data));saveDraft();setStatus("ゲームへ反映しました");alert("反映しました。同じブラウザでゲームを再読み込みすると家2階に反映されます。")});
-  $("#openGame").addEventListener("click",()=>window.open("../?tilemap=house2","_blank"));
-  $("#removeOverride").addEventListener("click",()=>{localStorage.removeItem(STORAGE_GAME);setStatus("ゲーム反映を解除しました")});
-  $("#exportJson").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(packageData(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="house2-layout.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});
-  $("#importJson").addEventListener("change",ev=>{const file=ev.target.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(Number(data.width)!==W||Number(data.height)!==H)throw new Error("map size");if(data.layers)state.layers={base:[...data.layers.base],object:[...data.layers.object],upper:[...data.layers.upper]};if(Array.isArray(data.collision))state.collision=[...data.collision];pushHistory();drawMap();setStatus("JSONを読み込みました")}catch{alert("12×9 house2用JSONではありません。")}};reader.readAsText(file)});
-
-  function restoreDraft(){const draft=(()=>{try{return JSON.parse(localStorage.getItem(STORAGE_DRAFT))}catch{return null}})();if(draft?.state){state=draft.state;selectedTile=Number.isInteger(draft.selectedTile)?draft.selectedTile:-1;currentLayer=draft.currentLayer||"base";document.querySelectorAll("#layerButtons button").forEach(b=>b.classList.toggle("active",b.dataset.layer===currentLayer))}}
-  restoreDraft();pushHistory();const savedTileset=localStorage.getItem(STORAGE_TILESET);if(savedTileset)loadDataUrl(savedTileset,false);else{drawPalette();drawMap();setStatus("女の子用タイルセットPNGを読み込んでください")};syncCursorFromSelection();
+(async()=>{
+ try{
+  await loadBaseline();
+  const local=restoreLocal();
+  if(local?.state){state=local.state;selectedTile=Number.isInteger(local.selectedTile)?local.selectedTile:-1;currentLayer=local.currentLayer||"base";visualDirty=!!local.visualDirty;setPreview(local.previewRenderedMap||baseline.renderedMap);document.querySelectorAll("#layerButtons button").forEach(b=>b.classList.toggle("active",b.dataset.layer===currentLayer));setStatus("前回の編集を復元しました")}
+  else{applyData(baseline,{markDirty:false});setStatus("仮案v1を読み込みました")}
+  history=[];historyIndex=-1;pushHistory();
+  const saved=localStorage.getItem(STORAGE_TILESET);if(saved)loadDataUrl(saved,false);else drawPalette();
+  drawMap();syncCursor();
+ }catch(e){console.error(e);drawPalette();drawMap();setStatus("仮案v1の読込に失敗しました")}
+})();
 })();
 </script>
 </body>
