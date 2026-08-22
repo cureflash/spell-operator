@@ -5,6 +5,7 @@
   if (!G?.state) return;
 
   const DEFAULT_PORTRAIT = "assets/characters/portraits/lumiere/grimoire-clear.svg?v=1";
+  const FALLBACK_PORTRAIT = "assets/characters/portraits/lumiere/smile.jpg?v=1";
   let portraitSrc = DEFAULT_PORTRAIT;
   let currentSpellKey = null;
 
@@ -65,7 +66,7 @@
     overlay.setAttribute("aria-label", "魔導書クリア");
     overlay.innerHTML = `
       <div class="grimoire-first-clear-card">
-        <div id="grimoire-first-clear-portrait" class="grimoire-first-clear-portrait" aria-hidden="true"></div>
+        <img id="grimoire-first-clear-portrait" class="grimoire-first-clear-portrait" alt="" aria-hidden="true">
         <div class="grimoire-first-clear-message">
           <div class="grimoire-first-clear-name">ルミエル</div>
           <div id="grimoire-first-clear-text" class="grimoire-first-clear-text">やった！クリアよ！</div>
@@ -80,7 +81,10 @@
   function applyPortrait() {
     const portrait = document.getElementById("grimoire-first-clear-portrait");
     if (!portrait) return;
-    portrait.style.backgroundImage = `url("${portraitSrc}")`;
+    portrait.onerror = () => {
+      if (!portrait.src.includes("/smile.jpg")) portrait.src = FALLBACK_PORTRAIT;
+    };
+    portrait.src = portraitSrc || DEFAULT_PORTRAIT;
   }
 
   function isOpen() {
