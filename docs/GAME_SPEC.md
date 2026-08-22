@@ -15,8 +15,8 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - Normal gameplay screens must not require browser/page scrolling to use them.
 - The primary information and controls required on each screen must fit within the current viewport.
 - If a screen would otherwise exceed the viewport, redesign the layout, adjust density, or use tabs/page switching rather than requiring whole-screen scrolling.
-- The grimoire screen shown after plug-in is subject to this policy.
-- This rule is being documented now; the grimoire screen implementation is intentionally not changed yet.
+- The plug-in menu and editor workspace are subject to this policy.
+- Editor and code-preview controls may manage their own text overflow; the browser/page itself must not need scrolling while the plug-in workspace is active.
 
 ## World place names
 
@@ -67,8 +67,8 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
 - Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
 - `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
-- Plug-in/computer screens use PeriTune `Dreambyte` as their BGM. This includes both the grimoire list (`screen-hub`) and the Python/grimoire editor (`screen-debug`).
-- `Dreambyte` continues without restarting when moving between the grimoire list and editor, and pauses when leaving the plug-in/computer screens for field, battle, or another screen.
+- Plug-in/computer screens use PeriTune `Dreambyte` as their BGM. This includes both the plug-in menu (`screen-hub`) and the Python editor workspace (`screen-debug`).
+- `Dreambyte` continues without restarting when moving between the plug-in menu and editor, and pauses when leaving the plug-in/computer screens for field, battle, or another screen.
 - Dreambyte source: `https://peritune.com/music/PeriTune_Dreambyte.mp3`; source page: `https://peritune.com/blog/2026/01/17/dreambyte/`. It was published in January 2026 and remains under CC BY 4.0.
 - `キョウトシティ` is pre-registered to use PeriTune `Awayuki` when the `kyoto_city` map is implemented. Runtime asset: `assets/audio/bgm/awayuki.mp3`.
 - Normal battles use PeriTune `Ancient Gust`. Runtime asset: `assets/audio/bgm/ancient-gust.mp3`.
@@ -159,18 +159,35 @@ SpellDialogTyping.resume();
 - The transition uses `kirayuki1` / `キラキラ雪放射` from the supplied `キラ雪.zip`; the runtime asset is `assets/effects/plugin/kirayuki1.webp`.
 - The supplied `可愛く輝く1.mp3` SE starts together with the Kirayuki animation and follows the global SE volume setting.
 - The browser runtime uses a lightweight audio encode stored at `assets/audio/sfx/plugin-sparkle.base64`, decoded to `audio/mpeg` when the transition module loads.
-- The programming computer screen opens only after the Kirayuki animation completes.
+- After the Kirayuki animation completes, the plug-in menu opens. It does not automatically open the first Python grimoire.
 - If `Z` is pressed before the plug-in line finishes rendering, that press only finishes the line; the next `Z` starts the transition.
-- The Kirayuki transition applies only to the normal-field `X` plug-in sequence; other direct computer/menu entry points keep their existing behavior.
-- Existing programming and spell-testing behavior is reused; this specification changes the field entry transition, not the Python runtime or spell-test rules.
+- The Kirayuki transition applies only to the normal-field `X` plug-in sequence; direct computer/menu entry opens the plug-in menu without the transition or plug-in SE.
+- The plug-in menu is divided into upper-left Lumiere portrait, upper-right menu, and bottom Lumiere dialogue areas.
+- The menu contains `エディタ`, `チュートリアル`, `カスタム`, and `戻る` in that order.
+- `カスタム` is reserved and has no defined behavior yet.
+- `チュートリアル` replays the same externally stored Lumiere explanation script used for the first explanation.
+- Detailed workspace layout rules are mirrored in `docs/PLUGIN_WORKSPACE.md`.
+
+## Plug-in editor workspace
+
+- The Python editor is on the left.
+- The right upper area is the grimoire for previously saved code.
+- A saved code entry can be selected and copied. It is not automatically inserted into the current editor; the player pastes it normally.
+- Execution controls are below the grimoire on the right.
+- There is no dedicated console panel.
+- The bottom pane is shared by Lumiere dialogue and program/test output.
+- Lumiere speech and program/test output are visually distinguishable within that shared pane.
+- The editor/right-pane boundary, grimoire/execution boundary, and upper-workspace/bottom-pane boundary are draggable.
+- The plug-in menu's Lumiere/menu boundary and upper/bottom boundary are also draggable.
+- Pane-size persistence between sessions is not specified.
 
 ## Python error guidance by Lumiere
 
 - Python compile-time and runtime exceptions from the grimoire test runner are presented through Lumiere guidance.
-- The Python exception class name is the lookup key, for example `SyntaxError`, `NameError`, or `TypeError`.
+- The Python exception class name is the internal lookup key, for example `SyntaxError`, `NameError`, or `TypeError`.
 - Lumiere's dialogue text is stored in the editable runtime table `data/python-error-dialogues.json` and must not be duplicated as per-error hardcoded strings in the execution or UI logic.
-- `js/lumiere-python-errors.js` loads the table and converts `compileError` and per-test runtime `error` strings before the existing grimoire UI displays them.
-- The displayed result contains Lumiere's guidance and the original Python exception text so the player can learn the real Python error name and message.
+- `js/lumiere-python-errors.js` loads the table and converts `compileError`, per-test runtime `error` strings, and rejected runner failures before the grimoire UI displays them.
+- The raw Python error remains available internally for classification but is not shown in a separate raw-error console. The player-facing exception result is Lumiere's explanation in the shared bottom pane.
 - An exception class missing from the table uses the table's `default` dialogue.
-- A test failure caused only by output mismatch is not a Python exception and keeps the existing test-failure display.
+- A test failure caused only by output mismatch is not a Python exception and keeps the normal test-failure display in the shared bottom pane.
 - Dialogue-table fetches bypass the browser cache so changing only `data/python-error-dialogues.json` is sufficient to change Lumiere's lines without editing the Python runner or grimoire code.
