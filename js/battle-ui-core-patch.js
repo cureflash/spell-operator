@@ -106,7 +106,6 @@
   const history = [];
   const MAX_LINES = 4;
   let rendered = "";
-  let internalWrite = false;
 
   function normalize(line) {
     return String(line || "").trim()
@@ -146,19 +145,17 @@
       lines = [prompt || "戦闘開始！"];
     }
     rendered = lines.join("\n");
-    internalWrite = true;
-    battleLog.textContent = rendered;
+    if (battleLog.textContent !== rendered) battleLog.textContent = rendered;
     battleLog.style.setProperty("color", "#fff", "important");
     battleLog.style.setProperty("visibility", "visible", "important");
     battleLog.style.setProperty("opacity", "1", "important");
-    internalWrite = false;
   }
 
   function consumeExternalLog() {
-    if (internalWrite) return;
     const raw = String(battleLog.textContent || "");
-    if (!raw || raw === rendered) {
-      renderLog();
+    if (raw === rendered) return;
+    if (!raw) {
+      if (battleScreen.classList.contains("active")) renderLog();
       return;
     }
     const lines = raw.split(/\r?\n/).map(normalize).filter(keep);
@@ -288,7 +285,7 @@
   syncSelection();
 
   window.SpellBattleUiCore = {
-    version: "2026-08-22-dq-command-v2",
+    version: "2026-08-22-dq-command-v3",
     syncSelection,
     moveSelection,
     renderLog,
