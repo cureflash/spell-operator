@@ -17,11 +17,12 @@
   addStyle("css/pokemon-house-compact.css?v=1");
   addStyle("css/sophie-sprite.css?v=21");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
+  const loadOptional=src=>load(src).catch(error=>{console.warn(`Optional module failed to load: ${src}`,error);});
   load("js/python-runner.js?v=1")
     .then(()=>load("js/interpreter.js?v=3"))
     .then(()=>load("js/game03-core.js?v=8"))
     .then(()=>load("js/audio-settings.js?v=1"))
-    .then(()=>load("js/lumiere-python-errors.js?v=1"))
+    .then(()=>loadOptional("js/lumiere-python-errors.js?v=2"))
     .then(()=>load("js/python-grimoire.js?v=1"))
     .then(()=>load("js/map-transition.js?v=3"))
     .then(()=>load("js/movement-step-lock.js?v=1"))
@@ -43,7 +44,7 @@
     .then(()=>load("js/dialog-typewriter.js?v=4"))
     .then(()=>load("js/dialog-sfx.js?v=3"))
     .then(()=>load("js/ido-confirm-dialog-fix.js?v=4"))
-    .then(()=>load("js/plugin-transition.js?v=1"))
+    .then(()=>load("js/plugin-transition.js?v=2"))
     .then(()=>load("js/house-room-layout.js?v=4"))
     .then(()=>window.SpellTilemapRuntime?.apply?.(window.SpellField?.currentMap?.()))
     .then(()=>load("js/party-lockstep.js?v=6"))
