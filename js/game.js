@@ -31,6 +31,7 @@
     .then(()=>load("js/game03-battle.js?v=6"))
     .then(()=>load("js/follower-normalize.js?v=1"))
     .then(()=>load("js/game03-field.js?v=19"))
+    .then(()=>load("js/place-names.js?v=1"))
     .then(()=>load("js/game-bgm.js?v=2"))
     .then(()=>load("js/character-portraits.js?v=3"))
     .then(()=>load("js/dialog-typewriter.js?v=4"))
@@ -42,7 +43,7 @@
     .then(()=>load("js/npc-facing.js?v=1"))
     .then(()=>load("js/z-escape.js?v=2"))
     .then(()=>{
-      const area=document.querySelector(".field-area");if(area&&!area.textContent)area.textContent="はじまりの町";
+      const area=document.querySelector(".field-area");if(area&&!area.textContent)area.textContent="フルール村";
       const help=[...document.querySelectorAll(".field-help span")];if(help[1])help[1].textContent="話す・調べる・戻る：Z";
       return load("js/sophie-sprite.js?v=7");
     })
