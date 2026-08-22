@@ -5,15 +5,13 @@
   const fieldMenuItems=[
     {label:"ステータス",action:()=>{closeFieldMenu();openStatus();}},
     {label:"リュック",action:()=>{closeFieldMenu();window.SpellItems?.openBackpack?.();}},
+    {label:"イードウ",action:()=>openTravelMenu()},
     {label:"パソコン",action:()=>{closeFieldMenu();G.openComputer?.();}},
-    {label:"移動",action:()=>openTravelMenu()},
     {label:"セーブ",action:()=>{closeFieldMenu();window.SpellField?.saveGame?.();}},
     {label:"とじる",action:()=>closeFieldMenu()}
   ];
   const travelMenuItems=[
-    {label:"フルール村",action:()=>warpTo("town")},
-    {label:"ラメールシティ",action:()=>warpTo("la_mer_city")},
-    {label:"もどる",action:()=>{fieldMenuMode="main";fieldMenuIndex=0;renderFieldMenu();}}
+    {label:"ラメールシティ",action:()=>warpTo("la_mer_city")}
   ];
 
   function activeFieldMenuItems(){return fieldMenuMode==="travel"?travelMenuItems:fieldMenuItems}
@@ -24,7 +22,7 @@
     const main=document.querySelector("main.shell");if(main&&!$("#screen-status")){const section=document.createElement("section");section.id="screen-status";section.className="screen";section.innerHTML=`<div class="status-screen-wrap"><div class="status-toolbar"><div><p class="kicker">PARTY STATUS</p><h2>ステータス</h2></div><button id="status-back" class="secondary">フィールドへ戻る</button></div><div id="status-grid" class="status-grid"></div></div>`;main.insertBefore(section,$("#screen-hub")||null);G.screens.status=section}
     $("#spell-loadout")?.remove();
   }
-  function renderFieldMenu(){const box=$("#field-main-menu-items");if(!box)return;const items=activeFieldMenuItems(),money=$("#field-menu-money"),title=$("#field-main-menu .field-main-menu-title");if(money)money.textContent=`${state.money} G`;if(title)title.textContent=fieldMenuMode==="travel"?"移動":"MENU";box.innerHTML=items.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("")}
+  function renderFieldMenu(){const box=$("#field-main-menu-items");if(!box)return;const items=activeFieldMenuItems(),money=$("#field-menu-money"),title=$("#field-main-menu .field-main-menu-title"),help=$("#field-main-menu .field-main-menu-help");if(money)money.textContent=`${state.money} G`;if(title)title.textContent=fieldMenuMode==="travel"?"イードウ":"MENU";if(help)help.textContent=fieldMenuMode==="travel"?"↑↓ 選択　Z イードウ　Enter 戻る":"↑↓ 選択　Z 決定　Enter 閉じる";box.innerHTML=items.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("")}
   function fieldScreenActive(){return Boolean(G.screens.field?.classList.contains("active"))}
   function dialogIsOpen(){const d=$("#field-dialog");return Boolean(d&&!d.classList.contains("hidden"))}
   function storyOverlayIsOpen(){return Boolean(window.SpellStory?.isOverlayOpen?.())}
@@ -33,7 +31,8 @@
   function closeFieldMenu(){fieldMenuOpen=false;fieldMenuMode="main";fieldMenuIndex=0;$("#field-main-menu")?.classList.add("hidden")}
   function toggleFieldMenu(){fieldMenuOpen?closeFieldMenu():openFieldMenu()}
   function openTravelMenu(){fieldMenuMode="travel";fieldMenuIndex=0;renderFieldMenu()}
-  function warpTo(mapId){closeFieldMenu();window.SpellField?.activateMap?.(mapId,{from:"warp"})}
+  function returnFromTravelMenu(){fieldMenuMode="main";fieldMenuIndex=Math.max(0,fieldMenuItems.findIndex(item=>item.label==="イードウ"));renderFieldMenu()}
+  function warpTo(mapId){closeFieldMenu();window.SpellField?.activateMap?.(mapId,{from:"fast-travel"});requestAnimationFrame(()=>{window.SpellPlaces?.refresh?.();window.SpellBgm?.sync?.()})}
   function moveFieldMenu(delta){const items=activeFieldMenuItems();fieldMenuIndex=(fieldMenuIndex+delta+items.length)%items.length;renderFieldMenu()}
   function activateFieldMenu(index=fieldMenuIndex){activeFieldMenuItems()[index]?.action?.()}
   function statRows(stats,key){const p=state.party[key],rows=[["HP",`${p.hp} / ${stats.hp}`],["MP",`${p.mp} / ${G.maxMpFor(stats,p.level)}`],["攻撃",stats.attack],["防御",stats.defense],["特攻",stats.spAttack],["特防",stats.spDefense],["素早さ",stats.speed]];return rows.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join("")}
@@ -65,8 +64,8 @@
   function isZKey(e){return e.code==="KeyZ"||e.key==="z"||e.key==="Z"}
   function isXKey(e){return e.code==="KeyX"||e.key==="x"||e.key==="X"}
   function isEnterKey(e){return e.key==="Enter"||e.code==="Enter"||e.code==="NumpadEnter"}
-  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isXKey(event)){if(openPluginPrompt()){event.preventDefault();event.stopImmediatePropagation()}return}if(isZKey(event)&&window.SpellDialogTyping?.handleAdvance?.()){event.preventDefault();event.stopImmediatePropagation();return}if(isZKey(event)&&continuePlugin()){event.preventDefault();event.stopImmediatePropagation();return}if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
+  function onFieldMenuKeydown(event){if(storyOverlayIsOpen())return;if(fieldMenuOpen){if(isEnterKey(event)||event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();if(fieldMenuMode==="travel")returnFromTravelMenu();else closeFieldMenu();return}if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}event.preventDefault();event.stopImmediatePropagation();return}if(!fieldScreenActive())return;if(isXKey(event)){if(openPluginPrompt()){event.preventDefault();event.stopImmediatePropagation()}return}if(isZKey(event)&&window.SpellDialogTyping?.handleAdvance?.()){event.preventDefault();event.stopImmediatePropagation();return}if(isZKey(event)&&continuePlugin()){event.preventDefault();event.stopImmediatePropagation();return}if(isEnterKey(event)){event.preventDefault();event.stopImmediatePropagation();if(!dialogIsOpen())openFieldMenu();return}if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();$("#field-action")?.click()}}
   ensureUi();
   $("#field-menu")?.addEventListener("click",toggleFieldMenu);$("#field-main-menu")?.addEventListener("click",event=>{const b=event.target.closest("[data-field-menu-index]");if(!b)return;fieldMenuIndex=Number(b.dataset.fieldMenuIndex)||0;activateFieldMenu(fieldMenuIndex)});$("#status-back")?.addEventListener("click",closeStatus);document.addEventListener("keydown",onFieldMenuKeydown,true);
-  window.SpellMenu={renderStatus,renderLoadout,renderFieldMenu,openStatus,openFieldMenu,closeFieldMenu,toggleFieldMenu,isOpen};
+  window.SpellMenu={renderStatus,renderLoadout,renderFieldMenu,openStatus,openFieldMenu,closeFieldMenu,openTravelMenu,toggleFieldMenu,isOpen};
 })();
