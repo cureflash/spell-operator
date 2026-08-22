@@ -1,14 +1,16 @@
-/* Applied from spell-operator/plugin-editor-layout@2. Plug-in editor only. */
+/* Applied from spell-operator/plugin-editor-layout@3. Plug-in editor only. */
 
 .plugin-right-pane {
   min-width: 0;
   min-height: 0;
-  display: grid !important;
-  grid-template-rows: auto minmax(0, 1fr) !important;
+  display: flex !important;
+  flex-direction: column !important;
   gap: 4px;
+  overflow: hidden;
 }
 
 .plugin-right-tabs {
+  flex: 0 0 auto;
   display: flex;
   align-items: end;
   justify-content: flex-start;
@@ -48,28 +50,14 @@
 }
 
 .plugin-right-content {
-  --plugin-grimoire-height: 34%;
+  --plugin-grimoire-height: 30%;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
-  display: grid;
+  display: flex !important;
+  flex-direction: column !important;
   overflow: hidden;
-}
-
-.plugin-right-pane.grimoire-collapsed .plugin-right-content {
-  grid-template-rows: 0 0 minmax(0, 1fr) !important;
-}
-
-.plugin-right-pane.grimoire-open .plugin-right-content {
-  grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(150px, 1fr) !important;
-}
-
-.plugin-right-pane.grimoire-collapsed .plugin-code-library-pane,
-.plugin-right-pane.grimoire-collapsed #plugin-grimoire-resizer {
-  display: none !important;
-}
-
-.plugin-right-pane.grimoire-open .plugin-code-library-pane {
-  display: grid !important;
+  gap: 0;
 }
 
 .plugin-code-library-pane {
@@ -87,24 +75,59 @@
   min-height: 0;
 }
 
+.plugin-right-pane.grimoire-collapsed .plugin-code-library-pane,
+.plugin-right-pane.grimoire-collapsed #plugin-grimoire-resizer {
+  display: none !important;
+}
+
+.plugin-right-pane.grimoire-open .plugin-code-library-pane {
+  display: grid !important;
+  flex: 0 0 var(--plugin-grimoire-height);
+  max-height: 42%;
+}
+
+.plugin-right-pane.grimoire-open #plugin-grimoire-resizer {
+  display: block !important;
+  flex: 0 0 2px;
+  min-height: 2px;
+}
+
 .plugin-run-pane-permanent {
+  flex: 1 1 0 !important;
+  width: 100%;
   min-width: 0 !important;
   min-height: 0 !important;
+  height: auto !important;
   display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) auto !important;
+  align-content: stretch !important;
   visibility: visible !important;
   opacity: 1 !important;
   overflow: hidden !important;
 }
 
+.plugin-run-pane-permanent .plugin-run-actions {
+  display: grid !important;
+}
+
 .plugin-run-pane-permanent .plugin-execution-output-panel {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  min-width: 0 !important;
   min-height: 0 !important;
   overflow: hidden;
 }
 
 .plugin-run-pane-permanent .plugin-execution-output {
+  width: 100%;
+  min-width: 0 !important;
   min-height: 120px !important;
   height: 100%;
   overflow: auto;
+}
+
+.plugin-run-pane-permanent #back-workshop {
+  flex: 0 0 auto;
 }
 
 @media (min-width: 761px) {
@@ -131,7 +154,7 @@
   }
 
   .plugin-run-pane {
-    gap: 2px !important;
+    gap: 6px !important;
   }
 
   .plugin-execution-output-panel,
@@ -174,8 +197,9 @@
 }
 
 @media (max-width: 760px) {
-  .plugin-right-pane.grimoire-open .plugin-right-content {
-    grid-template-rows: minmax(0, 38%) 2px minmax(140px, 1fr) !important;
+  .plugin-right-pane.grimoire-open .plugin-code-library-pane {
+    flex-basis: 36%;
+    max-height: 40%;
   }
 
   .plugin-grimoire-tab {
