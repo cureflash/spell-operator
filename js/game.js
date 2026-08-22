@@ -2,7 +2,10 @@
   "use strict";
 
   const startButton = document.getElementById("start-button");
-  if (startButton) startButton.disabled = true;
+  if (startButton) {
+    startButton.disabled = true;
+    startButton.textContent = "読み込み中...";
+  }
 
   const styles = [
     "css/dialog-portrait-layout-v3.css?v=6",
@@ -48,7 +51,7 @@
     "js/game03-battle.js?v=6",
     { src: "js/battle-ui-core-patch.js?v=3", optional: true },
     "js/tilemap-runtime.js?v=5",
-    { wait: () => window.SpellTilemapRuntime?.ready },
+    { wait: () => window.SpellTilemapRuntime?.ready, label: "SpellTilemapRuntime.ready" },
     "js/game03-field.js?v=20",
     "js/field-enemy-battle-override.js?v=1",
     "js/la-mer-expanded.js?v=3",
@@ -64,11 +67,63 @@
     "js/plugin-controller.js?v=2",
     "js/house-room-layout.js?v=4",
     "js/field-scene-controller.js?v=1",
-    { applyTilemap: true },
+    { applyTilemap: true, label: "tilemap apply" },
     "js/python-polish.js?v=1",
     "js/npc-facing.js?v=1",
     "js/sophie-sprite.js?v=7"
   ];
+
+  let currentBootStep = "game.js";
+  let diagnosticTimer = null;
+
+  function entryLabel(entry) {
+    if (typeof entry === "string") return entry;
+    return entry?.src || entry?.label || (entry?.wait ? "wait task" : entry?.applyTilemap ? "tilemap apply" : "unknown task");
+  }
+
+  function diagnosticBox() {
+    let box = document.getElementById("boot-diagnostic");
+    if (box) return box;
+    box = document.createElement("pre");
+    box.id = "boot-diagnostic";
+    Object.assign(box.style, {
+      margin: "16px 0 0",
+      padding: "12px",
+      maxWidth: "100%",
+      whiteSpace: "pre-wrap",
+      wordBreak: "break-word",
+      border: "1px solid #ff7b7b",
+      borderRadius: "8px",
+      background: "rgba(60,0,0,.88)",
+      color: "#fff",
+      fontSize: "13px",
+      lineHeight: "1.5",
+      textAlign: "left"
+    });
+    const host = document.querySelector("#screen-title .title-card") || document.body;
+    host.appendChild(box);
+    return box;
+  }
+
+  function showDiagnostic(title, detail) {
+    const box = diagnosticBox();
+    box.textContent = `${title}\n${detail}`;
+    box.hidden = false;
+  }
+
+  function clearDiagnostic() {
+    if (diagnosticTimer) clearTimeout(diagnosticTimer);
+    diagnosticTimer = null;
+    const box = document.getElementById("boot-diagnostic");
+    if (box) box.remove();
+  }
+
+  function scheduleSlowNotice() {
+    if (diagnosticTimer) clearTimeout(diagnosticTimer);
+    diagnosticTimer = setTimeout(() => {
+      showDiagnostic("起動診断: 読み込みが止まっています", `現在の処理: ${currentBootStep}\nこの表示をそのままスクリーンショットしてください。`);
+    }, 5000);
+  }
 
   function loadStyle(href) {
     const style = document.createElement("link");
@@ -88,6 +143,9 @@
   }
 
   async function loadModule(entry) {
+    currentBootStep = entryLabel(entry);
+    scheduleSlowNotice();
+
     if (typeof entry === "string") {
       await loadScript(entry);
       return;
@@ -118,16 +176,46 @@
     const help = [...document.querySelectorAll(".field-help span")];
     if (help[1]) help[1].textContent = "話す・調べる・戻る：Z";
 
-    if (startButton) startButton.disabled = false;
+    clearDiagnostic();
+    if (startButton) {
+      startButton.disabled = false;
+      startButton.textContent = "GAME START";
+    }
     window.SpellRuntimeBoot = {
       ready: true,
+      currentStep: null,
       modules: modules.filter(entry => typeof entry === "string")
     };
   }
 
+  window.SpellRuntimeBoot = {
+    ready: false,
+    get currentStep() { return currentBootStep; }
+  };
+
+  window.addEventListener("error", event => {
+    if (window.SpellRuntimeBoot?.ready) return;
+    const message = event?.error?.stack || event?.message || "Unknown JavaScript error";
+    const source = event?.filename ? `\n${event.filename}:${event.lineno || "?"}:${event.colno || "?"}` : "";
+    showDiagnostic("起動診断: JavaScriptエラー", `${message}${source}\n現在の処理: ${currentBootStep}`);
+  });
+
+  window.addEventListener("unhandledrejection", event => {
+    if (window.SpellRuntimeBoot?.ready) return;
+    const reason = event?.reason;
+    const message = reason?.stack || reason?.message || String(reason || "Unhandled promise rejection");
+    showDiagnostic("起動診断: Promiseエラー", `${message}\n現在の処理: ${currentBootStep}`);
+  });
+
+  scheduleSlowNotice();
   boot().catch(error => {
     console.error("Spell Operator boot failed", error);
-    if (startButton) startButton.disabled = false;
-    document.body.insertAdjacentHTML("beforeend", '<p style="padding:16px;color:#fff">ゲームの読み込みに失敗しました。再読み込みしてください。</p>');
+    if (diagnosticTimer) clearTimeout(diagnosticTimer);
+    diagnosticTimer = null;
+    if (startButton) {
+      startButton.disabled = true;
+      startButton.textContent = "起動失敗";
+    }
+    showDiagnostic("起動診断: 起動に失敗しました", `${error?.stack || error}\n停止箇所: ${currentBootStep}\nこの表示をそのままスクリーンショットしてください。`);
   });
 })();
