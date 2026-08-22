@@ -28,7 +28,7 @@
     <div class="row"><label class="button">ローカル素材を読み込む<input id="tilesetFile" type="file" accept="image/*" hidden></label><span id="tilesetInfo" class="label"></span></div>
     <div class="row" id="layerButtons"><button data-layer="base" class="active">床・壁</button><button data-layer="object">家具</button><button data-layer="upper">上層</button><button data-layer="collision">当たり判定</button></div>
     <div class="row"><button id="undo">↶</button><button id="redo">↷</button><button id="clearLayer" class="danger">レイヤー消去</button></div>
-    <div class="note">パレット上をドラッグすると複数チップを矩形選択できます。例：縦3チップのベッドを3マスまとめて選択 → マップを1クリックで一括配置。</div>
+    <div class="note">大型素材は選択時に橋8×4、建物7×9などを自動でまとめて選択します。必要ならパレット上をドラッグして選択範囲を変えられます。</div>
   </div>
   <div class="palette-wrap"><div class="palette-stage" id="paletteStage"><canvas id="paletteCanvas" width="256" height="32"></canvas><div id="paletteCursor" class="palette-cursor"></div></div></div>
 </section>
@@ -39,9 +39,9 @@
 <aside class="panel right"><div class="col">
   <strong>4. イベント配置</strong><div id="eventHelp" class="note"></div><div id="eventButtons" class="events"></div><button id="cancelEvent">イベント配置を終了</button>
   <div class="sep"></div><strong>5. 保存・プレビュー</strong><button id="applyGame" class="primary">このマップをプレビューへ反映</button><button id="openGame">プレビューゲームを開く</button><button id="saveDraft">編集状態を保存</button><button id="exportJson">JSONを書き出す</button><label class="button">JSONを読み込む<input id="importJson" type="file" accept="application/json" hidden></label><button id="resetMap" class="danger">このマップを初期状態へ戻す</button><button id="removeOverride">プレビュー反映を解除</button>
-  <div class="sep"></div><div class="note">通常ゲームの正式マップは変更しません。パレットを切り替えても既に置いた別素材のチップは保持されるので、Pipoya＋女の子の部屋などを混在できます。</div>
+  <div class="sep"></div><div class="note">通常ゲームの正式マップはエディタのlocalStorageでは変更しません。ラメールシティには今回のAI加工素材を仮配置済みです。</div>
 </div></aside>
 </div></div>
-<script src="tilemap-editor.js?v=8"></script>
+<script src="tilemap-editor.js?v=9"></script>
 </body>
 </html>
