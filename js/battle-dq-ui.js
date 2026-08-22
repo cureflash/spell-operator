@@ -66,13 +66,21 @@
     portrait.style.backgroundImage = src ? `url("${src}")` : "none";
   }
 
-  function playAttackBounce(character) {
+  function playPortraitMotion(character, className) {
     const portrait = document.getElementById(`dq-${character}-portrait`);
     if (!portrait) return false;
-    portrait.classList.remove("is-attacking");
+    portrait.classList.remove("is-attacking", "is-hit");
     void portrait.offsetWidth;
-    portrait.classList.add("is-attacking");
+    portrait.classList.add(className);
     return true;
+  }
+
+  function playAttackBounce(character) {
+    return playPortraitMotion(character, "is-attacking");
+  }
+
+  function playDamageDip(character) {
+    return playPortraitMotion(character, "is-hit");
   }
 
   function deriveStatus(member) {
@@ -148,6 +156,17 @@
     observer.observe(legacySprite, { attributes: true, attributeFilter: ["class"] });
   }
 
+  function bindHitSignal(character, selector) {
+    const legacySprite = document.querySelector(selector);
+    if (!legacySprite) return;
+    const observer = new MutationObserver(() => {
+      if (!document.getElementById("screen-battle")?.classList.contains("active")) return;
+      if (!legacySprite.classList.contains("hit")) return;
+      playDamageDip(character);
+    });
+    observer.observe(legacySprite, { attributes: true, attributeFilter: ["class"] });
+  }
+
   ensurePanel();
   render();
 
@@ -160,6 +179,8 @@
 
   bindAttackSignal("sophie", ".sophie-battle");
   bindAttackSignal("lumiere", ".lumiere-battle");
+  bindHitSignal("sophie", ".sophie-battle");
+  bindHitSignal("lumiere", ".lumiere-battle");
 
   new MutationObserver(() => {
     if (document.getElementById("screen-battle")?.classList.contains("active")) render();
@@ -172,6 +193,7 @@
     registerPortrait,
     registerStatusExpression,
     playAttack: playAttackBounce,
+    playHit: playDamageDip,
     getState(character) {
       return state[character] ? { ...state[character] } : null;
     },
