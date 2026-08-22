@@ -48,7 +48,11 @@
     }
   };
 
-  const registry=new Map(Object.entries(definitions).map(([key,value])=>[key,Object.freeze({...value,classes:Object.freeze([...value.classes])})]));
+  const registry=new Map(Object.entries(definitions).map(([key,value])=>[
+    key,
+    Object.freeze({...value,classes:Object.freeze([...value.classes])})
+  ]));
+
   window.SpellMapSprites={
     get:key=>registry.get(key)||null,
     has:key=>registry.has(key),
@@ -77,17 +81,21 @@
     };
   }
 
-  if(typeof field.startNewGame==="function"){
-    const originalStartNewGame=field.startNewGame.bind(field);
-    field.startNewGame=()=>{
-      const result=originalStartNewGame();
+  /*
+   * The core GAME START listener is registered before this module loads.
+   * Run after that listener and make house2 the final new-game location.
+   * This intentionally does not affect LOAD, which restores the saved map.
+   */
+  const startButton=document.getElementById("start-button");
+  if(startButton){
+    startButton.addEventListener("click",()=>{
       field.activateMap?.("house2",{from:"game-start",silent:true});
       requestAnimationFrame(()=>{
+        window.SpellPartyLockstep?.sync?.();
         window.SpellPlaces?.refresh?.();
         window.SpellBgm?.sync?.();
       });
-      return result;
-    };
+    });
   }
 
   decorateTownFacilitySprites();
