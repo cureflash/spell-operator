@@ -21,6 +21,8 @@
   let hubMenuIndex = 0;
   let hubMenuItems = [];
   let hubWasActive = false;
+  let debugWasActive = false;
+  let grimoireOpen = false;
 
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
@@ -104,14 +106,12 @@
     if (!hubMenuItems.length) return;
     const count = hubMenuItems.length;
     hubMenuIndex = ((index % count) + count) % count;
-
     hubMenuItems.forEach((button, i) => {
       const selected = i === hubMenuIndex;
       button.classList.toggle("is-selected", selected);
       button.setAttribute("aria-selected", selected ? "true" : "false");
       button.tabIndex = selected ? 0 : -1;
     });
-
     const selected = hubMenuItems[hubMenuIndex];
     if (focus) {
       try { selected.focus({ preventScroll: true }); } catch (_) { selected.focus(); }
@@ -146,7 +146,7 @@
     trigger.click();
     trigger.remove();
     queueMicrotask(() => {
-      renderCodeLibrary();
+      setGrimoireOpen(false);
       syncActiveScreen();
     });
   }
@@ -170,8 +170,8 @@
 
     const shell = el("div", "plugin-hub-shell plugin-workspace");
     shell.id = "plugin-hub-shell";
-
     const upper = el("div", "plugin-hub-upper");
+
     const lumierePane = el("section", "panel plugin-lumiere-pane");
     const portrait = new Image();
     portrait.src = "assets/characters/portraits/lumiere/neutral.jpg";
@@ -182,7 +182,6 @@
     lumierePane.append(portrait, lumiereCaption);
 
     const columnResizer = makeResizer("vertical", "ルミエル表示とメニューの幅を変更");
-
     const menuPane = el("section", "panel plugin-menu-pane");
     menuPane.append(el("p", "eyebrow", "PLUGIN MENU"), el("h2", "", "メニュー"));
     const menuList = el("div", "plugin-menu-list");
@@ -207,41 +206,23 @@
     menuList.append(editorButton, tutorialButton, customButton, returnField);
     menuPane.append(menuList);
     hubMenuItems = [editorButton, tutorialButton, customButton, returnField];
-
     upper.append(lumierePane, columnResizer, menuPane);
 
     const rowResizer = makeResizer("horizontal", "上部とルミエルのセリフ欄の高さを変更");
     const dialogue = makeConversationBox("plugin-hub-dialogue", MENU_HINTS.editor);
-
     shell.append(upper, rowResizer, dialogue.box);
     hub.replaceChildren(shell);
 
     editorButton.addEventListener("click", openEditorFromMenu);
     tutorialButton.addEventListener("click", playTutorial);
-
     hubMenuItems.forEach((button, index) => {
       button.addEventListener("focus", () => selectHubMenu(index, { focus: false, announce: true }));
       button.addEventListener("pointerenter", () => selectHubMenu(index, { focus: false, announce: true }));
       button.addEventListener("pointerdown", () => selectHubMenu(index, { focus: false, announce: true }));
     });
 
-    bindResizer(columnResizer, {
-      container: upper,
-      owner: shell,
-      axis: "x",
-      variable: "--plugin-hub-left",
-      min: 0.24,
-      max: 0.52
-    });
-    bindResizer(rowResizer, {
-      container: shell,
-      owner: shell,
-      axis: "y",
-      variable: "--plugin-hub-upper",
-      min: 0.48,
-      max: 0.80
-    });
-
+    bindResizer(columnResizer, { container: upper, owner: shell, axis: "x", variable: "--plugin-hub-left", min: 0.24, max: 0.52 });
+    bindResizer(rowResizer, { container: shell, owner: shell, axis: "y", variable: "--plugin-hub-upper", min: 0.48, max: 0.80 });
     selectHubMenu(0, { focus: false, announce: true });
   }
 
@@ -264,8 +245,8 @@
 
     const shell = el("div", "plugin-editor-shell plugin-workspace");
     shell.id = "plugin-editor-shell";
-
     const upper = el("div", "plugin-editor-upper");
+
     const editorPane = el("section", "panel editor-panel plugin-code-pane");
     const editorHead = el("div", "plugin-editor-head");
     const titleWrap = el("div", "plugin-editor-title");
@@ -275,17 +256,23 @@
     editorHead.append(titleWrap, editorActions);
     editorPane.append(editorHead, hint, editor);
 
-    const columnResizer = makeResizer("vertical", "エディタと魔導書の幅を変更");
+    const columnResizer = makeResizer("vertical", "エディタと実行欄の幅を変更");
+    const rightPane = el("aside", "plugin-right-pane grimoire-collapsed");
+    rightPane.id = "plugin-right-pane";
 
-    const rightPane = el("aside", "plugin-right-pane");
     const grimoirePane = el("section", "panel plugin-code-library-pane");
-    const grimoireHead = el("div", "plugin-panel-head");
-    grimoireHead.append(el("div", "", ""));
-    grimoireHead.firstChild.append(el("p", "eyebrow", "GRIMOIRE"), el("h3", "", "魔導書"));
-    const libraryStatus = el("span", "plugin-library-status", "過去のコード");
-    grimoireHead.append(libraryStatus);
+    const grimoireToggle = el("button", "plugin-panel-head plugin-grimoire-toggle");
+    grimoireToggle.id = "plugin-grimoire-toggle";
+    grimoireToggle.type = "button";
+    grimoireToggle.setAttribute("aria-expanded", "false");
+    const grimoireTitle = el("div");
+    grimoireTitle.append(el("p", "eyebrow", "GRIMOIRE"), el("h3", "", "魔導書"));
+    const libraryStatus = el("span", "plugin-library-status", "▶ 開く");
+    grimoireToggle.append(grimoireTitle, libraryStatus);
 
     const libraryBody = el("div", "plugin-library-body");
+    libraryBody.id = "plugin-library-body";
+    libraryBody.hidden = true;
     const list = el("div", "plugin-code-library-list");
     list.id = "plugin-code-library";
     const preview = el("pre", "plugin-code-preview", "保存されたコードを選んでください。");
@@ -295,9 +282,10 @@
     copy.type = "button";
     copy.disabled = true;
     libraryBody.append(list, preview, copy);
-    grimoirePane.append(grimoireHead, libraryBody);
+    grimoirePane.append(grimoireToggle, libraryBody);
 
     const rightResizer = makeResizer("horizontal", "魔導書と実行欄の高さを変更");
+    rightResizer.id = "plugin-grimoire-resizer";
 
     const runPane = el("section", "panel plugin-run-pane");
     const runHead = el("div", "plugin-panel-head");
@@ -308,7 +296,6 @@
     if (register) runActions.append(register);
     runPane.append(runHead, runActions, metrics, back);
     rightPane.append(grimoirePane, rightResizer, runPane);
-
     upper.append(editorPane, columnResizer, rightPane);
 
     const rowResizer = makeResizer("horizontal", "エディタ領域とルミエルのセリフ欄の高さを変更");
@@ -316,50 +303,47 @@
     dialogue.box.classList.add("plugin-editor-dialogue");
     dialogue.name.id = "plugin-editor-dialogue-name";
     dialogue.next.id = "plugin-editor-dialogue-next";
-
     output.classList.add("plugin-runtime-source");
 
     shell.append(upper, rowResizer, dialogue.box, output);
     debug.replaceChildren(shell);
 
+    grimoireToggle.addEventListener("click", () => setGrimoireOpen(!grimoireOpen));
     copy.addEventListener("click", copySelectedCode);
     new MutationObserver(() => {
       syncRuntimeDialogue();
-      renderCodeLibrary();
+      if (grimoireOpen) renderCodeLibrary();
     }).observe(output, { childList: true, subtree: true, characterData: true });
 
-    bindResizer(columnResizer, {
-      container: upper,
-      owner: shell,
-      axis: "x",
-      variable: "--plugin-editor-left",
-      min: 0.42,
-      max: 0.78
-    });
-    bindResizer(rightResizer, {
-      container: rightPane,
-      owner: rightPane,
-      axis: "y",
-      variable: "--plugin-grimoire-height",
-      min: 0.42,
-      max: 0.74
-    });
-    bindResizer(rowResizer, {
-      container: shell,
-      owner: shell,
-      axis: "y",
-      variable: "--plugin-editor-upper",
-      min: 0.54,
-      max: 0.84
-    });
+    bindResizer(columnResizer, { container: upper, owner: shell, axis: "x", variable: "--plugin-editor-left", min: 0.42, max: 0.78 });
+    bindResizer(rightResizer, { container: rightPane, owner: rightPane, axis: "y", variable: "--plugin-grimoire-height", min: 0.22, max: 0.68 });
+    bindResizer(rowResizer, { container: shell, owner: shell, axis: "y", variable: "--plugin-editor-upper", min: 0.54, max: 0.84 });
 
+    setGrimoireOpen(false);
     renderCodeLibrary();
     syncRuntimeDialogue();
   }
 
+  function setGrimoireOpen(open) {
+    grimoireOpen = Boolean(open);
+    const rightPane = document.getElementById("plugin-right-pane");
+    const body = document.getElementById("plugin-library-body");
+    const toggle = document.getElementById("plugin-grimoire-toggle");
+    const status = toggle?.querySelector(".plugin-library-status");
+    if (rightPane) {
+      rightPane.classList.toggle("grimoire-open", grimoireOpen);
+      rightPane.classList.toggle("grimoire-collapsed", !grimoireOpen);
+    }
+    if (body) body.hidden = !grimoireOpen;
+    if (toggle) toggle.setAttribute("aria-expanded", grimoireOpen ? "true" : "false");
+    if (status) status.textContent = grimoireOpen ? "▼ 閉じる" : "▶ 開く";
+    if (grimoireOpen) renderCodeLibrary();
+    return grimoireOpen;
+  }
+
   function savedCodeEntries() {
     return Object.entries(G.state?.registeredSpells || {})
-      .filter(([, spell]) => typeof spell?.source === "string" && spell.source.trim())
+      .filter(([key, spell]) => G.isSpellLearned?.(key) && typeof spell?.source === "string" && spell.source.trim())
       .map(([key, spell]) => ({
         key,
         name: spell.name || G.spellDefinitions?.[key]?.name || key,
@@ -376,8 +360,8 @@
 
     const entries = savedCodeEntries();
     if (!entries.some(entry => entry.key === selectedLibraryKey)) selectedLibraryKey = entries[0]?.key || null;
-
     list.replaceChildren();
+
     if (!entries.length) {
       list.append(el("p", "plugin-library-empty", "保存されたコードはまだありません。"));
       preview.textContent = "魔法を修得すると、ここから過去のコードを参照できます。";
@@ -389,9 +373,10 @@
       const button = el("button", `plugin-code-entry${entry.key === selectedLibraryKey ? " selected" : ""}`);
       button.type = "button";
       button.dataset.savedCodeKey = entry.key;
-      const name = el("span", "plugin-code-entry-name", entry.name);
-      const meta = el("span", "plugin-code-entry-meta", Number.isFinite(entry.mpCost) ? `MP ${entry.mpCost}` : "保存済み");
-      button.append(name, meta);
+      button.append(
+        el("span", "plugin-code-entry-name", entry.name),
+        el("span", "plugin-code-entry-meta", Number.isFinite(entry.mpCost) ? `MP ${entry.mpCost}` : "保存済み")
+      );
       button.addEventListener("click", () => {
         selectedLibraryKey = entry.key;
         renderCodeLibrary();
@@ -487,27 +472,57 @@
     return Boolean(target?.closest?.("input, textarea, [contenteditable='true']"));
   }
 
-  function handleHubKeydown(event) {
-    if (!hub.classList.contains("active") || editable(event.target)) return;
+  const isZ = event => event.code === "KeyZ" || event.key === "z" || event.key === "Z";
+  const isX = event => event.code === "KeyX" || event.key === "x" || event.key === "X";
 
-    if (event.key === "ArrowUp") {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      selectHubMenu(hubMenuIndex - 1);
+  function handleWorkspaceKeydown(event) {
+    if (editable(event.target)) return;
+
+    if (hub.classList.contains("active")) {
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        selectHubMenu(hubMenuIndex - 1);
+        return;
+      }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        selectHubMenu(hubMenuIndex + 1);
+        return;
+      }
+      if (isX(event)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        document.getElementById("return-field")?.click();
+        return;
+      }
+      if (isZ(event)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        activateHubMenu();
+      }
       return;
     }
-    if (event.key === "ArrowDown") {
+
+    if (!debug.classList.contains("active")) return;
+
+    if (isX(event)) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      selectHubMenu(hubMenuIndex + 1);
+      const key = G.state?.selectedSpellKey;
+      const editor = document.getElementById("code-editor");
+      if (key && editor) G.state.drafts[key] = editor.value;
+      document.getElementById("back-workshop")?.click();
       return;
     }
 
-    const confirm = event.code === "KeyZ" || event.key === "z" || event.key === "Z" || event.key === "Enter";
-    if (!confirm) return;
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    activateHubMenu();
+    if (isZ(event)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const focused = document.activeElement;
+      if (focused instanceof HTMLButtonElement && !focused.disabled) focused.click();
+    }
   }
 
   function syncActiveScreen() {
@@ -521,10 +536,13 @@
       selectHubMenu(hubMenuIndex, { focus: false, announce: true });
       requestAnimationFrame(() => selectHubMenu(hubMenuIndex, { focus: true, announce: false }));
     }
+    if (debugActive && !debugWasActive) setGrimoireOpen(false);
+
     hubWasActive = hubActive;
+    debugWasActive = debugActive;
 
     if (debugActive) {
-      renderCodeLibrary();
+      if (grimoireOpen) renderCodeLibrary();
       syncRuntimeDialogue();
     }
   }
@@ -532,7 +550,7 @@
   buildHub();
   buildEditor();
 
-  document.addEventListener("keydown", handleHubKeydown, true);
+  document.addEventListener("keydown", handleWorkspaceKeydown, true);
   const screenObserver = new MutationObserver(syncActiveScreen);
   screenObserver.observe(hub, { attributes: true, attributeFilter: ["class"] });
   screenObserver.observe(debug, { attributes: true, attributeFilter: ["class"] });
@@ -547,6 +565,8 @@
   window.SpellPluginWorkspace = {
     renderCodeLibrary,
     openEditor: openEditorFromMenu,
+    setGrimoireOpen,
+    isGrimoireOpen: () => grimoireOpen,
     sync: syncActiveScreen
   };
 })();
