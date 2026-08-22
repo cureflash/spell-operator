@@ -2,7 +2,9 @@
   "use strict";
 
   const names = {
-    town: "フルール村"
+    town: "フルール村",
+    kyoto_city: "キョウトシティ",
+    la_mer_city: "ラメールシティ"
   };
 
   const legacyNames = {
@@ -12,7 +14,8 @@
   function applyFieldAreaName() {
     const area = document.querySelector(".field-area");
     if (!area) return;
-    const replacement = legacyNames[area.textContent] || (window.SpellField?.currentMap?.() === "town" ? names.town : null);
+    const mapId = window.SpellField?.currentMap?.();
+    const replacement = legacyNames[area.textContent] || names[mapId] || null;
     if (replacement && area.textContent !== replacement) area.textContent = replacement;
   }
 

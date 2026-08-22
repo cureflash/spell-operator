@@ -22,6 +22,8 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 
 - The canonical name of the first village is `フルール村`.
 - Its existing internal map ID remains `town`; renaming the place does not change save data or map-transition IDs.
+- The Kyoto-inspired future city uses the provisional name `キョウトシティ`; its reserved internal map ID is `kyoto_city`.
+- `ラメールシティ` uses the reserved internal map ID `la_mer_city`.
 - Generic wording such as `町へ` may still be used for direction markers when it is functioning as a category/destination description rather than the proper place name.
 
 ## BGM
@@ -29,11 +31,18 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `フルール村` uses PeriTune's `Village_Fete` as its field BGM.
 - The BGM applies to the current first-village field maps: `town`, `school`, `library`, `house1`, and `house2`.
 - `Village_Fete` loops continuously while the player remains on those field maps.
-- The first-village BGM playback volume is `0.6` on the HTML audio element.
-- Leaving the field screen for another game screen such as battle or plug-in/computer pauses the BGM; returning to the village field resumes it.
+- The BGM playback volume is `0.6` on the shared HTML audio element.
+- Leaving the field screen for another game screen pauses the current field BGM; returning resumes the relevant field track.
 - Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
 - Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
 - `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+- `キョウトシティ` is pre-registered to use PeriTune `Awayuki` when the `kyoto_city` map is implemented. Runtime asset: `assets/audio/bgm/awayuki.mp3`.
+- Normal battles use PeriTune `Ancient Gust`. Runtime asset: `assets/audio/bgm/ancient-gust.mp3`.
+- `ラメールシティ` is pre-registered to use PeriTune `Resort5` when the `la_mer_city` map is implemented. Runtime asset: `assets/audio/bgm/resort5.mp3`.
+- Boss battles use PeriTune `Swift_Strike`. Runtime asset: `assets/audio/bgm/swift-strike.mp3`.
+- The current battle screen defaults to the normal-battle track. Future boss encounters can select the boss track with `SpellBgm.prepareBattle("boss")` before or during the battle transition, or by setting the battle state as a boss battle (`boss`, `isBoss`, or `type: "boss"`).
+- `SpellBgm.prepareBattle("normal")` explicitly selects the normal battle track.
+- The future field-map BGM registry currently reserves `kyoto_city -> Awayuki` and `la_mer_city -> Resort5`.
 
 ## Field dialog text
 

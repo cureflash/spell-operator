@@ -1,37 +1,95 @@
 (() => {
   "use strict";
 
-  const VILLAGE_FETE = {
-    id: "village_fete",
-    src: "https://peritune.com/music/PeriTune_Village_Fete.mp3"
-  };
+  const TRACKS = Object.freeze({
+    village_fete: {
+      id: "village_fete",
+      src: "https://peritune.com/music/PeriTune_Village_Fete.mp3"
+    },
+    awayuki: {
+      id: "awayuki",
+      src: "assets/audio/bgm/awayuki.mp3"
+    },
+    ancient_gust: {
+      id: "ancient_gust",
+      src: "assets/audio/bgm/ancient-gust.mp3"
+    },
+    resort5: {
+      id: "resort5",
+      src: "assets/audio/bgm/resort5.mp3"
+    },
+    swift_strike: {
+      id: "swift_strike",
+      src: "assets/audio/bgm/swift-strike.mp3"
+    }
+  });
+
   const VILLAGE_MAPS = new Set(["town", "school", "library", "house1", "house2"]);
+  const FIELD_TRACKS = Object.freeze({
+    kyoto_city: TRACKS.awayuki,
+    la_mer_city: TRACKS.resort5
+  });
 
   const audio = new Audio();
   audio.preload = "auto";
   audio.loop = true;
   audio.volume = 0.6;
 
+  const positions = new Map();
   let activeTrack = null;
   let userActivated = false;
+  let preparedBattleMode = null;
+  let wasBattleActive = false;
+
+  function battleIsActive() {
+    return Boolean(document.getElementById("screen-battle")?.classList.contains("active"));
+  }
+
+  function detectedBossBattle() {
+    const battle = window.SpellGame03?.state?.battle;
+    return battle?.boss === true || battle?.isBoss === true || battle?.type === "boss";
+  }
 
   function wantedTrack() {
+    if (battleIsActive()) {
+      return preparedBattleMode === "boss" || detectedBossBattle()
+        ? TRACKS.swift_strike
+        : TRACKS.ancient_gust;
+    }
+
     const fieldScreen = document.getElementById("screen-field");
     if (!fieldScreen?.classList.contains("active")) return null;
 
     const mapId = document.getElementById("field-world")?.dataset.map || "town";
-    return VILLAGE_MAPS.has(mapId) ? VILLAGE_FETE : null;
+    if (VILLAGE_MAPS.has(mapId)) return TRACKS.village_fete;
+    return FIELD_TRACKS[mapId] || null;
+  }
+
+  function restorePosition(track) {
+    const saved = positions.get(track.id) || 0;
+    if (saved <= 0) return;
+    const apply = () => {
+      if (Number.isFinite(audio.duration) && saved < audio.duration) audio.currentTime = saved;
+    };
+    if (audio.readyState >= 1) apply();
+    else audio.addEventListener("loadedmetadata", apply, { once: true });
   }
 
   function setTrack(track) {
     if (activeTrack?.id === track.id) return;
+    if (activeTrack && Number.isFinite(audio.currentTime)) positions.set(activeTrack.id, audio.currentTime);
     audio.pause();
+    activeTrack = track;
     audio.src = track.src;
     audio.loop = true;
-    activeTrack = track;
+    restorePosition(track);
   }
 
   function sync() {
+    const battleActive = battleIsActive();
+    if (wasBattleActive && !battleActive) preparedBattleMode = null;
+    wasBattleActive = battleActive;
+
     const track = wantedTrack();
     if (!track) {
       audio.pause();
@@ -50,18 +108,29 @@
     sync();
   }
 
+  function prepareBattle(mode = "normal") {
+    preparedBattleMode = mode === "boss" ? "boss" : "normal";
+    sync();
+  }
+
   document.addEventListener("click", activateAudio);
   document.addEventListener("keydown", activateAudio);
 
   const observer = new MutationObserver(sync);
   const fieldScreen = document.getElementById("screen-field");
+  const battleScreen = document.getElementById("screen-battle");
   const fieldWorld = document.getElementById("field-world");
   if (fieldScreen) observer.observe(fieldScreen, { attributes: true, attributeFilter: ["class"] });
+  if (battleScreen) observer.observe(battleScreen, { attributes: true, attributeFilter: ["class"] });
   if (fieldWorld) observer.observe(fieldWorld, { attributes: true, attributeFilter: ["data-map"] });
 
   window.SpellBgm = {
     sync,
+    prepareBattle,
+    setBattleMode: prepareBattle,
     currentTrack: () => activeTrack?.id || null,
+    tracks: { ...TRACKS },
+    fieldTracks: { ...FIELD_TRACKS },
     element: audio
   };
 
