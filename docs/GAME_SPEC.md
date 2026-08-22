@@ -18,9 +18,15 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - The grimoire screen shown after plug-in is subject to this policy.
 - This rule is being documented now; the grimoire screen implementation is intentionally not changed yet.
 
+## World place names
+
+- The canonical name of the first village is `フルール村`.
+- Its existing internal map ID remains `town`; renaming the place does not change save data or map-transition IDs.
+- Generic wording such as `町へ` may still be used for direction markers when it is functioning as a category/destination description rather than the proper place name.
+
 ## BGM
 
-- The first village uses PeriTune's `Village_Fete` as its field BGM.
+- `フルール村` uses PeriTune's `Village_Fete` as its field BGM.
 - The BGM applies to the current first-village field maps: `town`, `school`, `library`, `house1`, and `house2`.
 - `Village_Fete` loops continuously while the player remains on those field maps.
 - The first-village BGM playback volume is `0.6` on the HTML audio element.
