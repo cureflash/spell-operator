@@ -16,6 +16,7 @@
   const LIBRARY={width:16,height:12};
   const HOUSE1={width:11,height:9};
   const HOUSE2={width:12,height:9};
+  const LA_MER={width:36,height:28};
 
   const town={
     schoolDoor:{x:3,y:3},libraryDoor:{x:13,y:3},homeDoor:{x:2,y:8},shop:{x:11,y:11},enemy:{x:17,y:5},sign:{x:9,y:5},
@@ -27,6 +28,21 @@
   const house2={stairs:{x:10,y:7},pc:{x:9,y:2}};
 
   const dialogStyle=document.createElement("link");dialogStyle.rel="stylesheet";dialogStyle.href="css/dialog-portrait.css?v=2";document.head.appendChild(dialogStyle);
+  const laMerStyle=document.createElement("style");
+  laMerStyle.textContent=`
+    #field-map .field-tile.la-mer-mountain{background-image:linear-gradient(rgba(34,84,45,.32),rgba(26,62,35,.38)),var(--pipo-grass2)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-stone{background-image:linear-gradient(rgba(140,151,156,.28),rgba(95,105,111,.22)),var(--pipo-dirt2)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,0 calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-road{background-image:linear-gradient(rgba(86,89,94,.24),rgba(70,72,77,.28)),var(--pipo-dirt)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,0 calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-pavement{background-image:linear-gradient(rgba(191,185,167,.22),rgba(156,150,136,.18)),var(--pipo-dirt3)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,0 calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-plaza{background-image:linear-gradient(rgba(207,202,187,.25),rgba(171,166,153,.18)),var(--pipo-dirt2)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-sand{background-image:linear-gradient(rgba(244,218,151,.78),rgba(224,191,118,.78)),var(--pipo-dirt3)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,0 calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-harbor,#field-map .field-tile.la-mer-pier{background-image:linear-gradient(rgba(118,132,139,.22),rgba(86,99,106,.24)),var(--pipo-dirt4)!important;background-size:100% 100%,calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;background-position:0 0,calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important}
+    #field-map .field-tile.la-mer-center{background-image:linear-gradient(rgba(66,154,190,.28),rgba(54,111,144,.24)),var(--pipo-wall2)!important}
+    #field-map .field-tile.la-mer-shop{background-image:linear-gradient(rgba(190,128,72,.22),rgba(119,75,45,.18)),var(--pipo-wall2)!important}
+    #field-map .field-tile.la-mer-foreign{background-image:linear-gradient(rgba(220,201,173,.24),rgba(145,111,85,.18)),var(--pipo-wall)!important}
+    #field-map .field-tile.la-mer-dungeon-gate{box-shadow:inset 0 0 0 4px rgba(42,31,34,.72),inset 0 -10px rgba(18,17,19,.55)!important}
+  `;
+  document.head.appendChild(laMerStyle);
   const dialog=$("#field-dialog");
   dialog.innerHTML=`<div class="dialog-speaker"><div id="field-dialog-portrait" class="dialog-portrait" aria-hidden="true"></div><div id="field-dialog-name" class="dialog-name">SYSTEM</div></div><div class="dialog-message"><div id="field-dialog-text"></div><span class="dialog-next">▼</span></div>`;
 
@@ -70,12 +86,73 @@
     return b;
   }
 
+  function laMerTile(x,y){
+    if(y<=3){if((x===20||x===21)&&y===3)return"door la-mer-dungeon-gate";return"tree la-mer-mountain";}
+    if(y<=5){if(x===20||x===21)return"path la-mer-stone";return"tree la-mer-mountain";}
+    if(y>=6&&y<=11){
+      if(x<16||x>25)return"tree la-mer-mountain";
+      if(inRect(x,y,16,6,18,8)){if(y===6)return"roof la-mer-foreign";if(x===17&&y===8)return"door la-mer-foreign";return"building la-mer-foreign";}
+      if(inRect(x,y,23,6,25,8)){if(y===6)return"roof la-mer-foreign";if(x===24&&y===8)return"door la-mer-foreign";return"building la-mer-foreign";}
+      if(inRect(x,y,16,9,18,11)){if(y===9)return"roof la-mer-foreign";if(x===17&&y===11)return"door la-mer-foreign";return"building la-mer-foreign";}
+      if(inRect(x,y,23,9,25,11)){if(y===9)return"roof la-mer-foreign";if(x===24&&y===11)return"door la-mer-foreign";return"building la-mer-foreign";}
+      return"path la-mer-stone";
+    }
+    if(y>=12&&y<=14){
+      if(x<=7)return"tree la-mer-mountain";
+      if(inRect(x,y,8,10,13,14)){
+        const local=x-8,shop=Math.floor(local/3)+1,doorX=9+(shop-1)*3;
+        if(y===12)return"roof la-mer-shop";
+        if(y===14&&x===doorX)return"door la-mer-shop";
+        return"building la-mer-shop";
+      }
+      if(inRect(x,y,20,12,25,14)){
+        if(y===12)return"roof la-mer-center";
+        if(y===14&&(x===22||x===23))return"door la-mer-center";
+        return"building la-mer-center";
+      }
+      if(x>=26)return"grass";
+      return"path la-mer-pavement";
+    }
+    if(y>=15&&y<=17)return"path la-mer-road";
+    if(y>=18&&y<=20){
+      if(x<=4)return"tree la-mer-mountain";
+      if(x<=7)return"grass";
+      if(inRect(x,y,8,11,18,20))return y===18?"roof la-mer-shop":"building la-mer-shop";
+      if(inRect(x,y,15,18,19,20))return y===18?"roof la-mer-shop":"building la-mer-shop";
+      if(x>=20&&x<=25)return"path la-mer-plaza";
+      if(x>=26)return"grass";
+      return"path la-mer-pavement";
+    }
+    if(y===21){if(x>=26)return"water";return"path la-mer-road";}
+    if(y>=22&&y<=23){
+      if(x<=7)return"path la-mer-sand";
+      if(x<=25)return"path la-mer-harbor";
+      return"water";
+    }
+    if(y>=24&&y<=27){
+      if(x<=7)return y<=25?"path la-mer-sand":"water";
+      if(x<=19){if((x===10||x===11||x===16||x===17)&&y<=26)return"path la-mer-pier";return"water";}
+      if(x<=25){if((x===22||x===23)&&y<=26)return"path la-mer-pier";return"water";}
+      return"water";
+    }
+    return"grass";
+  }
+  function laMerBlocked(){
+    const b=new Set();
+    for(let y=0;y<LA_MER.height;y++)for(let x=0;x<LA_MER.width;x++){
+      const tile=laMerTile(x,y);
+      if(tile.includes("la-mer-mountain")||tile.includes("water")||tile.includes("building")||tile.includes("roof")||tile.includes("door"))b.add(key(x,y));
+    }
+    return b;
+  }
+
   function mapSpec(id){
     if(id==="school")return{...SCHOOL,blocked:schoolBlocked(),area:"学校"};
     if(id==="library")return{...LIBRARY,blocked:libraryBlocked(),area:"ピジブルの図書館"};
     if(id==="house1")return{...HOUSE1,blocked:house1Blocked(),area:"ソフィーの家 1F"};
     if(id==="house2")return{...HOUSE2,blocked:house2Blocked(),area:"ソフィーとルミエルの部屋"};
-    return{...TOWN,blocked:townBlocked(),area:"はじまりの町"};
+    if(id==="la_mer_city")return{...LA_MER,blocked:laMerBlocked(),area:"ラメールシティ"};
+    return{...TOWN,blocked:townBlocked(),area:"フルール村"};
   }
 
   function ensureWorld(){const map=$("#field-map");let world=$("#field-world");if(!world){world=document.createElement("div");world.id="field-world";world.className="field-world";map.insertBefore(world,map.firstChild);}const follower=$("#field-follower");if(follower&&follower.parentElement!==world)world.appendChild(follower);return world;}
@@ -90,7 +167,7 @@
   function schoolTile(x,y){if(x===school.exit.x&&y===school.exit.y)return"interior-door";if(y===0||x===0||x===SCHOOL.width-1||y===SCHOOL.height-1)return"interior-wall school-wall";if(y===1&&x>=3&&x<=12)return"school-board";if((y===3||y===6)&&((x>=2&&x<=4)||(x>=6&&x<=8)||(x>=10&&x<=12)))return"school-desk";return"interior-floor school-floor";}
   function libraryTile(x,y){if(x===library.exit.x&&y===library.exit.y)return"interior-door";if(y===0||x===0||x===LIBRARY.width-1||y===LIBRARY.height-1)return"interior-wall library-wall";if((y===2||y===3||y===7||y===8)&&((x>=2&&x<=5)||(x>=10&&x<=13)))return"bookshelf";if(y===5&&x>=6&&x<=9)return"library-table";return"interior-floor library-floor";}
   function houseTile(){return"house-floor";}
-  function tileForMap(id,x,y){if(id==="school")return schoolTile(x,y);if(id==="library")return libraryTile(x,y);if(id==="house1"||id==="house2")return houseTile(x,y);return townTile(x,y);}
+  function tileForMap(id,x,y){if(id==="school")return schoolTile(x,y);if(id==="library")return libraryTile(x,y);if(id==="house1"||id==="house2")return houseTile(x,y);if(id==="la_mer_city")return laMerTile(x,y);return townTile(x,y);}
 
   function buildMap(){
     const world=ensureWorld(),spec=mapSpec(fieldState.mapId);clearWorld(world);
@@ -107,6 +184,16 @@
       addMapLabel(world,"ピジブルの図書館",4.4,.55,7.0,"interior-label");world.appendChild(makeNpc("field-librarian","npc-librarian","ピジブル"));if(G.inventoryCount("unicodeChart")===0)world.appendChild(makeUnicodeItem());addMarker(world,"▼ 町へ",6.2,10.25);
     }else if(fieldState.mapId==="house1"){
       world.appendChild(makeNpc("field-mother","npc-mother","お母さん"));
+    }else if(fieldState.mapId==="la_mer_city"){
+      addMapLabel(world,"六甲山（ダンジョン）",16.5,1.15,9.0,"interior-label");
+      addMapLabel(world,"外国人居留地",18.0,9.55,6.0,"interior-label");
+      addMapLabel(world,"元町商店街",9.0,13.1,9.0,"interior-label");
+      addMapLabel(world,"三宮",20.3,18.6,5.0,"interior-label");
+      addMapLabel(world,"中心施設",20.7,12.55,4.8,"interior-label");
+      addMapLabel(world,"海岸",1.0,22.5,5.0,"interior-label");
+      addMapLabel(world,"港1",10.0,22.2,5.0,"interior-label");
+      addMapLabel(world,"港2",20.5,22.2,5.0,"interior-label");
+      addMapLabel(world,"東道路",29.0,15.25,5.0,"interior-label");
     }
   }
 
@@ -120,7 +207,7 @@
   function closeDialog(){fieldState.dialogOpen=false;dialog.classList.add("hidden");}
   function same(a,b){return Boolean(a&&b&&a.x===b.x&&a.y===b.y);}
   function front(){return model.front(model.player);}
-  function lumiereText(){if(fieldState.mapId==="house2")return"このくらいの広さの方が落ち着くね。パソコンは机のところ。";if(fieldState.mapId==="house1")return"お母さんがいると、ちゃんと帰ってきた感じがするね。";if(!window.SpellStory?.isComplete?.())return"今の目的は画面上部に出てるよ。建物の入口に向かえば別マップへ入れる。";return fieldState.enemyDefeated?"今の戦い、悪くなかった。":G.magicReady()?"Fire と Repair は修得済み。東側で実戦テストしよう。":"家の2階にあるパソコンで魔導書の問題を解こう。";}
+  function lumiereText(){if(fieldState.mapId==="la_mer_city")return"ここがラメールシティ。北は居留地と六甲山、西は元町、南へ行くと港と海岸だよ。";if(fieldState.mapId==="house2")return"このくらいの広さの方が落ち着くね。パソコンは机のところ。";if(fieldState.mapId==="house1")return"お母さんがいると、ちゃんと帰ってきた感じがするね。";if(!window.SpellStory?.isComplete?.())return"今の目的は画面上部に出てるよ。建物の入口に向かえば別マップへ入れる。";return fieldState.enemyDefeated?"今の戦い、悪くなかった。":G.magicReady()?"Fire と Repair は修得済み。東側で実戦テストしよう。":"家の2階にあるパソコンで魔導書の問題を解こう。";}
   function directionToward(from,to){const dx=to.x-from.x,dy=to.y-from.y;if(dx===0&&dy===0)return from.facing||"down";if(Math.abs(dx)>Math.abs(dy))return dx>0?"right":"left";return dy>0?"down":"up";}
   function opposite(direction){return{up:"down",down:"up",left:"right",right:"left"}[direction]||"down";}
   function faceLumiere(){const direction=directionToward(model.player,model.follower);model.player.facing=direction;model.follower.facing=opposite(direction);render();}
@@ -129,7 +216,7 @@
   function normalizeHouseSnapshot(id,snapshot){if(!snapshot)return null;const spec=mapSpec(id),safe={...snapshot};const p=safe.player,f=safe.follower;const valid=o=>o&&Number.isFinite(o.x)&&Number.isFinite(o.y)&&o.x>=0&&o.y>=0&&o.x<spec.width&&o.y<spec.height;return valid(p)&&valid(f)?safe:null;}
   function activateMap(id,{snapshot=null,from=null,silent=false}={}){
     fieldState.mapId=id;const spec=mapSpec(id);model.width=spec.width;model.height=spec.height;model.blocked=new Set(spec.blocked);buildMap();const restored=(id==="house1"||id==="house2")?normalizeHouseSnapshot(id,snapshot):snapshot;
-    if(restored){model.restore(restored);}else if(id==="school"){model.restore({player:{x:7,y:10,facing:"up"},follower:{x:7,y:11,facing:"up"}});}else if(id==="library"){model.restore({player:{x:7,y:10,facing:"up"},follower:{x:7,y:11,facing:"up"}});}else if(id==="house1"&&from==="house2"){model.restore({player:{x:9,y:3,facing:"up"},follower:{x:9,y:4,facing:"up"}});}else if(id==="house1"){model.restore({player:{x:5,y:7,facing:"up"},follower:{x:5,y:8,facing:"up"}});}else if(id==="house2"){model.restore({player:{x:10,y:6,facing:"up"},follower:{x:10,y:7,facing:"up"}});}else if(from==="school"){model.restore({player:{x:3,y:4,facing:"down"},follower:{x:3,y:3,facing:"down"}});}else if(from==="library"){model.restore({player:{x:13,y:4,facing:"down"},follower:{x:13,y:3,facing:"down"}});}else if(from==="house1"){model.restore({player:{x:2,y:9,facing:"down"},follower:{x:2,y:8,facing:"down"}});}else{model.restore({player:{x:4,y:5,facing:"right"},follower:{x:3,y:5,facing:"right"}});}closeDialog();render();requestAnimationFrame(updateCamera);
+    if(restored){model.restore(restored);}else if(id==="la_mer_city"){model.restore({player:{x:23,y:18,facing:"down"},follower:{x:23,y:17,facing:"down"}});}else if(id==="school"){model.restore({player:{x:7,y:10,facing:"up"},follower:{x:7,y:11,facing:"up"}});}else if(id==="library"){model.restore({player:{x:7,y:10,facing:"up"},follower:{x:7,y:11,facing:"up"}});}else if(id==="house1"&&from==="house2"){model.restore({player:{x:9,y:3,facing:"up"},follower:{x:9,y:4,facing:"up"}});}else if(id==="house1"){model.restore({player:{x:5,y:7,facing:"up"},follower:{x:5,y:8,facing:"up"}});}else if(id==="house2"){model.restore({player:{x:10,y:6,facing:"up"},follower:{x:10,y:7,facing:"up"}});}else if(from==="school"){model.restore({player:{x:3,y:4,facing:"down"},follower:{x:3,y:3,facing:"down"}});}else if(from==="library"){model.restore({player:{x:13,y:4,facing:"down"},follower:{x:13,y:3,facing:"down"}});}else if(from==="house1"){model.restore({player:{x:2,y:9,facing:"down"},follower:{x:2,y:8,facing:"down"}});}else{model.restore({player:{x:4,y:5,facing:"right"},follower:{x:3,y:5,facing:"right"}});}closeDialog();render();requestAnimationFrame(updateCamera);
   }
   function transitionIfNeeded(next){if(fieldState.mapId==="town"&&same(next,town.schoolDoor)){activateMap("school",{from:"town"});return true;}if(fieldState.mapId==="town"&&same(next,town.libraryDoor)){activateMap("library",{from:"town"});return true;}if(fieldState.mapId==="town"&&same(next,town.homeDoor)){activateMap("house1",{from:"town"});return true;}if(fieldState.mapId==="school"&&same(next,school.exit)){activateMap("town",{from:"school"});return true;}if(fieldState.mapId==="library"&&same(next,library.exit)){activateMap("town",{from:"library"});return true;}if(fieldState.mapId==="house1"&&same(next,house1.exit)){activateMap("town",{from:"house1"});return true;}if(fieldState.mapId==="house1"&&same(next,house1.stairs)){activateMap("house2",{from:"house1"});return true;}if(fieldState.mapId==="house2"&&same(next,house2.stairs)){activateMap("house1",{from:"house2"});return true;}return false;}
   function takeUnicodeChart(){if(fieldState.mapId!=="library"||G.inventoryCount("unicodeChart")>0)return false;G.addItem("unicodeChart",1);model.blocked.delete(key(library.unicode.x,library.unicode.y));$("#field-unicode-item")?.remove();window.SpellItems?.renderBackpack?.();window.SpellStory?.onUnicodeChartPicked?.();render();showDialog({speaker:"system",text:"『Unicode対応表』を手に入れた！\n0–9 / A–Z / a–z のUnicodeコードポイントが載っている。"});return true;}
