@@ -16,8 +16,12 @@ fetch("python-worker.mjs?v=1", { cache: "no-store" })
     return response.text();
   })
   .then(source => {
-    const body = source.replace(/^import\s+\{\s*loadPyodide\s*\}\s+from\s+["'][^"']+["'];\s*/m, "");
+    let body = source.replace(/^import\s+\{\s*loadPyodide\s*\}\s+from\s+["'][^"']+["'];\s*/m, "");
     if (body === source) throw new Error("Shared Python worker body format changed.");
+    body = body.replace(
+      "const pyodideReady = loadPyodide();",
+      `const pyodideReady = loadPyodide({ indexURL: ${JSON.stringify(PYODIDE_BASE)} });`
+    );
     (0, eval)(body);
   })
   .catch(error => {
