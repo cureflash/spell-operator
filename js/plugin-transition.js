@@ -14,24 +14,28 @@
   image.src = EFFECT_SOURCE;
 
   let overlay = null;
+  let glow = null;
   let canvas = null;
   let context = null;
   let playing = null;
   let armedUntil = 0;
   let soundUrlPromise = null;
+  let soundBufferPromise = null;
   let openComputerWrapped = false;
 
   const sound = new Audio();
   sound.preload = "auto";
+
+  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+  const audioContext = AudioContextCtor ? new AudioContextCtor() : null;
 
   function currentSfxVolume() {
     const value = window.SpellAudioSettings?.snapshot?.().sfx;
     return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.5;
   }
 
-  function ensureSoundUrl() {
-    if (soundUrlPromise) return soundUrlPromise;
-    soundUrlPromise = fetch(SE_SOURCE, { cache: "force-cache" })
+  function fetchSoundBytes() {
+    return fetch(SE_SOURCE, { cache: "force-cache" })
       .then(response => {
         if (!response.ok) throw new Error(`plug-in SE fetch failed: ${response.status}`);
         return response.text();
@@ -40,8 +44,14 @@
         const binary = atob(encoded.trim());
         const bytes = new Uint8Array(binary.length);
         for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
-        return URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" }));
-      })
+        return bytes;
+      });
+  }
+
+  function ensureSoundUrl() {
+    if (soundUrlPromise) return soundUrlPromise;
+    soundUrlPromise = fetchSoundBytes()
+      .then(bytes => URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" })))
       .then(url => {
         sound.src = url;
         sound.load();
@@ -55,6 +65,93 @@
     return soundUrlPromise;
   }
 
+  function decodeAudioData(arrayBuffer) {
+    if (!audioContext) return Promise.resolve(null);
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const done = buffer => {
+        if (settled) return;
+        settled = true;
+        resolve(buffer);
+      };
+      const fail = error => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      };
+      try {
+        const result = audioContext.decodeAudioData(arrayBuffer.slice(0), done, fail);
+        if (result?.then) result.then(done, fail);
+      } catch (error) {
+        fail(error);
+      }
+    });
+  }
+
+  function ensureSoundBuffer() {
+    if (!audioContext) return Promise.resolve(null);
+    if (soundBufferPromise) return soundBufferPromise;
+    soundBufferPromise = fetchSoundBytes()
+      .then(bytes => decodeAudioData(bytes.buffer))
+      .catch(error => {
+        console.warn("Spell plug-in Web Audio preload failed", error);
+        soundBufferPromise = null;
+        return null;
+      });
+    return soundBufferPromise;
+  }
+
+  function resumeAudioFromGesture() {
+    if (!audioContext || audioContext.state !== "suspended") return;
+    try {
+      const resumed = audioContext.resume();
+      if (resumed?.catch) resumed.catch(() => {});
+    } catch (_) {}
+  }
+
+  function playHtmlAudioFallback() {
+    const start = () => {
+      try {
+        sound.pause();
+        sound.currentTime = 0;
+        sound.volume = currentSfxVolume();
+        const promise = sound.play();
+        if (promise?.catch) promise.catch(error => console.warn("Spell plug-in SE playback blocked", error));
+      } catch (error) {
+        console.warn("Spell plug-in SE playback failed", error);
+      }
+    };
+    if (sound.src) start();
+    else ensureSoundUrl().then(url => { if (url) start(); });
+  }
+
+  function playSound() {
+    resumeAudioFromGesture();
+    if (!audioContext) {
+      playHtmlAudioFallback();
+      return;
+    }
+
+    ensureSoundBuffer().then(buffer => {
+      if (!buffer) {
+        playHtmlAudioFallback();
+        return;
+      }
+      try {
+        const source = audioContext.createBufferSource();
+        const gain = audioContext.createGain();
+        source.buffer = buffer;
+        gain.gain.value = currentSfxVolume();
+        source.connect(gain);
+        gain.connect(audioContext.destination);
+        source.start(0);
+      } catch (error) {
+        console.warn("Spell plug-in Web Audio playback failed", error);
+        playHtmlAudioFallback();
+      }
+    });
+  }
+
   function ensureCanvas() {
     if (canvas) return;
 
@@ -66,11 +163,21 @@
       inset: "0",
       width: "100vw",
       height: "100vh",
-      pointerEvents: "none",
+      pointerEvents: "auto",
       zIndex: "2147483000",
       display: "none",
       overflow: "hidden",
-      background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,.88) 0%, rgba(225,235,255,.46) 22%, rgba(176,154,255,.20) 46%, rgba(255,255,255,0) 72%)"
+      background: "#05040b",
+      opacity: "1"
+    });
+
+    glow = document.createElement("div");
+    glow.id = "plugin-kirayuki-glow";
+    Object.assign(glow.style, {
+      position: "absolute",
+      inset: "0",
+      background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,.96) 0%, rgba(225,235,255,.58) 20%, rgba(176,154,255,.24) 46%, rgba(5,4,11,0) 72%)",
+      opacity: "0"
     });
 
     canvas = document.createElement("canvas");
@@ -85,6 +192,15 @@
       filter: "brightness(1.7) contrast(1.12) saturate(1.15)"
     });
 
+    const blockInput = event => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    overlay.addEventListener("pointerdown", blockInput, true);
+    overlay.addEventListener("click", blockInput, true);
+    overlay.addEventListener("touchstart", blockInput, { capture: true, passive: false });
+
+    overlay.appendChild(glow);
     overlay.appendChild(canvas);
     document.body.appendChild(overlay);
     context = canvas.getContext("2d", { alpha: true });
@@ -149,49 +265,35 @@
     );
   }
 
-  function playSound() {
-    const start = () => {
-      try {
-        sound.pause();
-        sound.currentTime = 0;
-        sound.volume = currentSfxVolume();
-        const promise = sound.play();
-        if (promise?.catch) promise.catch(() => {});
-      } catch (_) {}
-    };
-    if (sound.src) {
-      start();
-      return;
-    }
-    ensureSoundUrl().then(url => {
-      if (url) start();
-    });
-  }
-
-  function showOverlayPulse() {
+  function showEffectScreen() {
     overlay.style.display = "block";
-    overlay.getAnimations?.().forEach(animation => animation.cancel());
-    if (typeof overlay.animate === "function") {
-      overlay.animate(
+    glow.getAnimations?.().forEach(animation => animation.cancel());
+    if (typeof glow.animate === "function") {
+      glow.animate(
         [
-          { opacity: 0 },
-          { opacity: 1, offset: 0.16 },
-          { opacity: 0.82, offset: 0.72 },
-          { opacity: 0 }
+          { opacity: 0, transform: "scale(.92)" },
+          { opacity: 1, transform: "scale(1.05)", offset: 0.2 },
+          { opacity: 0.72, transform: "scale(1.12)", offset: 0.72 },
+          { opacity: 0, transform: "scale(1.2)" }
         ],
         { duration: EFFECT_DURATION_MS, easing: "ease-in-out", fill: "forwards" }
       );
     } else {
-      overlay.style.opacity = "1";
+      glow.style.opacity = "1";
     }
+  }
+
+  function pauseFieldBgm() {
+    try { window.SpellBgm?.element?.pause?.(); } catch (_) {}
   }
 
   function play() {
     if (playing) return playing;
     playing = (async () => {
       ensureCanvas();
+      pauseFieldBgm();
       playSound();
-      showOverlayPulse();
+      showEffectScreen();
 
       try {
         await ensureImage();
@@ -201,7 +303,7 @@
           await delay(FRAME_MS);
         }
       } catch (error) {
-        console.warn("Spell plug-in Kirayuki image failed; using visible glow fallback.", error);
+        console.warn("Spell plug-in Kirayuki image failed; using glow-only transition.", error);
         await delay(EFFECT_DURATION_MS);
       }
     })().finally(() => {
@@ -209,11 +311,11 @@
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.clearRect(0, 0, canvas.width, canvas.height);
       }
-      if (overlay) {
-        overlay.getAnimations?.().forEach(animation => animation.cancel());
-        overlay.style.display = "none";
-        overlay.style.opacity = "";
+      if (glow) {
+        glow.getAnimations?.().forEach(animation => animation.cancel());
+        glow.style.opacity = "0";
       }
+      if (overlay) overlay.style.display = "none";
       playing = null;
     });
     return playing;
@@ -233,6 +335,10 @@
     const dialog = document.getElementById("field-dialog");
     if (dialog?.dataset.pluginPrompt !== "1") return;
     if (window.SpellDialogTyping?.isTyping?.()) return;
+
+    // Resume Web Audio directly inside the user's Z-key gesture so Safari/Chrome
+    // permit the sparkle SE to start even though the decoded buffer is loaded async.
+    resumeAudioFromGesture();
     armedUntil = performance.now() + ARM_WINDOW_MS;
   }
 
@@ -251,6 +357,7 @@
   }
 
   window.addEventListener("keydown", onKeydown, true);
+  ensureSoundBuffer();
   ensureSoundUrl();
   if (!installOpenComputerWrapper()) {
     const timer = setInterval(() => {
@@ -261,6 +368,7 @@
 
   window.SpellPluginTransition = {
     play,
+    unlockAudioFromGesture: resumeAudioFromGesture,
     isPlaying: () => Boolean(playing)
   };
 })();
