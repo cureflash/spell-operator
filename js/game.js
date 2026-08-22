@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const addStyle=href=>{const style=document.createElement("link");style.rel="stylesheet";style.href=href;document.head.appendChild(style);};
-  addStyle("css/dialog-portrait-layout-v3.css?v=4");
+  addStyle("css/dialog-portrait-layout-v3.css?v=5");
   addStyle("css/character-portraits.css?v=1");
   addStyle("css/rpg-systems.css?v=2");
   addStyle("css/items.css?v=2");
