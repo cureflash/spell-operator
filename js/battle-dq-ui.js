@@ -66,6 +66,15 @@
     portrait.style.backgroundImage = src ? `url("${src}")` : "none";
   }
 
+  function playAttackBounce(character) {
+    const portrait = document.getElementById(`dq-${character}-portrait`);
+    if (!portrait) return false;
+    portrait.classList.remove("is-attacking");
+    void portrait.offsetWidth;
+    portrait.classList.add("is-attacking");
+    return true;
+  }
+
   function deriveStatus(member) {
     if (!member || member.hp <= 0) return "ko";
     if (member.maxHp > 0 && member.hp / member.maxHp <= 0.25) return "danger";
@@ -126,6 +135,19 @@
     return true;
   }
 
+  function bindAttackSignal(character, selector) {
+    const legacySprite = document.querySelector(selector);
+    const enemySprite = document.getElementById("enemy-sprite");
+    if (!legacySprite || !enemySprite) return;
+    const observer = new MutationObserver(() => {
+      if (!document.getElementById("screen-battle")?.classList.contains("active")) return;
+      if (!legacySprite.classList.contains("cast")) return;
+      if (!enemySprite.classList.contains("hit")) return;
+      playAttackBounce(character);
+    });
+    observer.observe(legacySprite, { attributes: true, attributeFilter: ["class"] });
+  }
+
   ensurePanel();
   render();
 
@@ -135,6 +157,9 @@
   ].map(id => document.getElementById(id)).filter(Boolean);
   const observer = new MutationObserver(render);
   legacyTargets.forEach(el => observer.observe(el, { childList: true, subtree: true, characterData: true }));
+
+  bindAttackSignal("sophie", ".sophie-battle");
+  bindAttackSignal("lumiere", ".lumiere-battle");
 
   new MutationObserver(() => {
     if (document.getElementById("screen-battle")?.classList.contains("active")) render();
@@ -146,6 +171,7 @@
     setExpression,
     registerPortrait,
     registerStatusExpression,
+    playAttack: playAttackBounce,
     getState(character) {
       return state[character] ? { ...state[character] } : null;
     },
