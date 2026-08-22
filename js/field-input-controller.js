@@ -68,6 +68,11 @@
 
   function acceptOrQueue(item, event) {
     if (bypass || !fieldActive()) return;
+    if (blockedByUi()) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
     const now = performance.now();
     if (now >= lockUntil) {
       lockUntil = now + STEP_MS;
