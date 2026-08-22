@@ -157,6 +157,8 @@ SpellDialogTyping.resume();
 - The plug-in line uses the normal discrete field-dialog pacing and no longer overrides the global pace with the old 30 ms setting.
 - After the plug-in line has finished rendering, pressing `Z` closes the dialog and plays the Kirayuki plug-in transition once.
 - The transition uses `kirayuki1` / `キラキラ雪放射` from the supplied `キラ雪.zip`; the runtime asset is `assets/effects/plugin/kirayuki1.webp`.
+- The supplied `可愛く輝く1.mp3` SE starts together with the Kirayuki animation and follows the global SE volume setting.
+- The browser runtime uses a lightweight audio encode stored at `assets/audio/sfx/plugin-sparkle.base64`, decoded to `audio/mpeg` when the transition module loads.
 - The programming computer screen opens only after the Kirayuki animation completes.
 - If `Z` is pressed before the plug-in line finishes rendering, that press only finishes the line; the next `Z` starts the transition.
 - The Kirayuki transition applies only to the normal-field `X` plug-in sequence; other direct computer/menu entry points keep their existing behavior.
