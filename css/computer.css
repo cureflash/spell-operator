@@ -257,6 +257,51 @@ body.plugin-workspace-active{overflow:hidden}
 .plugin-run-pane #back-workshop{width:100%}
 .plugin-editor-dialogue{border-color:rgba(124,224,255,.25)}
 
+/* Plug-in menu selection and field-dialog reuse */
+.plugin-menu-button.is-selected{
+  background:var(--accent)!important;
+  border-color:var(--accent-2)!important;
+  color:#fff!important;
+  box-shadow:0 0 0 2px rgba(198,185,255,.18);
+}
+.plugin-menu-button.is-disabled{opacity:.38}
+.plugin-menu-button.is-disabled.is-selected{opacity:.62}
+.plugin-field-dialog{
+  position:relative!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  align-self:stretch;
+  overflow:hidden!important;
+  z-index:1!important;
+}
+.plugin-field-dialog .dialog-speaker,
+.plugin-field-dialog .dialog-portrait,
+.plugin-field-dialog .dialog-message{
+  min-height:0!important;
+}
+.plugin-field-dialog .dialog-portrait{
+  height:100%!important;
+}
+.plugin-field-dialog .dialog-message{
+  overflow:hidden;
+}
+.plugin-conversation-text{
+  width:100%;
+  min-height:0;
+  max-height:100%;
+  overflow:auto;
+  white-space:pre-line;
+  font-size:14px;
+  line-height:1.75;
+}
+.plugin-runtime-source{display:none!important}
+
 @media(max-width:760px){
   .plugin-hub-shell{--plugin-hub-left:38%;--plugin-hub-upper:66%}
   .plugin-menu-pane{padding:12px}
