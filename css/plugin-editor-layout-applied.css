@@ -48,6 +48,10 @@
     font-size: 14px !important;
   }
 
+  .plugin-editor-dialogue .dialog-next {
+    bottom: 4px !important;
+  }
+
   /* The speaker label is reduced to match the 70px portrait column. */
   .plugin-editor-dialogue .dialog-name {
     left: 77px !important;
