@@ -36,6 +36,9 @@
   font-weight:900!important;
   line-height:1.25!important;
   text-align:left!important;
+  white-space:nowrap!important;
+  word-break:keep-all!important;
+  writing-mode:horizontal-tb!important;
   z-index:3!important;
 }
 .dialog-message{
