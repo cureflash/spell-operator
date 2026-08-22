@@ -3,7 +3,7 @@
 
   const names = {
     town: "フルール村",
-    kyoto_city: "キョウトシティ",
+    kyoto_city: "ビエイユシティ",
     la_mer_city: "ラメールシティ"
   };
 
