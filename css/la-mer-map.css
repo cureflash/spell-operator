@@ -1,34 +1,21 @@
 /* La Mer City road/pavement surfaces.
- * Use the same Pipoya 32x32 map chips as the rest of Spell Operator.
- * AI-generated La Mer art is reserved for large decorative stamps; it must not
- * replace the canonical road/stone/harbor ground tiles.
+ * Roads use the AI-derived 3x3 white-stone ground pattern.
+ * The logical road geometry still comes from la-mer-expanded.js.
  */
-#field-map .field-tile.path.la-mer-road{
-  background-image:var(--pipo-dirt)!important;
-  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
-  background-position:0 calc(var(--tile-size)*-4)!important;
-}
+:root{--la-mer-ai-ground:url("../assets/tiles/la_mer/ground.svg?v=3")}
 
-#field-map .field-tile.path.la-mer-pavement{
-  background-image:var(--pipo-dirt2)!important;
-  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
-  background-position:0 calc(var(--tile-size)*-4)!important;
-}
-
-#field-map .field-tile.path.la-mer-stone{
-  background-image:var(--pipo-dirt3)!important;
-  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
-  background-position:calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important;
-}
-
-#field-map .field-tile.path.la-mer-harbor{
-  background-image:var(--pipo-dirt4)!important;
-  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
-  background-position:0 calc(var(--tile-size)*-4)!important;
-}
-
+#field-map .field-tile.path.la-mer-road,
+#field-map .field-tile.path.la-mer-pavement,
+#field-map .field-tile.path.la-mer-stone,
+#field-map .field-tile.path.la-mer-harbor,
 #field-map .field-tile.path.la-mer-plaza{
-  background-image:var(--pipo-dirt2)!important;
-  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
-  background-position:calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important;
+  background-color:#e7dfcf!important;
+  background-image:var(--la-mer-ai-ground)!important;
+  background-repeat:repeat!important;
+  background-size:calc(var(--tile-size)*3) calc(var(--tile-size)*3)!important;
 }
+#field-map .field-tile.path.la-mer-road{background-position:0 0!important}
+#field-map .field-tile.path.la-mer-pavement{background-position:calc(var(--tile-size)*-1) 0!important}
+#field-map .field-tile.path.la-mer-stone{background-position:0 calc(var(--tile-size)*-1)!important}
+#field-map .field-tile.path.la-mer-harbor{background-position:calc(var(--tile-size)*-1) calc(var(--tile-size)*-1)!important;filter:saturate(.88) brightness(.96)}
+#field-map .field-tile.path.la-mer-plaza{background-position:calc(var(--tile-size)*-2) calc(var(--tile-size)*-1)!important}
