@@ -1,0 +1,30 @@
+name: Fetch Awayuki asset
+
+on:
+  push:
+    branches:
+      - asset/awayuki-fetch
+    paths:
+      - .github/workflows/fetch-awayuki.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Awayuki from PeriTune
+        run: |
+          mkdir -p assets/audio/bgm
+          curl -L --fail --retry 3 --output assets/audio/bgm/awayuki.mp3 \
+            https://peritune.com/music/PerituneMaterial_Awayuki.mp3
+          test -s assets/audio/bgm/awayuki.mp3
+      - name: Commit downloaded asset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/audio/bgm/awayuki.mp3
+          git commit -m "Add Awayuki BGM asset" || exit 0
+          git push
