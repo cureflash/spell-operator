@@ -6,6 +6,7 @@
   const FRAME_COUNT = 10;
   const FRAME_MS = 154;
   const ARM_WINDOW_MS = 500;
+  const IMAGE_LOAD_TIMEOUT_MS = 2500;
 
   const image = new Image();
   image.decoding = "async";
@@ -71,18 +72,32 @@
     context = canvas.getContext("2d", { alpha: true });
   }
 
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async function ensureImage() {
-    if (image.complete && image.naturalWidth) return;
+    if (image.complete) {
+      if (image.naturalWidth) return;
+      throw new Error("plug-in effect image failed to load.");
+    }
     if (image.decode) {
       try {
-        await image.decode();
-        return;
+        await Promise.race([
+          image.decode(),
+          delay(IMAGE_LOAD_TIMEOUT_MS).then(() => { throw new Error("plug-in effect image decode timed out."); })
+        ]);
+        if (image.naturalWidth) return;
       } catch (_) {}
     }
-    await new Promise((resolve, reject) => {
-      image.addEventListener("load", resolve, { once: true });
-      image.addEventListener("error", reject, { once: true });
-    });
+    await Promise.race([
+      new Promise((resolve, reject) => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", () => reject(new Error("plug-in effect image failed to load.")), { once: true });
+      }),
+      delay(IMAGE_LOAD_TIMEOUT_MS).then(() => { throw new Error("plug-in effect image load timed out."); })
+    ]);
+    if (!image.naturalWidth) throw new Error("plug-in effect image is unavailable.");
   }
 
   function resize() {
@@ -113,10 +128,6 @@
       drawWidth,
       drawHeight
     );
-  }
-
-  function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   function playSound() {
@@ -187,7 +198,7 @@
       if (performance.now() > armedUntil) return originalOpenComputer.apply(this, args);
       armedUntil = 0;
       return play()
-        .catch(error => console.warn("Spell plug-in transition failed", error))
+        .catch(error => console.warn("Spell plug-in transition failed; opening editor without effect.", error))
         .then(() => originalOpenComputer.apply(this, args));
     };
     openComputerWrapped = true;
