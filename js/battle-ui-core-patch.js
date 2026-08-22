@@ -20,16 +20,23 @@
     #screen-battle .battle-log {
       display: block !important;
       min-height: 132px;
-      padding: 16px 18px;
+      padding: 16px 18px !important;
       overflow: hidden;
       background: #0b0b0f !important;
       color: #fff !important;
+      opacity: 1 !important;
+      visibility: visible !important;
       border-right: 4px solid #f4f4f4 !important;
-      white-space: pre-line;
+      white-space: pre-line !important;
       font-family: ui-monospace, "Noto Sans JP", monospace;
-      font-size: 15px;
-      line-height: 1.7;
-      text-shadow: 1px 1px 0 #000;
+      font-size: 15px !important;
+      line-height: 1.7 !important;
+      text-shadow: 1px 1px 0 #000 !important;
+    }
+    #screen-battle .battle-log::before,
+    #screen-battle .battle-log::after {
+      content: none !important;
+      display: none !important;
     }
     #screen-battle .battle-menu-wrap {
       display: block !important;
@@ -40,9 +47,7 @@
       background: #0b0b0f !important;
       color: #fff !important;
     }
-    #screen-battle .battle-menu-wrap .command-grid.hidden {
-      display: none !important;
-    }
+    #screen-battle .battle-menu-wrap .command-grid.hidden { display: none !important; }
     #screen-battle .battle-menu-wrap .command-grid:not(.hidden) {
       display: grid !important;
       grid-template-columns: 1fr !important;
@@ -69,9 +74,7 @@
       box-shadow: none !important;
       outline: 0 !important;
     }
-    #screen-battle .battle-menu-wrap button.command::before {
-      content: none !important;
-    }
+    #screen-battle .battle-menu-wrap button.command::before { content: none !important; }
     #screen-battle .battle-menu-wrap button.command:hover,
     #screen-battle .battle-menu-wrap button.command:focus,
     #screen-battle .battle-menu-wrap button.command.is-selected {
@@ -85,18 +88,13 @@
       color: #fff;
       text-align: center;
     }
-    #screen-battle .battle-menu-wrap button.command .battle-command-label {
-      min-width: 0;
-    }
     #screen-battle .battle-menu-wrap button.command > [id$="-cost"] {
       margin-left: auto;
       font-size: 12px;
       opacity: .9;
     }
     @media (max-width: 760px) {
-      #screen-battle .battle-command-box {
-        grid-template-columns: 1fr !important;
-      }
+      #screen-battle .battle-command-box { grid-template-columns: 1fr !important; }
       #screen-battle .battle-log {
         border-right: 0 !important;
         border-bottom: 4px solid #f4f4f4 !important;
@@ -105,52 +103,80 @@
   `;
   document.head.appendChild(style);
 
-  const logHistory = [];
-  const MAX_LOG_LINES = 4;
-  let renderedLog = "";
+  const history = [];
+  const MAX_LINES = 4;
+  let rendered = "";
+  let internalWrite = false;
 
-  function normalizeLine(line) {
+  function normalize(line) {
     return String(line || "").trim()
       .replace(/^ソフィーはどうする？$/, "ソフィーは どうする？")
       .replace(/^ルミエルはどうする？$/, "ルミエルは どうする？");
   }
 
-  function keepLine(line) {
+  function keep(line) {
     if (!line) return false;
     if (/^(ソフィー|ルミエル)：(?:たたかう|ぼうぎょ)$/.test(line)) return false;
     if (/^ソフィーの行動を決めた。$/.test(line)) return false;
     return true;
   }
 
-  function renderLog() {
-    renderedLog = logHistory.slice(-MAX_LOG_LINES).join("\n");
-    if (battleLog.textContent !== renderedLog) battleLog.textContent = renderedLog;
-  }
-
-  function consumeLog() {
-    const raw = battleLog.textContent || "";
-    if (raw === renderedLog) return;
-    const lines = raw.split(/\r?\n/).map(normalizeLine).filter(keepLine);
-    if (!lines.length) return;
-    if (lines.some(line => line.includes("が あらわれた！"))) logHistory.length = 0;
-    logHistory.push(...lines);
-    if (logHistory.length > MAX_LOG_LINES) {
-      logHistory.splice(0, logHistory.length - MAX_LOG_LINES);
-    }
-    renderLog();
-  }
-
-  new MutationObserver(consumeLog).observe(battleLog, {
-    childList: true,
-    subtree: true,
-    characterData: true
-  });
-  consumeLog();
-
   function visibleGrid() {
     return [...menuWrap.querySelectorAll(".command-grid")]
       .find(grid => !grid.classList.contains("hidden")) || null;
   }
+
+  function promptForVisibleMenu() {
+    const grid = visibleGrid();
+    if (!grid) return "";
+    if (grid.id === "sophie-menu") return "ソフィーは どうする？";
+    if (grid.id === "lumiere-menu") return "ルミエルは どうする？";
+    if (grid.id === "magic-menu") return "どの まほうを つかう？";
+    if (grid.id === "heal-target-menu") return "だれに つかう？";
+    return "";
+  }
+
+  function renderLog() {
+    let lines = history.slice(-MAX_LINES);
+    const prompt = promptForVisibleMenu();
+    if (prompt && lines[lines.length - 1] !== prompt && !window.SpellGame03?.state?.busy) {
+      lines = [...lines.slice(-(MAX_LINES - 1)), prompt];
+    }
+    if (!lines.length && battleScreen.classList.contains("active")) {
+      lines = [prompt || "戦闘開始！"];
+    }
+    rendered = lines.join("\n");
+    internalWrite = true;
+    battleLog.textContent = rendered;
+    battleLog.style.setProperty("color", "#fff", "important");
+    battleLog.style.setProperty("visibility", "visible", "important");
+    battleLog.style.setProperty("opacity", "1", "important");
+    internalWrite = false;
+  }
+
+  function consumeExternalLog() {
+    if (internalWrite) return;
+    const raw = String(battleLog.textContent || "");
+    if (!raw || raw === rendered) {
+      renderLog();
+      return;
+    }
+    const lines = raw.split(/\r?\n/).map(normalize).filter(keep);
+    if (lines.some(line => line.includes("が あらわれた！"))) history.length = 0;
+    for (const line of lines) {
+      if (!line) continue;
+      if (history[history.length - 1] === line) continue;
+      history.push(line);
+    }
+    if (history.length > MAX_LINES) history.splice(0, history.length - MAX_LINES);
+    renderLog();
+  }
+
+  new MutationObserver(consumeExternalLog).observe(battleLog, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
 
   function visibleCommands() {
     const grid = visibleGrid();
@@ -188,16 +214,10 @@
 
   function syncSelection() {
     const commands = visibleCommands();
-    if (!commands.length) {
-      menuWrap.querySelectorAll("button.command").forEach(button => {
-        button.classList.remove("is-selected");
-        ensureCursor(button).textContent = "";
-        button.removeAttribute("aria-current");
-      });
-      return;
-    }
+    if (!commands.length) return;
     const current = commands.find(button => button.classList.contains("is-selected"));
     select(current || commands[0]);
+    renderLog();
   }
 
   function moveSelection(delta) {
@@ -205,8 +225,7 @@
     if (!commands.length) return false;
     const current = commands.find(button => button.classList.contains("is-selected")) || commands[0];
     const index = commands.indexOf(current);
-    const next = commands[(index + delta + commands.length) % commands.length];
-    return select(next, true);
+    return select(commands[(index + delta + commands.length) % commands.length], true);
   }
 
   menuWrap.addEventListener("pointerover", event => {
@@ -241,7 +260,10 @@
     }
   }, true);
 
-  new MutationObserver(syncSelection).observe(menuWrap, {
+  new MutationObserver(() => {
+    syncSelection();
+    queueMicrotask(consumeExternalLog);
+  }).observe(menuWrap, {
     childList: true,
     subtree: true,
     attributes: true,
@@ -249,18 +271,27 @@
   });
 
   new MutationObserver(() => {
-    if (battleScreen.classList.contains("active")) syncSelection();
+    if (battleScreen.classList.contains("active")) {
+      queueMicrotask(() => {
+        consumeExternalLog();
+        syncSelection();
+        renderLog();
+      });
+    }
   }).observe(battleScreen, {
     attributes: true,
     attributeFilter: ["class"]
   });
 
   menuWrap.querySelectorAll("button.command").forEach(ensureCursor);
+  consumeExternalLog();
   syncSelection();
 
   window.SpellBattleUiCore = {
-    version: "2026-08-22-dq-command-v1",
+    version: "2026-08-22-dq-command-v2",
     syncSelection,
-    moveSelection
+    moveSelection,
+    renderLog,
+    history
   };
 })();
