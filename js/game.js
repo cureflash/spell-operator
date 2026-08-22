@@ -34,7 +34,7 @@
     .then(()=>load("js/game03-field.js?v=20"))
     .then(()=>load("js/la-mer-expanded.js?v=2"))
     .then(()=>load("js/place-names.js?v=2"))
-    .then(()=>load("js/game-bgm.js?v=5"))
+    .then(()=>load("js/game-bgm.js?v=6"))
     .then(()=>load("js/character-portraits.js?v=3"))
     .then(()=>load("js/dialog-typewriter.js?v=4"))
     .then(()=>load("js/dialog-sfx.js?v=3"))
