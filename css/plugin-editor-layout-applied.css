@@ -1,68 +1,110 @@
-/* Applied from spell-operator/plugin-editor-layout@1. Plug-in editor only. */
+/* Applied from spell-operator/plugin-editor-layout@2. Plug-in editor only. */
 
-.plugin-grimoire-toggle {
-  width: 100%;
-  min-height: 42px;
-  padding: 4px 2px;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
+.plugin-right-pane {
+  min-width: 0;
+  min-height: 0;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 4px;
+}
+
+.plugin-right-tabs {
+  display: flex;
+  align-items: end;
+  justify-content: flex-start;
+  min-height: 34px;
+  padding: 0 4px;
+}
+
+.plugin-grimoire-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 112px;
+  min-height: 32px;
+  padding: 6px 12px;
+  margin: 0;
+  border: 1px solid #3d4862;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: #171c29;
+  color: var(--text);
+  font-weight: 800;
   cursor: pointer;
 }
 
-.plugin-grimoire-toggle:hover,
-.plugin-grimoire-toggle:focus-visible {
+.plugin-grimoire-tab:hover,
+.plugin-grimoire-tab:focus-visible,
+.plugin-right-pane.grimoire-open .plugin-grimoire-tab {
+  border-color: var(--pc-cyan, #7ce0ff);
+  background: #1c2b38;
   color: var(--pc-cyan, #7ce0ff);
   outline: 0;
 }
 
-.plugin-grimoire-toggle .plugin-library-status {
+.plugin-grimoire-tab .plugin-library-status {
   white-space: nowrap;
 }
 
-/* Only the grimoire body is collapsible. Execution controls/output stay visible. */
-.plugin-right-pane {
+.plugin-right-content {
+  --plugin-grimoire-height: 34%;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
   overflow: hidden;
 }
 
-.plugin-right-pane .plugin-run-pane,
-.plugin-right-pane .plugin-execution-output-panel,
-.plugin-right-pane .plugin-execution-output {
-  visibility: visible !important;
-  opacity: 1 !important;
+.plugin-right-pane.grimoire-collapsed .plugin-right-content {
+  grid-template-rows: 0 0 minmax(0, 1fr) !important;
 }
 
-.plugin-right-pane .plugin-run-pane {
-  display: grid !important;
-  min-height: 0;
+.plugin-right-pane.grimoire-open .plugin-right-content {
+  grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(150px, 1fr) !important;
 }
 
-.plugin-right-pane .plugin-execution-output-panel {
-  display: grid !important;
-  min-height: 120px !important;
-}
-
-.plugin-right-pane.grimoire-collapsed {
-  grid-template-rows: auto 0 minmax(180px, 1fr) !important;
-}
-
-.plugin-right-pane.grimoire-collapsed .plugin-code-library-pane {
-  padding-top: 7px;
-  padding-bottom: 7px;
-}
-
-.plugin-right-pane.grimoire-collapsed .plugin-library-body,
+.plugin-right-pane.grimoire-collapsed .plugin-code-library-pane,
 .plugin-right-pane.grimoire-collapsed #plugin-grimoire-resizer {
   display: none !important;
 }
 
-.plugin-right-pane.grimoire-open .plugin-library-body {
-  display: grid;
+.plugin-right-pane.grimoire-open .plugin-code-library-pane {
+  display: grid !important;
 }
 
-.plugin-right-pane.grimoire-open .plugin-run-pane {
-  min-height: 180px;
+.plugin-code-library-pane {
+  min-width: 0;
+  min-height: 0;
+  padding: 10px;
+  overflow: hidden;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.plugin-code-library-pane .plugin-library-body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  min-height: 0;
+}
+
+.plugin-run-pane-permanent {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: hidden !important;
+}
+
+.plugin-run-pane-permanent .plugin-execution-output-panel {
+  min-height: 0 !important;
+  overflow: hidden;
+}
+
+.plugin-run-pane-permanent .plugin-execution-output {
+  min-height: 120px !important;
+  height: 100%;
+  overflow: auto;
 }
 
 @media (min-width: 761px) {
@@ -74,18 +116,6 @@
 
   .plugin-editor-upper {
     grid-template-columns: minmax(0, var(--plugin-editor-left)) 2px minmax(0, 1fr) !important;
-  }
-
-  .plugin-right-pane {
-    --plugin-grimoire-height: 30%;
-  }
-
-  .plugin-right-pane.grimoire-open {
-    grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(180px, 1fr) !important;
-  }
-
-  .plugin-right-pane.grimoire-collapsed {
-    grid-template-rows: auto 0 minmax(180px, 1fr) !important;
   }
 
   .plugin-resizer::before {
@@ -129,7 +159,6 @@
     bottom: 6px !important;
   }
 
-  /* The speaker label is reduced to match the 70px portrait column. */
   .plugin-editor-dialogue .dialog-name {
     left: 77px !important;
     top: 4px !important;
@@ -145,15 +174,13 @@
 }
 
 @media (max-width: 760px) {
-  .plugin-right-pane.grimoire-open {
-    grid-template-rows: minmax(0, 36%) 2px minmax(160px, 1fr) !important;
+  .plugin-right-pane.grimoire-open .plugin-right-content {
+    grid-template-rows: minmax(0, 38%) 2px minmax(140px, 1fr) !important;
   }
 
-  .plugin-right-pane.grimoire-collapsed {
-    grid-template-rows: auto 0 minmax(160px, 1fr) !important;
-  }
-
-  .plugin-right-pane.grimoire-open .plugin-run-pane {
-    min-height: 160px;
+  .plugin-grimoire-tab {
+    min-width: 96px;
+    min-height: 30px;
+    padding: 5px 9px;
   }
 }
