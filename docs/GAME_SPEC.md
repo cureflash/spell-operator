@@ -26,6 +26,17 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `ラメールシティ` uses the reserved internal map ID `la_mer_city`.
 - Generic wording such as `町へ` may still be used for direction markers when it is functioning as a category/destination description rather than the proper place name.
 
+## Fast travel / イードウ
+
+- The field menu contains the command `イードウ`.
+- Choosing `イードウ` opens a destination list instead of moving immediately.
+- The destination list uses the same field-menu navigation model: `↑/↓` changes the selection, `Z` confirms the destination, and `Enter` / `Escape` returns to the main field menu.
+- Fast travel changes the active field map directly; it is the Spell Operator equivalent of Pokémon's Fly / Dragon Quest's Zoom-style world travel.
+- The destination registry is owned by `SpellTravel`, so more destinations can be added without redesigning the menu.
+- At the current implementation stage, the only listed destination is `ラメールシティ` (`la_mer_city`).
+- Selecting `ラメールシティ` activates the `la_mer_city` field map ID and updates the field area name and field BGM.
+- The dedicated La Mer City map layout is not implemented yet. Until that map is built, `la_mer_city` is a temporary field stub using the existing field renderer; the map ID is already final so the later city map can replace the stub without changing the fast-travel menu or save-data identity.
+
 ## BGM
 
 - `フルール村` uses PeriTune's `Village_Fete` as its field BGM.
