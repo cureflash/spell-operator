@@ -31,11 +31,16 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - The field menu contains the command `イードウ`.
 - `イードウ` is the game-wide fast-travel command, analogous to Pokémon's Fly or Dragon Quest's Zoom.
 - Choosing `イードウ` replaces the main menu list with a destination list.
-- The destination list uses `↑/↓` for selection and `Z` to warp. `Enter` or `Escape` returns to the main field menu without moving.
-- At the current implementation stage, the destination list contains `フルール村` and `ラメールシティ`.
-- Selecting `フルール村` activates map ID `town` directly.
-- Selecting `ラメールシティ` activates map ID `la_mer_city` directly.
-- `la_mer_city` is the stable map ID used by the travel command and save data. The dedicated La Mer City field map may be implemented or replaced independently without changing the `イードウ` command contract.
+- The current destination list contains `フルール村` and `ラメールシティ`.
+- `フルール村` maps to internal map ID `town`; `ラメールシティ` maps to `la_mer_city`.
+- Choosing a destination does not warp immediately. Lumiere first asks `○○に移動するの？` using the normal field dialogue UI.
+- A `はい / いいえ` confirmation menu is shown while Lumiere asks.
+- If the confirmation line is still typing, the first `Z` only finishes the line; a subsequent `Z` confirms the selected answer.
+- Choosing `いいえ` cancels the move and returns to the destination list.
+- Choosing `はい` makes Lumiere say exactly `イードウ！`.
+- After `イードウ！` finishes rendering, the screen fades completely to black, the destination map is activated while blacked out, then the screen fades back in.
+- Player movement and menu input are locked during the casting/fade transition.
+- `Enter` or `Escape` backs out of the confirmation or destination list without moving.
 - Additional destinations can be appended to the travel destination list later.
 
 ## Audio volume settings
