@@ -35,10 +35,9 @@ Game-space interpretation:
 
 ## Temporary access
 
-Until the external city entrance is implemented, the field menu has a temporary `移動` command.
+Until the external city entrance is implemented, the field menu's temporary `イードウ` command can warp directly to ラメールシティ.
 
-- `移動 → フルール村` warps to map ID `town`.
-- `移動 → ラメールシティ` warps to map ID `la_mer_city`.
+- `イードウ → ラメールシティ` warps to map ID `la_mer_city`.
 - This is a temporary development/access route; it does not establish a world-travel lore mechanic.
 
 ## Current interaction scope
