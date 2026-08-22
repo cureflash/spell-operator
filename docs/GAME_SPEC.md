@@ -145,6 +145,10 @@ SpellDialogTyping.resume();
 - Current neutral portraits are:
   - `assets/characters/portraits/sophie/neutral.jpg`
   - `assets/characters/portraits/lumiere/neutral.jpg`
+- Battle portraits use expression ID `battle`:
+  - `assets/characters/portraits/sophie/battle.jpg`
+  - `assets/characters/portraits/lumiere/battle.jpg`
+- The normal battle UI uses the `battle` expression for Sophie and Lumiere. Dedicated danger/KO/fainted portraits are not specified yet and continue to use `neutral`.
 - `SpellField.showDialog()` accepts an optional `expression` property. Existing dialogue that omits it uses `neutral`.
 - Additional expressions can be registered without changing the dialogue layout through `SpellPortraits.register(character, expression, src)`.
 - `SpellPortraits.prepare(expression)` can prepare an expression for the next field-dialog portrait update when existing internal field code invokes its local dialog function directly.
