@@ -15,7 +15,7 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - Field dialog text uses discrete game-style message pacing rather than smooth-looking rapid text growth.
 - The default pace is one grapheme/visible character every `55 ms` (`stepChars: 1`). Each update is a discrete step: the text remains unchanged between ticks, then the next character appears at once.
 - Default punctuation adds extra waiting after the punctuation appears:
-  - `、` / `,`: +90 ms.
+  - `、` / `,`: +180 ms, so the next character appears about 235 ms later with the default 55 ms base interval.
   - `。` / `.`: +180 ms.
   - `！` / `!` and `？` / `?`: +160 ms.
   - `…`: +110 ms.

@@ -6,9 +6,9 @@
   if(!dialog||!textEl)return;
 
   const DEFAULT_PUNCTUATION_PAUSES={
-    "、":90,
-    "，":90,
-    ",":90,
+    "、":180,
+    "，":180,
+    ",":180,
     "。":180,
     "．":180,
     ".":180,
