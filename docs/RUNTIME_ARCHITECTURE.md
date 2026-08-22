@@ -122,6 +122,21 @@ SpellPluginHints.status()
 SpellAnswerJudge.generateInputs("fire", 10)
 ```
 
+## Python runtime diagnostic
+
+`tools/python-runtime-test.html` is an isolated developer diagnostic for browser Python execution. It deliberately does not use the game runtime, `SpellPython`, the plug-in UI, answer judging, or Lumiere presentation code.
+
+It tests this path only:
+
+1. create a same-origin module Web Worker
+2. dynamically import Pyodide 0.28.3 from jsDelivr inside that worker
+3. initialize Pyodide
+4. install a minimal stdin/stdout capture helper
+5. run `print("str")`
+6. run `input()` with a supplied stdin value
+
+The page outputs machine-readable JSON with format `spell-operator/python-runtime-diagnostic@1`. When browser Python fails, use the first failed phase/stage from this diagnostic before changing the game runner again. Do not add another compatibility layer to the game runtime until this isolated path has been confirmed or disproved on the target browser.
+
 ## Field input and scene ownership
 
 `js/field-input-controller.js` owns movement-rate locking and the one-input movement buffer.
