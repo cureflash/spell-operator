@@ -22,7 +22,7 @@
       inset: "0",
       width: "100vw",
       height: "100vh",
-      pointerEvents: "none",
+      pointerEvents: "auto",
       zIndex: "10000",
       display: "none"
     });
@@ -102,6 +102,44 @@
     });
     return playing;
   }
+
+  function isZKey(event) {
+    return event.code === "KeyZ" || event.key === "z" || event.key === "Z";
+  }
+
+  function pluginDialog() {
+    const dialog = document.getElementById("field-dialog");
+    if (!dialog || dialog.classList.contains("hidden")) return null;
+    return dialog.dataset.pluginPrompt === "1" ? dialog : null;
+  }
+
+  async function finishPlugin(dialog) {
+    delete dialog.dataset.pluginPrompt;
+    document.getElementById("field-action")?.click();
+    try {
+      await play();
+    } catch (error) {
+      console.error("Plugin transition failed", error);
+    }
+    window.SpellGame03?.openComputer?.();
+  }
+
+  function onKeydown(event) {
+    if (playing) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+    if (!isZKey(event)) return;
+    const dialog = pluginDialog();
+    if (!dialog) return;
+    if (window.SpellDialogTyping?.isTyping?.()) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    finishPlugin(dialog);
+  }
+
+  document.addEventListener("keydown", onKeydown, true);
 
   window.SpellPluginTransition = {
     play,
