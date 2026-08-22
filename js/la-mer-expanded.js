@@ -35,6 +35,7 @@
 
   function settlementTile(x,y){
     if(y===0&&x>=17&&x<=19)return stone();
+    if((y===1||y===2)&&x>=17&&x<=19)return stone();
     if(y===25&&x>=17&&x<=24)return stone();
     if(y===1||y===2)return mountain();
     if(inRect(x,y,3,3,8,7))return y===3?roof("la-mer-foreign"):building("la-mer-foreign");
@@ -44,7 +45,7 @@
     if(inRect(x,y,24,10,30,16))return y===10?roof("la-mer-foreign"):building("la-mer-foreign");
     if(inRect(x,y,6,19,12,22))return y===19?roof("la-mer-foreign"):building("la-mer-foreign");
     if((y===8||y===9||y===17||y===18)&&x>=2&&x<=33)return stone();
-    if(((y>=4&&y<=7)||(y>=10&&y<=22))&&x>=17&&x<=19)return stone();
+    if(((y>=3&&y<=7)||(y>=10&&y<=22))&&x>=17&&x<=19)return stone();
     return grass();
   }
 
@@ -219,12 +220,13 @@
 
   const originalRestore=FieldModel.FollowFieldModel.prototype.restore;
   FieldModel.FollowFieldModel.prototype.restore=function(snapshot){
-    if(!expandingLaMer)return originalRestore.call(this,snapshot);
+    const worldIsLaMer=document.getElementById("field-world")?.dataset.map==="la_mer_city";
+    if(!expandingLaMer&&!worldIsLaMer)return originalRestore.call(this,snapshot);
     this.width=WIDTH;
     this.height=HEIGHT;
     this.blocked=new Set(blocked);
     const p=snapshot?.player;
-    const looksExpanded=p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&(p.x>=ZONE_W||p.y>=ZONE_H+2);
+    const looksExpanded=p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&(p.x>=ZONE_W||p.y>=ZONE_H);
     return originalRestore.call(this,looksExpanded?snapshot:spawn);
   };
 
@@ -241,6 +243,13 @@
       expandingLaMer=false;
     }
   };
+
+  const world=document.getElementById("field-world");
+  if(world){
+    const observer=new MutationObserver(()=>{if(world.dataset.map==="la_mer_city")queueMicrotask(rebuildWorld);});
+    observer.observe(world,{attributes:true,attributeFilter:["data-map"]});
+  }
+  document.getElementById("field-load")?.addEventListener("click",()=>queueMicrotask(()=>{if(Field.currentMap?.()==="la_mer_city")rebuildWorld();}));
 
   window.SpellLaMerExpanded={width:WIDTH,height:HEIGHT,tileAt,rebuildWorld,spawn,blockedCount:blocked.size};
 })();
