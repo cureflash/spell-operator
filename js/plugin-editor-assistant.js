@@ -10,6 +10,7 @@
   let outputText = null;
   let hintButton = null;
   let syncQueued = false;
+  let errorDialogueToken = 0;
 
   function queueSync() {
     if (syncQueued) return;
@@ -33,59 +34,76 @@
   function splitSource(value) {
     const raw = String(value ?? "");
     const match = raw.match(/ルミエル「([\s\S]*?)」/);
-    const dialogue = match ? match[1].trim() : "";
-    const technical = match ? raw.replace(match[0], "").trim() : raw.trim();
-    return { raw, dialogue, technical };
+    return {
+      raw,
+      dialogue: match ? match[1].trim() : ""
+    };
   }
 
   function resultKind(status) {
-    if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) return "error";
+    if (/RUNTIME ERROR|PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) return "error";
     if (/TEST FAILED|JUDGE FAILED|FAILED/i.test(status)) return "failed";
     if (/TEST PASS|JUDGE PASS|PASS/i.test(status)) return "passed";
     if (/RUNNING|JUDGING/i.test(status)) return "running";
     return "neutral";
   }
 
-  function fallbackDialogue(raw, status) {
-    if (/JUDGING/i.test(status) || raw.includes("模範解答と照合しています")) {
-      return "解答を判定するね。ちょっと待ってて。";
-    }
-    if (/RUNNING/i.test(status) || raw.includes("準備してテストしています")) {
-      return "実行しているよ。少し待ってね。";
-    }
-    if (/JUDGE FAILED/i.test(status)) {
-      return "これだとまだダメそうね。判定結果を確認してみて。";
-    }
-    if (/TEST FAILED|FAILED/i.test(status) || raw.includes("不合格") || raw.includes("不正解")) {
-      return "これだとダメそうね。出力結果を確認してみて。";
-    }
-    if (/JUDGE PASS/i.test(status)) {
-      return "正解！ ちゃんといろんな入力でも動いてるよ。";
-    }
-    if (/TEST PASS|PASS/i.test(status) || raw.includes("ALL TESTS PASSED")) {
-      return "うまくいったね。これなら大丈夫そう。";
-    }
-    if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status) || /(?:^|\n)[A-Za-z_][A-Za-z0-9_]*Error:/.test(raw) || raw.includes("Python:")) {
-      return "Pythonの実行中に問題が起きたみたい。実行結果を確認してみて。";
-    }
-    if (raw.includes("コードが空")) return "まだコードが書かれていないみたい。";
-    if (raw.includes("コードをクリア")) return "コードをクリアしたよ。";
-    if (raw.includes("Pythonコードを書いてテスト実行")) return "コードができたら、テスト実行してみてね。";
+  function lastPythonResult() {
+    return window.SpellPython?.lastResult || null;
+  }
+
+  function codeErrorFrom(result) {
+    if (!result) return "";
+    if (result.compileError) return String(result.compileError);
+    const failed = Array.isArray(result.tests) ? result.tests.find(test => test?.error) : null;
+    return failed?.error ? String(failed.error) : "";
+  }
+
+  function stdoutFrom(result) {
+    if (!result || !Array.isArray(result.tests) || !result.tests.length) return "";
+    const failed = result.tests.find(test => !test?.passed);
+    const selected = failed || result.tests[0];
+    return String(selected?.actual ?? "");
+  }
+
+  function displayStdout(status) {
+    if (!outputText) return;
+    const result = lastPythonResult();
+    const stdout = stdoutFrom(result);
+    outputText.textContent = stdout.trimEnd() || "（出力なし）";
+    outputText.dataset.resultKind = resultKind(status);
+  }
+
+  function basicDialogue(parts, status, hasCodeError) {
+    if (parts.dialogue) return parts.dialogue;
+    if (/JUDGING/i.test(status)) return "解答を判定するね。ちょっと待ってて。";
+    if (/RUNNING/i.test(status)) return "実行しているよ。少し待ってね。";
+    if (/JUDGE FAILED/i.test(status)) return "これだとまだダメそうね。出力を確認してみて。";
+    if (/TEST FAILED|FAILED/i.test(status)) return "これだとダメそうね。出力を確認してみて。";
+    if (/JUDGE PASS/i.test(status)) return "正解！ ちゃんといろんな入力でも動いてるよ。";
+    if (/TEST PASS|PASS/i.test(status)) return "うまくいったね。これなら大丈夫そう。";
+    if (/RUNTIME ERROR/i.test(status)) return "実行環境側で問題が起きたみたい。もう一度実行してみて。";
+    if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status) && !hasCodeError) return "実行環境側で問題が起きたみたい。もう一度実行してみて。";
+    if (parts.raw.includes("コードが空")) return "まだコードが書かれていないみたい。";
+    if (parts.raw.includes("コードをクリア")) return "コードをクリアしたよ。";
     return "コードができたら、テスト実行してみてね。";
   }
 
-  function displayOutput(parts, status) {
-    if (!outputText) return;
-
-    let text = parts.technical;
-    if (parts.raw.includes("Pythonコードを書いてテスト実行")) text = "まだ実行していません。";
-    if (parts.raw.includes("コードをクリア")) text = "まだ実行していません。";
-
-    // Lumiere-only messages such as copy/hint feedback must not erase the last technical result.
-    if (!text && parts.dialogue) return;
-
-    outputText.textContent = text || "まだ実行していません。";
-    outputText.dataset.resultKind = resultKind(status);
+  function resolveCodeErrorDialogue(errorText, statusSnapshot) {
+    const token = ++errorDialogueToken;
+    const service = window.SpellLumierePythonErrors;
+    if (!service?.resolve) {
+      setDialogue("コードにエラーがあるみたい。もう一度確認してみて。");
+      return;
+    }
+    service.resolve(errorText).then(result => {
+      if (token !== errorDialogueToken) return;
+      const current = String(runState.textContent || "").trim();
+      if (current !== statusSnapshot) return;
+      setDialogue(result?.dialogue || "コードにエラーがあるみたい。もう一度確認してみて。");
+    }).catch(() => {
+      if (token === errorDialogueToken) setDialogue("コードにエラーがあるみたい。もう一度確認してみて。");
+    });
   }
 
   function sync() {
@@ -93,9 +111,26 @@
     if (!dialogueText || !outputText) return;
 
     const parts = splitSource(source.textContent);
-    const status = String(runState.textContent || "").trim();
-    displayOutput(parts, status);
-    setDialogue(parts.dialogue || fallbackDialogue(parts.raw, status));
+    let status = String(runState.textContent || "").trim();
+    const result = lastPythonResult();
+    const codeError = codeErrorFrom(result);
+
+    // A worker/CDN/runtime failure is not a Python-code error.
+    if (/PYTHON ERROR/i.test(status) && !codeError && window.SpellPython?.lastError) {
+      runState.textContent = "RUNTIME ERROR";
+      runState.className = "status bad";
+      status = "RUNTIME ERROR";
+    }
+
+    displayStdout(status);
+
+    if (codeError && /PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) {
+      resolveCodeErrorDialogue(codeError, status);
+      return;
+    }
+
+    errorDialogueToken++;
+    setDialogue(basicDialogue(parts, status, Boolean(codeError)));
   }
 
   async function requestHint() {
@@ -145,21 +180,24 @@
       const head = document.createElement("div");
       head.className = "plugin-execution-output-head";
       const title = document.createElement("span");
-      title.textContent = "実行結果 / 出力";
+      title.textContent = "出力";
       const note = document.createElement("span");
-      note.textContent = "OUTPUT";
+      note.textContent = "STDOUT";
       head.append(title, note);
 
       outputText = document.createElement("pre");
       outputText.id = "plugin-execution-output";
       outputText.className = "plugin-execution-output";
-      outputText.textContent = "まだ実行していません。";
+      outputText.textContent = "（出力なし）";
       outputText.dataset.resultKind = "neutral";
 
       panel.append(head, outputText);
       runPane.insertBefore(panel, back);
     } else {
       outputText = document.getElementById("plugin-execution-output");
+      const head = outputText.closest(".plugin-execution-output-panel")?.querySelector(".plugin-execution-output-head");
+      if (head?.children?.[0]) head.children[0].textContent = "出力";
+      if (head?.children?.[1]) head.children[1].textContent = "STDOUT";
     }
 
     return true;
