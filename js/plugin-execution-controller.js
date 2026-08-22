@@ -68,6 +68,42 @@
     return String(test?.actual ?? "");
   }
 
+  function normalizeDisplayValue(value, emptyLabel) {
+    const normalized = String(value ?? "").replace(/\r\n?/g, "\n").replace(/\n+$/g, "");
+    return normalized || emptyLabel;
+  }
+
+  function formatJudgeIo(result) {
+    const tests = Array.isArray(result?.tests) ? result.tests : [];
+    if (!tests.length) return "（判定結果なし）";
+
+    return tests.map((test, index) => {
+      const input = normalizeDisplayValue(test?.input, "（入力なし）");
+      const actual = normalizeDisplayValue(test?.actual, "（出力なし）");
+      const lines = [
+        `ケース ${index + 1}`,
+        `入力: ${input}`,
+        `出力: ${actual}`
+      ];
+      if (!test?.passed && !test?.error) {
+        lines.push(`期待値: ${normalizeDisplayValue(test?.expected, "（出力なし）")}`);
+      }
+      if (test?.error) {
+        lines.push(`エラー: ${String(test.error)}`);
+      }
+      return lines.join("\n");
+    }).join("\n\n");
+  }
+
+  function playClearSe() {
+    try {
+      return Boolean(window.SpellAudio?.playSfx?.("plugin-clear"));
+    } catch (error) {
+      console.warn("Plugin clear SE playback failed.", error);
+      return false;
+    }
+  }
+
   function sampleTests(def) {
     const samples = Array.isArray(def?.samples) ? def.samples : [];
     if (samples.length) return samples.map(item => ({ ...item, kind: "sample" }));
@@ -181,7 +217,7 @@
 
     button.disabled = true;
     setRunState("JUDGING", "neutral");
-    setOutput("（出力待ち）", "running");
+    setOutput("（判定中）", "running");
     updateMetrics({ result: "判定中" });
     setDialogue("解答を判定するね。ちょっと待ってて。");
 
@@ -189,7 +225,7 @@
       const result = await judgeService.judge(key, source, judgeService.caseCount || 10);
       const raw = result?.raw;
       const codeError = firstRuntimeError(raw);
-      setOutput(shownStdout(raw), codeError ? "error" : (result?.ok ? "passed" : "failed"));
+      setOutput(formatJudgeIo(result), codeError ? "error" : (result?.ok ? "passed" : "failed"));
 
       if (codeError) {
         setRunState("PYTHON ERROR", "bad");
@@ -201,7 +237,7 @@
       if (!result?.ok) {
         setRunState("JUDGE FAILED", "warn");
         updateMetrics({ result: "不正解", cost: raw?.maxCost ?? 0 });
-        setDialogue("まだ違うみたい。出力を確認してみて。");
+        setDialogue("まだ違うみたい。入力と出力を確認してみて。");
         return;
       }
 
@@ -209,6 +245,7 @@
       setRunState("JUDGE PASS", "good");
       updateMetrics({ result: "正解", cost: saved?.submittedCost ?? raw?.maxCost ?? 0, mp: saved?.submittedMp ?? "—" });
       setDialogue("正解！ ちゃんといろんな入力でも動いてるよ。");
+      playClearSe();
 
       const def = G.spellDefinitions?.[key];
       const badge = $("spell-badge");
@@ -274,6 +311,7 @@
     runSample,
     runJudge,
     resetCode,
-    install
+    install,
+    playClearSe
   };
 })();
