@@ -18,18 +18,25 @@ jobs:
       - name: Download BGM assets
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
           mkdir -p assets/audio/bgm
-          curl -L --fail --retry 3 --output assets/audio/bgm/ancient-gust.mp3 https://peritune.com/music/Peritune_Ancient_Gust.mp3
-          curl -L --fail --retry 3 --output assets/audio/bgm/resort5.mp3 https://peritune.com/music/PerituneMaterial_Resort5.mp3
-          curl -L --fail --retry 3 --output assets/audio/bgm/swift-strike.mp3 https://peritune.com/music/Peritune_Swift_Strike.mp3
-          test -s assets/audio/bgm/ancient-gust.mp3
-          test -s assets/audio/bgm/resort5.mp3
-          test -s assets/audio/bgm/swift-strike.mp3
-      - name: Commit downloaded assets
+          : > fetch-bgm-diagnostic.txt
+          for spec in \
+            'ancient-gust.mp3|https://peritune.com/music/Peritune_Ancient_Gust.mp3' \
+            'resort5.mp3|https://peritune.com/music/PerituneMaterial_Resort5.mp3' \
+            'swift-strike.mp3|https://peritune.com/music/Peritune_Swift_Strike.mp3'
+          do
+            file="${spec%%|*}"
+            url="${spec#*|}"
+            code=$(curl -L --retry 2 --silent --show-error -w '%{http_code}' -o "assets/audio/bgm/$file" "$url")
+            size=$(wc -c < "assets/audio/bgm/$file" 2>/dev/null || echo 0)
+            echo "$file $code $size $url" >> fetch-bgm-diagnostic.txt
+          done
+          cat fetch-bgm-diagnostic.txt
+      - name: Commit assets and diagnostics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/audio/bgm/ancient-gust.mp3 assets/audio/bgm/resort5.mp3 assets/audio/bgm/swift-strike.mp3
-          git commit -m "Add PeriTune city and battle BGM assets" || exit 0
+          git add assets/audio/bgm/ancient-gust.mp3 assets/audio/bgm/resort5.mp3 assets/audio/bgm/swift-strike.mp3 fetch-bgm-diagnostic.txt
+          git commit -m "Fetch PeriTune city and battle BGM assets" || exit 0
           git push
