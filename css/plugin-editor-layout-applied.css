@@ -2,7 +2,7 @@
 @media (min-width: 761px) {
   .plugin-editor-shell {
     --plugin-editor-left: 64%;
-    --plugin-editor-upper: 88%;
+    --plugin-editor-upper: 85%;
     grid-template-rows: minmax(0, var(--plugin-editor-upper)) 2px minmax(0, 1fr) !important;
   }
 
@@ -38,25 +38,28 @@
 
   .plugin-editor-dialogue.plugin-field-dialog {
     grid-template-columns: 70px minmax(0, 1fr) !important;
+    min-height: 96px !important;
   }
 
   .plugin-editor-dialogue .dialog-message {
-    padding-top: 20px !important;
-    padding-bottom: 10px !important;
+    padding-top: 22px !important;
+    padding-bottom: 14px !important;
   }
 
   .plugin-editor-dialogue .plugin-conversation-text {
     font-size: 14px !important;
+    overflow: hidden !important;
+    max-height: none !important;
   }
 
   .plugin-editor-dialogue .dialog-next {
-    bottom: 2px !important;
+    bottom: 6px !important;
   }
 
   /* The speaker label is reduced to match the 70px portrait column. */
   .plugin-editor-dialogue .dialog-name {
     left: 77px !important;
-    top: 3px !important;
+    top: 4px !important;
     width: max-content !important;
     max-width: calc(100% - 84px) !important;
     min-width: 0 !important;
