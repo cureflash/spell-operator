@@ -19,137 +19,162 @@
   let context = null;
   let playing = null;
   let armedUntil = 0;
-  let soundUrlPromise = null;
-  let soundBufferPromise = null;
   let openComputerWrapped = false;
 
-  const sound = new Audio();
-  sound.preload = "auto";
-
-  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-  const audioContext = AudioContextCtor ? new AudioContextCtor() : null;
+  let audioContext = null;
+  let decodedBuffer = null;
+  let audioLoadPromise = null;
+  let fallbackUrlPromise = null;
+  const fallbackAudio = new Audio();
+  fallbackAudio.preload = "auto";
 
   function currentSfxVolume() {
-    const value = window.SpellAudioSettings?.snapshot?.().sfx;
+    const value = window.SpellAudioSettings?.get?.("sfx");
     return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.5;
   }
 
-  function fetchSoundBytes() {
+  function base64Bytes() {
     return fetch(SE_SOURCE, { cache: "force-cache" })
       .then(response => {
         if (!response.ok) throw new Error(`plug-in SE fetch failed: ${response.status}`);
         return response.text();
       })
       .then(encoded => {
-        const binary = atob(encoded.trim());
+        const binary = atob(encoded.replace(/\s+/g, ""));
         const bytes = new Uint8Array(binary.length);
-        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
         return bytes;
       });
   }
 
-  function ensureSoundUrl() {
-    if (soundUrlPromise) return soundUrlPromise;
-    soundUrlPromise = fetchSoundBytes()
+  function ensureWebAudio() {
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return Promise.resolve(false);
+
+    // Create the context only after a real user gesture. This mirrors the
+    // dialog SE path that already works on Safari/Chrome.
+    if (!audioContext) audioContext = new Context();
+    const resume = audioContext.state === "suspended" ? audioContext.resume() : Promise.resolve();
+
+    if (!audioLoadPromise) {
+      audioLoadPromise = base64Bytes()
+        .then(bytes => audioContext.decodeAudioData(bytes.buffer.slice(0)))
+        .then(buffer => {
+          decodedBuffer = buffer;
+          return true;
+        })
+        .catch(error => {
+          console.warn("Spell plug-in SE decode failed", error);
+          return false;
+        });
+    }
+
+    return Promise.all([resume, audioLoadPromise]).then(([, loaded]) => Boolean(loaded));
+  }
+
+  function unlockAudio() {
+    ensureWebAudio().catch(error => console.warn("Spell plug-in audio unlock failed", error));
+  }
+
+  // Unlock early on the same user gestures that successfully unlock dialog SE.
+  document.addEventListener("pointerdown", unlockAudio, { capture: true });
+  document.addEventListener("keydown", unlockAudio, { capture: true });
+
+  function playWebAudioSparkle() {
+    if (!audioContext || audioContext.state !== "running" || !decodedBuffer) return false;
+    if (currentSfxVolume() <= 0) return true;
+    try {
+      const source = audioContext.createBufferSource();
+      const gain = audioContext.createGain();
+      source.buffer = decodedBuffer;
+      gain.gain.value = currentSfxVolume();
+      source.connect(gain);
+      gain.connect(audioContext.destination);
+      source.start(0);
+      return true;
+    } catch (error) {
+      console.warn("Spell plug-in Web Audio playback failed", error);
+      return false;
+    }
+  }
+
+  function playSynthSparkle() {
+    if (!audioContext || audioContext.state !== "running" || currentSfxVolume() <= 0) return false;
+    try {
+      const now = audioContext.currentTime;
+      const master = audioContext.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(Math.max(0.02, currentSfxVolume() * 0.32), now + 0.015);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
+      master.connect(audioContext.destination);
+
+      [1174.66, 1567.98, 2093.00].forEach((frequency, index) => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.06);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.5, now + index * 0.06 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.06 + 0.34);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + index * 0.06);
+        osc.stop(now + index * 0.06 + 0.36);
+      });
+      return true;
+    } catch (error) {
+      console.warn("Spell plug-in synthesized fallback failed", error);
+      return false;
+    }
+  }
+
+  function ensureFallbackUrl() {
+    if (fallbackUrlPromise) return fallbackUrlPromise;
+    fallbackUrlPromise = base64Bytes()
       .then(bytes => URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" })))
       .then(url => {
-        sound.src = url;
-        sound.load();
+        fallbackAudio.src = url;
+        fallbackAudio.load();
         return url;
       })
       .catch(error => {
-        console.warn("Spell plug-in SE preload failed", error);
-        soundUrlPromise = null;
+        console.warn("Spell plug-in HTMLAudio preload failed", error);
+        fallbackUrlPromise = null;
         return null;
       });
-    return soundUrlPromise;
-  }
-
-  function decodeAudioData(arrayBuffer) {
-    if (!audioContext) return Promise.resolve(null);
-    return new Promise((resolve, reject) => {
-      let settled = false;
-      const done = buffer => {
-        if (settled) return;
-        settled = true;
-        resolve(buffer);
-      };
-      const fail = error => {
-        if (settled) return;
-        settled = true;
-        reject(error);
-      };
-      try {
-        const result = audioContext.decodeAudioData(arrayBuffer.slice(0), done, fail);
-        if (result?.then) result.then(done, fail);
-      } catch (error) {
-        fail(error);
-      }
-    });
-  }
-
-  function ensureSoundBuffer() {
-    if (!audioContext) return Promise.resolve(null);
-    if (soundBufferPromise) return soundBufferPromise;
-    soundBufferPromise = fetchSoundBytes()
-      .then(bytes => decodeAudioData(bytes.buffer))
-      .catch(error => {
-        console.warn("Spell plug-in Web Audio preload failed", error);
-        soundBufferPromise = null;
-        return null;
-      });
-    return soundBufferPromise;
-  }
-
-  function resumeAudioFromGesture() {
-    if (!audioContext || audioContext.state !== "suspended") return;
-    try {
-      const resumed = audioContext.resume();
-      if (resumed?.catch) resumed.catch(() => {});
-    } catch (_) {}
+    return fallbackUrlPromise;
   }
 
   function playHtmlAudioFallback() {
+    if (currentSfxVolume() <= 0) return;
     const start = () => {
       try {
-        sound.pause();
-        sound.currentTime = 0;
-        sound.volume = currentSfxVolume();
-        const promise = sound.play();
-        if (promise?.catch) promise.catch(error => console.warn("Spell plug-in SE playback blocked", error));
+        fallbackAudio.pause();
+        fallbackAudio.currentTime = 0;
+        fallbackAudio.volume = currentSfxVolume();
+        const promise = fallbackAudio.play();
+        if (promise?.catch) promise.catch(error => console.warn("Spell plug-in HTMLAudio playback blocked", error));
       } catch (error) {
-        console.warn("Spell plug-in SE playback failed", error);
+        console.warn("Spell plug-in HTMLAudio playback failed", error);
       }
     };
-    if (sound.src) start();
-    else ensureSoundUrl().then(url => { if (url) start(); });
+    if (fallbackAudio.src) start();
+    else ensureFallbackUrl().then(url => { if (url) start(); });
   }
 
   function playSound() {
-    resumeAudioFromGesture();
-    if (!audioContext) {
-      playHtmlAudioFallback();
+    if (currentSfxVolume() <= 0) return;
+    if (playWebAudioSparkle()) return;
+
+    // If the real MP3 has not finished decoding yet, still provide an audible
+    // sparkle immediately instead of failing silently.
+    if (playSynthSparkle()) {
+      ensureWebAudio().catch(() => {});
       return;
     }
 
-    ensureSoundBuffer().then(buffer => {
-      if (!buffer) {
-        playHtmlAudioFallback();
-        return;
-      }
-      try {
-        const source = audioContext.createBufferSource();
-        const gain = audioContext.createGain();
-        source.buffer = buffer;
-        gain.gain.value = currentSfxVolume();
-        source.connect(gain);
-        gain.connect(audioContext.destination);
-        source.start(0);
-      } catch (error) {
-        console.warn("Spell plug-in Web Audio playback failed", error);
-        playHtmlAudioFallback();
-      }
-    });
+    playHtmlAudioFallback();
+    ensureWebAudio().catch(() => {});
   }
 
   function ensureCanvas() {
@@ -335,10 +360,7 @@
     const dialog = document.getElementById("field-dialog");
     if (dialog?.dataset.pluginPrompt !== "1") return;
     if (window.SpellDialogTyping?.isTyping?.()) return;
-
-    // Resume Web Audio directly inside the user's Z-key gesture so Safari/Chrome
-    // permit the sparkle SE to start even though the decoded buffer is loaded async.
-    resumeAudioFromGesture();
+    unlockAudio();
     armedUntil = performance.now() + ARM_WINDOW_MS;
   }
 
@@ -357,8 +379,6 @@
   }
 
   window.addEventListener("keydown", onKeydown, true);
-  ensureSoundBuffer();
-  ensureSoundUrl();
   if (!installOpenComputerWrapper()) {
     const timer = setInterval(() => {
       if (installOpenComputerWrapper()) clearInterval(timer);
@@ -368,7 +388,8 @@
 
   window.SpellPluginTransition = {
     play,
-    unlockAudioFromGesture: resumeAudioFromGesture,
+    unlockAudioFromGesture: unlockAudio,
+    testSound: playSound,
     isPlaying: () => Boolean(playing)
   };
 })();
