@@ -45,12 +45,12 @@ The menu contains, in this order:
 - Selecting saved code shows the code and enables copying it to the clipboard.
 - The grimoire never auto-inserts code into the editor. The player pastes copied code normally.
 - Execution controls are below the grimoire on the right.
-- The right-side execution area includes a separate `実行結果 / 出力` pane.
-- Python exception text, test results, output mismatch details, and other technical execution information are shown in that output pane.
+- The right-side `出力` pane is stdout-only. It displays only text actually emitted by the player's program, such as `print()` output.
+- Test counts, expected output, calculation cost, MP, pass/fail explanations, and other diagnostics must not be mixed into the stdout pane.
+- Calculation cost, MP, and pass/fail remain available in their dedicated status/metric UI.
 - The bottom area is only Lumiere dialogue and keeps the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
-- Test failure does not turn the bottom area into a console. Lumiere gives a short response such as `これだとダメそうね。出力結果を確認してみて。` while the detailed result remains in the output pane.
-- Python exceptions may still be translated into Lumiere guidance, but the technical exception/result text remains separately inspectable in the output pane.
-- Output mismatch is a test failure (`TEST FAILED`), not a Python exception.
+- Output mismatch is a test failure (`TEST FAILED`), not a Python exception. Lumiere gives a short response such as `これだとダメそうね。出力を確認してみて。` while the stdout pane shows the player's actual output.
+- Real Python-code exceptions and execution-environment failures are distinct. Lumiere may explain a Python exception by type, but a worker/CDN/runtime infrastructure failure must not be described as a Python-code error.
 
 ### Current desktop layout values
 
@@ -79,7 +79,7 @@ The speaker-name badge inside the plug-in editor dialogue is reduced specificall
 - The canonical reference Python solutions are stored separately in `data/python-reference-solutions.json`.
 - The judge runs the reference solution against each generated input and uses the reference program's actual stdout as the expected output for that case.
 - The player's code is then run against the same input set. A case passes only when its normalized stdout matches the expected stdout and no Python exception occurs.
-- A failed judgment shows at least one failing random input, the player's output, and the expected output in the `実行結果 / 出力` pane.
+- The stdout pane remains stdout-only during answer judging. Judgment metadata is conveyed through status/metrics and Lumiere dialogue instead of being inserted into stdout.
 - Lumiere's bottom dialogue remains separate and gives only a short response to the judgment result.
 - Passing all random cases records the submitted code as a learned/battle-usable spell using the existing MP/cost model; a less efficient submission does not replace a better saved implementation.
 - Reference solution code is judge data. It is not shown automatically in the editor or in normal hint output.
