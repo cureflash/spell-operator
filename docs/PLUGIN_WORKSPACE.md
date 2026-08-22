@@ -46,10 +46,11 @@ The menu contains, in this order:
 
 - The Python editor occupies the left side.
 - The right side primarily contains execution controls and the execution/output pane.
-- The grimoire for previously saved code is a collapsible tab on the right side and is closed by default whenever the editor workspace is entered.
-- Only the grimoire body is controlled by that tab. The execution controls, `出力` pane, and bottom Lumiere dialogue are never collapsed by the grimoire tab.
-- Activating the grimoire tab opens its saved-code list and preview. Activating it again closes only that saved-code area.
-- While the grimoire is closed, the execution/output area expands vertically into the space that would otherwise be used by the grimoire.
+- A dedicated tab strip sits above the permanent execution/output area. At present, only `魔導書` is a tab-controlled feature.
+- The grimoire for previously saved code is closed by default whenever the editor workspace is entered.
+- Only the grimoire body is controlled by the `魔導書` tab. The execution controls, `出力` pane, and bottom Lumiere dialogue are not tab panels and are never collapsed or replaced by the grimoire tab.
+- Activating the `魔導書` tab opens its saved-code list and preview above the still-visible execution/output pane. Activating it again closes only that saved-code area.
+- While the grimoire is closed, the execution/output area expands vertically into the freed space.
 - While the grimoire is open, the execution/output pane remains visibly open below it so the player can view the grimoire and output at the same time.
 - Selecting saved code while the grimoire is open shows the code and enables copying it to the clipboard.
 - The grimoire never auto-inserts saved code into the editor. The player pastes copied code normally.
@@ -79,15 +80,16 @@ print(n * 2)
 
 ### Current desktop layout values
 
-The current `spell-operator/plugin-editor-layout@1` tuning is:
+The current `spell-operator/plugin-editor-layout@2` tuning is:
 
 - editor width: 64%
 - upper workspace: 85%
 - Lumiere dialogue: 15%
 - divider thickness: 2px
-- grimoire open height: up to 30%
+- a dedicated grimoire tab strip sits above the right-side content
 - grimoire default state: closed
-- execution/output pane: always open
+- grimoire default open height: 34% of the right-side content; user-adjustable while open
+- execution/output pane: permanent and always visible
 - execution output minimum height: 120px
 - execution pane gap: 2px
 - dialogue portrait column: 70px
