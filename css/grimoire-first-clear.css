@@ -26,15 +26,23 @@
   font-family:ui-monospace,"Noto Sans JP",monospace;
   animation:grimoireClearPop .22s ease-out;
 }
-.grimoire-first-clear-portrait{
-  display:block;
-  width:100%;
-  height:100%;
+.grimoire-first-clear-portrait-frame{
+  width:136px;
+  min-width:136px;
+  height:156px;
   min-height:156px;
-  object-fit:cover;
-  object-position:center;
+  overflow:hidden;
   background:#f6edcf;
   border-right:3px solid #c6b993;
+}
+.grimoire-first-clear-portrait{
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-width:none!important;
+  object-fit:cover!important;
+  object-position:center!important;
 }
 .grimoire-first-clear-message{
   position:relative;
@@ -85,7 +93,12 @@
     grid-template-columns:104px minmax(0,1fr);
     min-height:126px;
   }
-  .grimoire-first-clear-portrait{min-height:126px}
+  .grimoire-first-clear-portrait-frame{
+    width:104px;
+    min-width:104px;
+    height:126px;
+    min-height:126px;
+  }
   .grimoire-first-clear-message{padding:42px 34px 24px 16px}
   .grimoire-first-clear-name{left:12px;top:9px;padding:2px 13px;font-size:12px}
   .grimoire-first-clear-text{font-size:17px}
