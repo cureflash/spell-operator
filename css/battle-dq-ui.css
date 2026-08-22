@@ -1,0 +1,130 @@
+/* Dragon Quest-inspired party status presentation. Enemy presentation stays unchanged. */
+#screen-battle .party-platform,
+#screen-battle .party-status {
+  display: none !important;
+}
+
+#screen-battle .battle-scene {
+  min-height: 470px;
+}
+
+.dq-party-panel {
+  position: absolute;
+  left: 3%;
+  right: 3%;
+  bottom: 12px;
+  z-index: 12;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 180px));
+  justify-content: center;
+  align-items: end;
+  gap: 18px;
+  pointer-events: none;
+}
+
+.dq-party-card {
+  display: grid;
+  grid-template-rows: 118px auto;
+  min-width: 0;
+  filter: drop-shadow(0 5px 3px rgba(0,0,0,.25));
+}
+
+.dq-party-portrait {
+  width: 112px;
+  height: 112px;
+  justify-self: center;
+  align-self: end;
+  border: 4px solid #f6f3e5;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  background: #181722 center/cover no-repeat;
+  box-shadow: 0 0 0 3px #30313a;
+  overflow: hidden;
+}
+
+.dq-party-stats {
+  position: relative;
+  z-index: 2;
+  min-height: 82px;
+  padding: 8px 11px 9px;
+  border: 4px solid #f6f3e5;
+  border-radius: 6px;
+  background: #111019;
+  color: #fff;
+  box-shadow: 0 0 0 3px #30313a;
+  font-family: ui-monospace,"Noto Sans JP",monospace;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.dq-party-name {
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.dq-party-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dq-party-line strong {
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.dq-party-card[data-status="ko"] .dq-party-portrait,
+.dq-party-card[data-status="fainted"] .dq-party-portrait {
+  filter: grayscale(1) brightness(.62);
+}
+
+.dq-party-card[data-status="danger"] .dq-party-stats {
+  box-shadow: 0 0 0 3px #30313a, inset 0 0 0 2px rgba(255,110,110,.55);
+}
+
+@media(max-width:760px) {
+  #screen-battle .battle-scene {
+    height: 410px;
+    min-height: 410px;
+  }
+
+  .dq-party-panel {
+    left: 2%;
+    right: 2%;
+    bottom: 8px;
+    grid-template-columns: repeat(2, minmax(0, 148px));
+    gap: 10px;
+  }
+
+  .dq-party-card {
+    grid-template-rows: 92px auto;
+  }
+
+  .dq-party-portrait {
+    width: 88px;
+    height: 88px;
+    border-width: 3px;
+  }
+
+  .dq-party-stats {
+    min-height: 72px;
+    padding: 6px 8px 7px;
+    border-width: 3px;
+  }
+
+  .dq-party-name {
+    margin-bottom: 3px;
+    font-size: 13px;
+  }
+
+  .dq-party-line,
+  .dq-party-line strong {
+    font-size: 11px;
+  }
+}
