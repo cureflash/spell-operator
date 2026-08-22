@@ -5,10 +5,16 @@
 }
 .plugin-run-actions{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:8px;
 }
+.plugin-run-actions #run-code,
+.plugin-judge-button{
+  width:100%;
+}
 .plugin-hint-button{
+  grid-column:1/-1;
+  width:100%;
   white-space:nowrap;
 }
 .plugin-execution-output-panel{
@@ -48,6 +54,6 @@
 
 @media(max-width:760px){
   .plugin-run-actions{grid-template-columns:1fr}
-  .plugin-hint-button{width:100%}
+  .plugin-hint-button{grid-column:auto}
   .plugin-execution-output{font-size:10px}
 }
