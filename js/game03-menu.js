@@ -10,6 +10,7 @@
   let fieldMenuMode = "main";
   let pendingTravel = null;
   let travelCasting = false;
+  let travelCastReady = false;
   let travelChoiceReady = false;
 
   const travelMenuItems = [
@@ -174,6 +175,7 @@
     fieldMenuMode = "main";
     fieldMenuIndex = 0;
     pendingTravel = null;
+    travelCastReady = false;
     hideTravelChoice();
     $("#field-main-menu")?.classList.add("hidden");
   }
@@ -202,6 +204,7 @@
     const label = fieldMenuMode.startsWith("travel") ? "イードウ" : "設定";
     fieldMenuMode = "main";
     pendingTravel = null;
+    travelCastReady = false;
     hideTravelChoice();
     fieldMenuIndex = Math.max(0, fieldMenuItems.findIndex(item => item.label === label));
     renderFieldMenu();
@@ -232,6 +235,7 @@
     closeDialog();
     hideTravelChoice();
     pendingTravel = null;
+    travelCastReady = false;
     fieldMenuOpen = true;
     fieldMenuMode = "travel";
     fieldMenuIndex = 0;
@@ -243,6 +247,7 @@
     if (!pendingTravel || travelCasting || !travelChoiceReady) return;
     const destination = { ...pendingTravel };
     travelCasting = true;
+    travelCastReady = false;
     fieldMenuOpen = false;
     hideTravelChoice();
     $("#field-main-menu")?.classList.add("hidden");
@@ -250,7 +255,13 @@
     await delay(40);
     window.SpellField?.showDialog?.({ speaker: "lumiere", text: "イードウ！", typing: { allowSkip: false } });
     await waitForDialogTyping();
-    await delay(180);
+    if (travelCasting && pendingTravel?.mapId === destination.mapId) travelCastReady = true;
+  }
+
+  async function executeTravel() {
+    if (!pendingTravel || !travelCasting || !travelCastReady) return;
+    const destination = { ...pendingTravel };
+    travelCastReady = false;
     closeDialog();
     const fade = $("#ido-fade");
     fade?.classList.add("active");
@@ -361,6 +372,7 @@
     if (travelCasting) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      if (travelCastReady && isZ(event) && !event.repeat) void executeTravel();
       return;
     }
 
