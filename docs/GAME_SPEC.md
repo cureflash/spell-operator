@@ -155,6 +155,7 @@ SpellDialogTyping.resume();
   - `assets/characters/portraits/sophie/battle.jpg`
   - `assets/characters/portraits/lumiere/battle.jpg`
 - The normal battle UI uses the `battle` expression for Sophie and Lumiere. Dedicated danger/KO/fainted portraits are not specified yet and continue to use `neutral`.
+- When Sophie or Lumiere performs an enemy-targeting attack in battle, only the attacking character's currently visible battle portrait briefly moves up and down. This applies to normal attacks and offensive magic such as `Fire`; non-attacking actions such as `Repair` do not play the attack bounce.
 - `SpellField.showDialog()` accepts an optional `expression` property. Existing dialogue that omits it uses `neutral`.
 - Additional expressions can be registered without changing the dialogue layout through `SpellPortraits.register(character, expression, src)`.
 - `SpellPortraits.prepare(expression)` can prepare an expression for the next field-dialog portrait update when existing internal field code invokes its local dialog function directly.
@@ -166,7 +167,7 @@ SpellDialogTyping.resume();
 - Pressing `X` does not immediately change screens. Sophie first says exactly: `プラグイン！ルミエル.EXE トランスミッション！` in the field dialog.
 - The plug-in line uses the normal discrete field-dialog pacing and no longer overrides the global pace with the old 30 ms setting.
 - After the plug-in line has finished rendering, pressing `Z` closes the dialog and plays the Kirayuki plug-in transition once.
-- Pressing `X` while the plug-in confirmation line is open cancels that plug-in attempt and returns to the normal field.
+- While the plug-in prompt or its transition is active, `X` is consumed and does not cancel or return to the field. `Z` remains the only progression key for that sequence.
 - The transition uses `kirayuki1` / `キラキラ雪放射` from the supplied `キラ雪.zip`; the runtime asset is `assets/effects/plugin/kirayuki1.webp`.
 - The supplied `可愛く輝く1.mp3` SE starts together with the Kirayuki animation and follows the global SE volume setting.
 - The browser runtime uses a lightweight audio encode stored at `assets/audio/sfx/plugin-sparkle.base64`, decoded to `audio/mpeg` when the transition module loads.
