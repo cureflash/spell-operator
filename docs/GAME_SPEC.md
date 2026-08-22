@@ -163,3 +163,14 @@ SpellDialogTyping.resume();
 - If `Z` is pressed before the plug-in line finishes rendering, that press only finishes the line; the next `Z` starts the transition.
 - The Kirayuki transition applies only to the normal-field `X` plug-in sequence; other direct computer/menu entry points keep their existing behavior.
 - Existing programming and spell-testing behavior is reused; this specification changes the field entry transition, not the Python runtime or spell-test rules.
+
+## Python error guidance by Lumiere
+
+- Python compile-time and runtime exceptions from the grimoire test runner are presented through Lumiere guidance.
+- The Python exception class name is the lookup key, for example `SyntaxError`, `NameError`, or `TypeError`.
+- Lumiere's dialogue text is stored in the editable runtime table `data/python-error-dialogues.json` and must not be duplicated as per-error hardcoded strings in the execution or UI logic.
+- `js/lumiere-python-errors.js` loads the table and converts `compileError` and per-test runtime `error` strings before the existing grimoire UI displays them.
+- The displayed result contains Lumiere's guidance and the original Python exception text so the player can learn the real Python error name and message.
+- An exception class missing from the table uses the table's `default` dialogue.
+- A test failure caused only by output mismatch is not a Python exception and keeps the existing test-failure display.
+- Dialogue-table fetches bypass the browser cache so changing only `data/python-error-dialogues.json` is sufficient to change Lumiere's lines without editing the Python runner or grimoire code.
