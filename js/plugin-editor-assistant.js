@@ -40,14 +40,6 @@
     };
   }
 
-  function resultKind(status) {
-    if (/RUNTIME ERROR|PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) return "error";
-    if (/TEST FAILED|JUDGE FAILED|FAILED/i.test(status)) return "failed";
-    if (/TEST PASS|JUDGE PASS|PASS/i.test(status)) return "passed";
-    if (/RUNNING|JUDGING/i.test(status)) return "running";
-    return "neutral";
-  }
-
   function lastPythonResult() {
     return window.SpellPython?.lastResult || null;
   }
@@ -59,34 +51,14 @@
     return failed?.error ? String(failed.error) : "";
   }
 
-  function stdoutFrom(result) {
-    if (!result || !Array.isArray(result.tests) || !result.tests.length) return "";
-    const failed = result.tests.find(test => !test?.passed);
-    const selected = failed || result.tests[0];
-    return String(selected?.actual ?? "");
-  }
-
-  function displayStdout(status) {
-    if (!outputText) return;
-    if (/RUNNING|JUDGING/i.test(status)) {
-      outputText.textContent = "（出力待ち）";
-      outputText.dataset.resultKind = "running";
-      return;
-    }
-    const result = lastPythonResult();
-    const stdout = stdoutFrom(result);
-    outputText.textContent = stdout.trimEnd() || "（出力なし）";
-    outputText.dataset.resultKind = resultKind(status);
-  }
-
   function basicDialogue(parts, status, hasCodeError) {
     if (parts.dialogue) return parts.dialogue;
     if (/JUDGING/i.test(status)) return "解答を判定するね。ちょっと待ってて。";
     if (/RUNNING/i.test(status)) return "実行しているよ。少し待ってね。";
-    if (/JUDGE FAILED/i.test(status)) return "これだとまだダメそうね。出力を確認してみて。";
+    if (/JUDGE FAILED/i.test(status)) return "まだ違うみたい。入力値と出力値を確認してみて。";
     if (/TEST FAILED|FAILED/i.test(status)) return "これだとダメそうね。出力を確認してみて。";
-    if (/JUDGE PASS/i.test(status)) return "正解！ ちゃんといろんな入力でも動いてるよ。";
-    if (/TEST PASS|PASS/i.test(status)) return "うまくいったね。これなら大丈夫そう。";
+    if (/JUDGE PASS/i.test(status)) return "正解！ 3回ともちゃんと動いてるよ。";
+    if (/TEST PASS|PASS/i.test(status)) return "うん、ちゃんと出力できてるね。解答を判定してみて。";
     if (/RUNTIME ERROR/i.test(status)) return "実行環境側で問題が起きたみたい。もう一度実行してみて。";
     if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status) && !hasCodeError) return "実行環境側で問題が起きたみたい。もう一度実行してみて。";
     if (parts.raw.includes("コードが空")) return "まだコードが書かれていないみたい。";
@@ -113,7 +85,7 @@
 
   function sync() {
     const dialogueText = document.getElementById("plugin-editor-dialogue-text");
-    if (!dialogueText || !outputText) return;
+    if (!dialogueText) return;
 
     const parts = splitSource(source.textContent);
     let status = String(runState.textContent || "").trim();
@@ -126,7 +98,8 @@
       status = "RUNTIME ERROR";
     }
 
-    displayStdout(status);
+    // Output contents are owned by plugin-execution-controller.js.
+    // Do not mirror SpellPython.lastResult here; doing so overwrites judge I/O display.
 
     if (codeError && /PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) {
       resolveCodeErrorDialogue(codeError, status);
@@ -186,7 +159,7 @@
       const title = document.createElement("span");
       title.textContent = "出力";
       const note = document.createElement("span");
-      note.textContent = "STDOUT";
+      note.textContent = "TEST / JUDGE";
       head.append(title, note);
 
       outputText = document.createElement("pre");
@@ -201,7 +174,7 @@
       outputText = document.getElementById("plugin-execution-output");
       const head = outputText.closest(".plugin-execution-output-panel")?.querySelector(".plugin-execution-output-head");
       if (head?.children?.[0]) head.children[0].textContent = "出力";
-      if (head?.children?.[1]) head.children[1].textContent = "STDOUT";
+      if (head?.children?.[1]) head.children[1].textContent = "TEST / JUDGE";
     }
 
     return true;
