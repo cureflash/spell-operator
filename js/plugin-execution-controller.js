@@ -88,9 +88,7 @@
       if (!test?.passed && !test?.error) {
         lines.push(`期待値: ${normalizeDisplayValue(test?.expected, "（出力なし）")}`);
       }
-      if (test?.error) {
-        lines.push(`エラー: ${String(test.error)}`);
-      }
+      if (test?.error) lines.push(`エラー: ${String(test.error)}`);
       return lines.join("\n");
     }).join("\n\n");
   }
@@ -119,8 +117,9 @@
     const def = G.spellDefinitions?.[key];
     if (!def) return null;
     const state = G.state;
-    state.registeredSpells = state.registeredSpells || Object.create(null);
-    state.drafts = state.drafts || Object.create(null);
+    state.registeredSpells ||= Object.create(null);
+    state.learnedSpells ||= Object.create(null);
+    state.drafts ||= Object.create(null);
     state.drafts[key] = source;
 
     const cost = Math.max(0, Number(raw?.maxCost) || 0);
@@ -139,6 +138,7 @@
     };
     const improved = !old || !Number.isFinite(old.abstractCost) || mpCost < old.mpCost || (mpCost === old.mpCost && cost < old.abstractCost);
     if (improved) state.registeredSpells[key] = candidate;
+    state.learnedSpells[key] = true;
     G.updateComputer?.();
     return { spell: state.registeredSpells[key], improved, submittedMp: mpCost, submittedCost: cost };
   }
@@ -291,8 +291,7 @@
     const runReady = replaceButton("run-code", runSample);
     const resetReady = replaceButton("reset-code", resetCode);
     const judgeReady = replaceButton("plugin-judge-button", runJudge);
-    if (runReady && resetReady && judgeReady) return true;
-    return false;
+    return Boolean(runReady && resetReady && judgeReady);
   }
 
   function installWhenReady() {
