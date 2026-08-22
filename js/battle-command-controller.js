@@ -1,10 +1,9 @@
 (() => {
   "use strict";
 
-  const G = window.SpellGame03;
   const battleScreen = document.getElementById("screen-battle");
   const menuWrap = battleScreen?.querySelector(".battle-menu-wrap");
-  if (!G || !battleScreen || !menuWrap) return;
+  if (!battleScreen || !menuWrap) return;
 
   const grids = () => [...menuWrap.querySelectorAll(".command-grid")];
   const visibleGrid = () => grids().find(grid => !grid.classList.contains("hidden")) || null;
@@ -39,10 +38,12 @@
   }
 
   function ensureVisibleMenu() {
-    if (!battleScreen.classList.contains("active") || !G.state?.battle) return null;
+    if (!battleScreen.classList.contains("active")) return null;
     let grid = visibleGrid();
     if (grid) return grid;
-    if (G.state.busy) return null;
+
+    const G = window.SpellGame03;
+    if (!G?.state?.battle || G.state.busy) return null;
 
     const pending = G.state.pendingActions || {};
     const id = !pending.sophie ? "sophie-menu" : !pending.lumiere ? "lumiere-menu" : null;
@@ -104,11 +105,13 @@
   }
 
   menuWrap.querySelectorAll("button.command").forEach(ensureCursor);
+
   menuWrap.addEventListener("pointerover", event => {
     const button = event.target.closest?.("button.command");
     if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
     setSelected(button);
   });
+
   menuWrap.addEventListener("focusin", event => {
     const button = event.target.closest?.("button.command");
     if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
@@ -117,8 +120,9 @@
 
   document.addEventListener("keydown", event => {
     if (!battleScreen.classList.contains("active")) return;
+    const G = window.SpellGame03;
     const grid = ensureVisibleMenu() || visibleGrid();
-    if (!grid || G.state?.busy) return;
+    if (!grid || G?.state?.busy) return;
 
     const direction = {
       ArrowLeft: "left",
