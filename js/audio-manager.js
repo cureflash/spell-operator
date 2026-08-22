@@ -201,7 +201,6 @@
     const volume = sfxVolume();
     const state = stateFor(id);
     if (!state || volume <= 0) return false;
-    prepareFromGesture();
     if (playWebAudio(id, volume)) return true;
     const played = playFallback(id, volume);
     if (!played) preloadSfx(id).then(() => decodeSfx(id)).catch(() => {});
