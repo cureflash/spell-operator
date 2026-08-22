@@ -1,5 +1,7 @@
 (() => {
   "use strict";
+  const startButton=document.getElementById("start-button");
+  if(startButton)startButton.disabled=true;
   const addStyle=href=>{const style=document.createElement("link");style.rel="stylesheet";style.href=href;document.head.appendChild(style);};
   addStyle("css/dialog-portrait-layout-v3.css?v=6");
   addStyle("css/character-portraits.css?v=1");
@@ -18,10 +20,16 @@
   addStyle("css/sophie-sprite.css?v=21");
   const load=src=>new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});
   const loadOptional=src=>load(src).catch(error=>{console.warn(`Optional module failed to load: ${src}`,error);});
-  load("js/python-runner.js?v=1")
+
+  // Load shared audio state and the plug-in SE before the game becomes
+  // interactive. Previously the title button could be clicked while the
+  // late audio modules were still loading, which made initialization depend
+  // on player timing.
+  load("js/audio-settings.js?v=1")
+    .then(()=>load("js/plugin-se.js?v=2"))
+    .then(()=>load("js/python-runner.js?v=1"))
     .then(()=>load("js/interpreter.js?v=3"))
     .then(()=>load("js/game03-core.js?v=8"))
-    .then(()=>load("js/audio-settings.js?v=1"))
     .then(()=>loadOptional("js/lumiere-python-errors.js?v=2"))
     .then(()=>load("js/python-grimoire.js?v=1"))
     .then(()=>load("js/map-transition.js?v=3"))
@@ -44,7 +52,6 @@
     .then(()=>load("js/dialog-typewriter.js?v=4"))
     .then(()=>load("js/dialog-sfx.js?v=3"))
     .then(()=>load("js/ido-confirm-dialog-fix.js?v=4"))
-    .then(()=>load("js/plugin-se.js?v=1"))
     .then(()=>load("js/plugin-transition.js?v=5"))
     .then(()=>load("js/plugin-editor-entry.js?v=5"))
     .then(()=>load("js/house-room-layout.js?v=4"))
@@ -59,5 +66,6 @@
       const help=[...document.querySelectorAll(".field-help span")];if(help[1])help[1].textContent="話す・調べる・戻る：Z";
       return load("js/sophie-sprite.js?v=7");
     })
+    .then(()=>{if(startButton)startButton.disabled=false;})
     .catch(error=>{console.error("Spell Operator boot failed",error);document.body.insertAdjacentHTML("beforeend",'<p style="padding:16px;color:#fff">ゲームの読み込みに失敗しました。再読み込みしてください。</p>');});
 })();
