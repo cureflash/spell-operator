@@ -49,7 +49,7 @@
     "js/game03-story.js?v=10",
     "js/friend-conversation.js?v=3",
     "js/game03-battle.js?v=6",
-    "js/tilemap-runtime.js?v=3",
+    "js/tilemap-runtime.js?v=4",
     { wait: () => window.SpellTilemapRuntime?.ready },
     "js/game03-field.js?v=20",
     "js/field-enemy-battle-override.js?v=1",
