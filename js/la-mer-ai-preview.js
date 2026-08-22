@@ -19,10 +19,19 @@
     { id:"port2-lamp", x:100, y:83, sx:24, sy:14, w:2, h:5, kind:"prop" }
   ];
 
+  const DECOR = [
+    { id:"foreign-fountain", x:84, y:37, w:5, h:5, image:"assets/tiles/la_mer/fountain.svg?v=1", kind:"garden" },
+    { id:"foreign-bench-east", x:93, y:38, w:3, h:2, image:"assets/tiles/la_mer/bench.svg?v=1", kind:"garden" },
+    { id:"foreign-bench-south", x:93, y:42, w:3, h:2, image:"assets/tiles/la_mer/bench.svg?v=1", kind:"garden" },
+    { id:"foreign-flowerbed-north", x:80, y:34, w:4, h:2, image:"assets/tiles/la_mer/flowerbed.svg?v=1", kind:"garden" },
+    { id:"foreign-flowerbed-south", x:92, y:45, w:4, h:2, image:"assets/tiles/la_mer/flowerbed.svg?v=1", kind:"garden" },
+    { id:"foreign-lamp-a", x:87, y:34, w:2, h:3, image:"assets/tiles/la_mer/lamp.svg?v=1", kind:"prop" },
+    { id:"foreign-lamp-b", x:91, y:34, w:2, h:3, image:"assets/tiles/la_mer/lamp.svg?v=1", kind:"prop" }
+  ];
+
   const style = document.createElement("style");
   style.id = "la-mer-ai-preview-style";
   style.textContent = `
-    /* Ground/roads deliberately remain owned by the canonical Pipoya map-chip CSS. */
     #field-world[data-map="${MAP_ID}"] .la-mer-virtual-tile.water {
       background-color:#147fb5!important;
       background-image:
@@ -41,11 +50,11 @@
       pointer-events:none;
       z-index:2;
       image-rendering:pixelated;
-      background-image:url("${ATLAS}");
       background-repeat:no-repeat;
       filter:drop-shadow(0 2px 1px rgba(0,0,0,.22));
     }
     #field-world[data-map="${MAP_ID}"] .la-mer-ai-stamp[data-kind="water-object"]{z-index:3}
+    #field-world[data-map="${MAP_ID}"] .la-mer-ai-stamp[data-kind="garden"],
     #field-world[data-map="${MAP_ID}"] .la-mer-ai-stamp[data-kind="prop"]{z-index:4}
     @keyframes la-mer-water-drift{to{background-position:calc(2 * var(--tile-size)) 0,calc(-3 * var(--tile-size)) 0,0 0}}
   `;
@@ -57,7 +66,7 @@
     return Number.isFinite(n) && n > 0 ? n : 32;
   }
 
-  function makeStamp(world, stamp, tile) {
+  function baseStamp(stamp) {
     const el = document.createElement("div");
     el.className = "la-mer-ai-stamp";
     el.dataset.stampId = stamp.id;
@@ -66,8 +75,22 @@
     el.style.top = `calc(${stamp.y} * var(--tile-size))`;
     el.style.width = `calc(${stamp.w} * var(--tile-size))`;
     el.style.height = `calc(${stamp.h} * var(--tile-size))`;
+    return el;
+  }
+
+  function makeAtlasStamp(world, stamp, tile) {
+    const el = baseStamp(stamp);
+    el.style.backgroundImage = `url("${ATLAS}")`;
     el.style.backgroundSize = `${ATLAS_COLS * tile}px ${ATLAS_ROWS * tile}px`;
     el.style.backgroundPosition = `${-stamp.sx * tile}px ${-stamp.sy * tile}px`;
+    world.appendChild(el);
+  }
+
+  function makeImageStamp(world, stamp) {
+    const el = baseStamp(stamp);
+    el.style.backgroundImage = `url("${stamp.image}")`;
+    el.style.backgroundSize = "100% 100%";
+    el.style.backgroundPosition = "0 0";
     world.appendChild(el);
   }
 
@@ -76,9 +99,8 @@
     if (!world || world.dataset.map !== MAP_ID) return false;
     const tile = tilePixels(world);
     const present = new Set([...world.querySelectorAll(":scope > .la-mer-ai-stamp")].map(el => el.dataset.stampId));
-    for (const stamp of STAMPS) {
-      if (!present.has(stamp.id)) makeStamp(world, stamp, tile);
-    }
+    for (const stamp of STAMPS) if (!present.has(stamp.id)) makeAtlasStamp(world, stamp, tile);
+    for (const stamp of DECOR) if (!present.has(stamp.id)) makeImageStamp(world, stamp);
     return true;
   }
 
@@ -108,5 +130,10 @@
   }
 
   requestAnimationFrame(mount);
-  window.SpellLaMerAiPreview = { atlas:ATLAS, stamps:STAMPS.map(x => ({...x})), mount };
+  window.SpellLaMerAiPreview = {
+    atlas:ATLAS,
+    stamps:STAMPS.map(x => ({...x})),
+    decor:DECOR.map(x => ({...x})),
+    mount
+  };
 })();
