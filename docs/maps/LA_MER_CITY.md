@@ -38,6 +38,18 @@ Game-space interpretation:
 
 The seams between sectors are adjusted only enough to make the intended routes continuously walkable. The district layouts are not scaled down to fit the combined map.
 
+## Road / ground tiles
+
+The provisional road network uses the same canonical Pipoya FREE RPG Tileset 32x32 map chips already used by Spell Operator. AI-generated La Mer art is not used as the road surface.
+
+- General roads: Pipoya `Dirt1`
+- Urban pavement / shopping streets: Pipoya `Dirt2`
+- Foreign settlement stone paving: Pipoya `Dirt3`
+- Harbor pavement: Pipoya `Dirt4`
+- Plazas: Pipoya `Dirt2` alternate chip
+
+The existing continuous route geometry in `js/la-mer-expanded.js` is retained for this provisional pass. Sea is rendered separately as a blue base plus wave/highlight effect. Large AI-generated buildings, bridges, boats, market stalls, and props may remain as provisional decorative stamps above the canonical ground layer.
+
 ## Rendering
 
 - The logical map remains `144 x 104` tiles for movement and collision.
@@ -56,7 +68,7 @@ The seams between sectors are adjusted only enough to make the intended routes c
 - 分類: 地面 / 橋 / 建物 / 港 / 市場 / 小物
 - 大型素材は 3×3、8×4、7×8、7×9、9×9、9×4、6×4 等の矩形スタンプとして扱う。
 - 海面は画像タイルを全面敷き詰めるのではなく、青色ベース + 波・反射エフェクトで表現する。
-- 白石畳は32×32の基準チップから3×3パターンとして構成し、反復可能な地面表現に使う。
+- 白石畳はエディタ用の仮素材として保持するが、通常ゲームの道路・石畳・港舗装はPipoya系の正式マップチップを使う。
 
 通常ゲームでは `js/la-mer-ai-preview.js` が**外観検討用の仮配置**を重ねる。
 
@@ -64,7 +76,6 @@ The seams between sectors are adjusted only enough to make the intended routes c
 - 三宮: 青屋根建物A/B
 - 港1: 市場、ボート、石橋、街灯
 - 港2: 市場、ランドマーク建物、ボート、街灯
-- 港の舗装: 白石畳
 - 海: 青色ベース + 水面エフェクト
 
 この仮配置は既存の `144 x 104` 論理座標・既存の移動経路・セクター構造を変更しない。最終配置ではなく、マップエディタで調整するための叩き台である。
