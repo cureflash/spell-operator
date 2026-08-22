@@ -68,6 +68,11 @@
 
   function displayStdout(status) {
     if (!outputText) return;
+    if (/RUNNING|JUDGING/i.test(status)) {
+      outputText.textContent = "（出力待ち）";
+      outputText.dataset.resultKind = "running";
+      return;
+    }
     const result = lastPythonResult();
     const stdout = stdoutFrom(result);
     outputText.textContent = stdout.trimEnd() || "（出力なし）";
@@ -115,7 +120,6 @@
     const result = lastPythonResult();
     const codeError = codeErrorFrom(result);
 
-    // A worker/CDN/runtime failure is not a Python-code error.
     if (/PYTHON ERROR/i.test(status) && !codeError && window.SpellPython?.lastError) {
       runState.textContent = "RUNTIME ERROR";
       runState.className = "status bad";
