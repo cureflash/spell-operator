@@ -5,11 +5,13 @@
   const portraits = {
     sophie: {
       neutral: "assets/characters/portraits/sophie/neutral.jpg?v=3",
-      smile: "assets/characters/portraits/sophie/smile.jpg?v=1"
+      smile: "assets/characters/portraits/sophie/smile.jpg?v=1",
+      battle: "assets/characters/portraits/sophie/battle.jpg?v=1"
     },
     lumiere: {
       neutral: "assets/characters/portraits/lumiere/neutral.jpg?v=2",
-      smile: "assets/characters/portraits/lumiere/smile.jpg?v=1"
+      smile: "assets/characters/portraits/lumiere/smile.jpg?v=1",
+      battle: "assets/characters/portraits/lumiere/battle.jpg?v=1"
     }
   };
 
