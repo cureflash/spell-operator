@@ -3,15 +3,15 @@
 
   const SOURCE = "assets/audio/sfx/dialog-pop.wav";
   const FALLBACK_POOL_SIZE = 6;
-  const FALLBACK_VOLUME = 1.0;
-  const WEB_AUDIO_GAIN = 2.4;
+  const DEFAULT_VOLUME = 0.5;
 
   if (!window.SpellDialogTyping?.setStepListener) return;
 
+  let currentVolume = window.SpellAudioSettings?.get?.("sfx") ?? DEFAULT_VOLUME;
   const fallbackPool = Array.from({ length: FALLBACK_POOL_SIZE }, () => {
     const audio = new Audio(SOURCE);
     audio.preload = "auto";
-    audio.volume = FALLBACK_VOLUME;
+    audio.volume = currentVolume;
     return audio;
   });
   let fallbackCursor = 0;
@@ -60,7 +60,7 @@
     const source = audioContext.createBufferSource();
     const gain = audioContext.createGain();
     source.buffer = decodedBuffer;
-    gain.gain.value = WEB_AUDIO_GAIN;
+    gain.gain.value = currentVolume;
     source.connect(gain);
     gain.connect(audioContext.destination);
     source.start();
@@ -72,6 +72,7 @@
     fallbackCursor = (fallbackCursor + 1) % fallbackPool.length;
     try {
       audio.currentTime = 0;
+      audio.volume = currentVolume;
       const playPromise = audio.play();
       if (playPromise?.catch) playPromise.catch(() => {});
     } catch (_) {}
@@ -79,18 +80,23 @@
 
   function playPop({ chunk } = {}) {
     if (!Array.isArray(chunk) || !chunk.some(char => /\S/.test(char))) return;
+    if (currentVolume <= 0) return;
     if (!playWebAudioPop()) {
       playFallbackPop();
       ensureWebAudio().catch(() => {});
     }
   }
 
+  window.SpellAudioSettings?.subscribe?.(settings => {
+    currentVolume = settings.sfx;
+    fallbackPool.forEach(audio => { audio.volume = currentVolume; });
+  });
+
   window.SpellDialogTyping.setStepListener(playPop);
 
   window.SpellDialogSfx = {
     source: SOURCE,
-    volume: FALLBACK_VOLUME,
-    gain: WEB_AUDIO_GAIN,
+    volume: () => currentVolume,
     playPop,
     unlock: unlockAudio,
     test: () => playPop({ chunk: ["あ"] })
