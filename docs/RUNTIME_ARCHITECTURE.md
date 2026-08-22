@@ -107,7 +107,17 @@ After the transition, the controller stops at the plug-in menu. It does not choo
 - reports a failing random input plus player/expected output in the technical output pane
 - records a fully passing submission as the learned spell while preserving a more efficient saved implementation
 
-The Python execution engine and fixed test logic remain owned by `js/python-grimoire.js`; workspace, assistant, and answer-judge modules reuse `SpellPython.runSuite()` rather than implementing another Python runtime.
+`js/python-runner.js` and `js/python-worker.mjs` own the browser Python runtime. `js/python-grimoire.js` owns the fixed problem/test definitions that use that runtime. Workspace, assistant, grimoire, and answer-judge code must reuse `SpellPython.runSuite()` rather than implementing another Python backend.
+
+The production Python backend is intentionally the same browser path that passed the isolated Safari diagnostic:
+
+1. same-origin `Worker(..., { type: "module" })`
+2. dynamic import of Pyodide 0.28.3 inside the worker
+3. Pyodide initialization inside the worker
+4. Python stdin/stdout capture inside the worker
+5. suite result serialized to JSON text in Python and parsed in JavaScript
+
+Do not reintroduce the retired Classic Worker or Safari main-thread Pyodide fallback unless a new isolated diagnostic proves the module-worker path itself is unavailable.
 
 Diagnostics:
 
@@ -120,11 +130,13 @@ SpellPluginTutorial.play()
 SpellPluginEditorAssistant.sync()
 SpellPluginHints.status()
 SpellAnswerJudge.generateInputs("fire", 10)
+SpellPython.runtimeMode
+SpellPython.lastError
 ```
 
-## Python runtime diagnostic
+## Python runtime diagnostics
 
-`tools/python-runtime-test.html` is an isolated developer diagnostic for browser Python execution. It deliberately does not use the game runtime, `SpellPython`, the plug-in UI, answer judging, or Lumiere presentation code.
+`tools/python-runtime-test.html` is the isolated browser/Pyodide diagnostic. It deliberately does not use the game runtime, `SpellPython`, the plug-in UI, answer judging, or Lumiere presentation code.
 
 It tests this path only:
 
@@ -135,7 +147,9 @@ It tests this path only:
 5. run `print("str")`
 6. run `input()` with a supplied stdin value
 
-The page outputs machine-readable JSON with format `spell-operator/python-runtime-diagnostic@1`. When browser Python fails, use the first failed phase/stage from this diagnostic before changing the game runner again. Do not add another compatibility layer to the game runtime until this isolated path has been confirmed or disproved on the target browser.
+The page outputs machine-readable JSON with format `spell-operator/python-runtime-diagnostic@1`.
+
+`python-runtime-integration-test.html` uses the production `js/python-runner.js` and `js/python-worker.mjs` directly. It runs the same print/input checks through `SpellPython.runSuite()` and emits `spell-operator/python-production-runtime-diagnostic@1`. If the isolated diagnostic passes but this integration diagnostic fails, the fault is in the production runner/worker integration. If both pass but the plug-in editor still fails, investigate the plug-in execution/controller layer rather than changing Pyodide startup again.
 
 ## Field input and scene ownership
 
@@ -177,6 +191,7 @@ The following post-load patch modules were removed after their behavior was fold
 - `plugin-se.js`
 - `plugin-transition.js`
 - `plugin-editor-entry.js`
+- `python-worker-classic.js`
 
 Prototype 0.2 runtime files `game02-core.js` and `game02-battle.js` were also removed because the active entrypoint and current specifications use Prototype 0.3 only.
 
