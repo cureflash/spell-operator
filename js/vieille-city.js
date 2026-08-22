@@ -41,6 +41,7 @@
   document.head.appendChild(style);
 
   let expandingVieille = false;
+  let activatingWithSnapshot = false;
   let renderedWindow = null;
   let renderQueued = false;
 
@@ -149,13 +150,8 @@
     this.height = HEIGHT;
     this.blocked = new Set(blocked);
 
-    const player = snapshot?.player;
-    const looksExpanded = player
-      && Number.isFinite(player.x)
-      && Number.isFinite(player.y)
-      && (player.x >= 20 || player.y >= 14);
-
-    return originalRestore.call(this, looksExpanded ? snapshot : spawn);
+    const useSnapshot = !expandingVieille || activatingWithSnapshot;
+    return originalRestore.call(this, useSnapshot && snapshot ? snapshot : spawn);
   };
 
   const originalActivate = Field.activateMap.bind(Field);
@@ -163,6 +159,7 @@
     if (id !== MAP_ID) return originalActivate(id, options);
 
     expandingVieille = true;
+    activatingWithSnapshot = Boolean(options?.snapshot);
     try {
       const result = originalActivate(id, options);
       rebuildWorld();
@@ -170,6 +167,7 @@
       requestAnimationFrame(() => window.SpellBgm?.sync?.());
       return result;
     } finally {
+      activatingWithSnapshot = false;
       expandingVieille = false;
     }
   };
