@@ -41,12 +41,28 @@
     return `ルミエル「${result.dialogue}」`;
   }
 
+  function failureResult(message){
+    return {
+      ok:false,
+      compileError:message,
+      tests:[],
+      maxCost:0,
+      maxBreakdown:null
+    };
+  }
+
   function install(){
     const python=window.SpellPython;
     if(!python||python.__lumiereErrorGuideInstalled)return false;
     const originalRunSuite=python.runSuite.bind(python);
     python.runSuite=async(...args)=>{
-      const result=await originalRunSuite(...args);
+      let result;
+      try{
+        result=await originalRunSuite(...args);
+      }catch(error){
+        const raw=`${error?.name||"Error"}: ${error?.message||error}`;
+        return failureResult(await format(raw));
+      }
       if(result?.compileError)result.compileError=await format(result.compileError);
       if(Array.isArray(result?.tests)){
         for(const test of result.tests){
