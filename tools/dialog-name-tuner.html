@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Spell Operator - 発言者名UI調整</title>
+  <style>
+    :root{color-scheme:light dark;font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif;background:#151722;color:#eceef4}
+    *{box-sizing:border-box}
+    body{margin:0;background:#151722;color:#eceef4}
+    main{max-width:1180px;margin:0 auto;padding:24px}
+    h1{font-size:24px;margin:0 0 8px}
+    h2{font-size:17px;margin:0 0 12px}
+    p{line-height:1.6;color:#bec4d3}
+    .layout{display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);gap:20px;align-items:start}
+    .panel{background:#202330;border:1px solid #393e51;border-radius:12px;padding:16px}
+    .controls{display:grid;gap:14px}
+    .group{border-top:1px solid #393e51;padding-top:12px}
+    .group:first-child{border-top:0;padding-top:0}
+    .group-title{font-weight:800;margin-bottom:8px;color:#fff}
+    .control{display:grid;grid-template-columns:110px 1fr 72px;gap:8px;align-items:center;margin:8px 0}
+    .control label{font-size:13px;color:#d8dbe5}
+    .control input[type="range"]{width:100%}
+    input[type="number"],input[type="text"],select,textarea{width:100%;border:1px solid #555c72;border-radius:6px;background:#12141c;color:#fff;padding:8px;font:inherit}
+    input[type="color"]{width:100%;height:38px;border:1px solid #555c72;border-radius:6px;background:#12141c;padding:3px}
+    .color-row{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:8px 0}
+    .color-row label{font-size:13px;color:#d8dbe5}
+    .preview-wrap{overflow:auto;padding:16px;background:#0f1118;border-radius:10px;border:1px solid #393e51}
+    .preview-stage{position:relative;width:860px;height:166px;display:grid;grid-template-columns:160px 1fr;background:#fffef2;color:#202128;border:4px solid #333946;border-radius:8px;box-shadow:inset 0 0 0 2px #adb5c4,0 5px 14px rgba(0,0,0,.22);font-family:ui-monospace,"Noto Sans JP",monospace;overflow:visible}
+    .speaker-pane{position:relative;overflow:visible;border-right:3px solid #555d6a;background:#ddd}
+    .portrait{width:100%;height:100%;min-height:158px;background:#e6a157 url("../assets/characters/portraits/sophie/neutral.jpg?v=3") center/cover no-repeat}
+    .name-badge{position:absolute;left:176px;top:12px;z-index:3;display:block;white-space:nowrap;cursor:grab;user-select:none;touch-action:none;color:#202128;font-size:14px;font-weight:900;line-height:1.25;padding:3px 10px;min-width:92px;background:transparent;border:0 solid #555d6a;border-radius:0;text-align:left}
+    .name-badge.dragging{cursor:grabbing;outline:2px dashed #7a5cff;outline-offset:2px}
+    .message-pane{position:relative;padding:45px 42px 20px 18px;font-size:14px;line-height:1.75}
+    .next{position:absolute;right:14px;bottom:9px}
+    .hint{font-size:12px;color:#9ea6ba;margin-top:8px}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    button{border:1px solid #6f7690;border-radius:7px;background:#303548;color:#fff;padding:9px 12px;font-weight:700;cursor:pointer}
+    button.primary{background:#5a49d8;border-color:#7668e7}
+    button:hover{filter:brightness(1.08)}
+    textarea{min-height:235px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.45}
+    .status{min-height:1.5em;font-size:13px;color:#9fe0af}
+    .preset-note{font-size:12px;color:#9ea6ba}
+    @media(max-width:800px){main{padding:14px}.layout{grid-template-columns:1fr}.control{grid-template-columns:100px 1fr 68px}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>発言者名UI 調整ツール</h1>
+  <p>名前札をドラッグするか数値を変更して調整してください。最後に「ChatGPT用JSON」をコピーして、このチャットへそのまま貼れば同じ値を実装できます。</p>
+
+  <div class="layout">
+    <section class="panel controls" aria-label="調整項目">
+      <div class="group">
+        <div class="group-title">表示内容</div>
+        <div class="color-row"><label for="speakerText">表示名</label><input id="speakerText" type="text" value="ソフィー"></div>
+      </div>
+
+      <div class="group" id="positionControls"><div class="group-title">位置</div></div>
+      <div class="group" id="sizeControls"><div class="group-title">大きさ・文字</div></div>
+
+      <div class="group">
+        <div class="group-title">色・枠</div>
+        <div class="color-row"><label for="backgroundColor">背景色</label><input id="backgroundColor" type="color" value="#ffe8a3"></div>
+        <div class="control"><label for="backgroundOpacityRange">背景透明度</label><input id="backgroundOpacityRange" type="range" min="0" max="100" step="1" value="0"><input id="backgroundOpacity" type="number" min="0" max="100" value="0"></div>
+        <div class="color-row"><label for="textColor">文字色</label><input id="textColor" type="color" value="#202128"></div>
+        <div class="color-row"><label for="borderColor">枠線色</label><input id="borderColor" type="color" value="#555d6a"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">プリセット</div>
+        <div class="actions">
+          <button type="button" id="presetCurrent">現在の見た目</button>
+          <button type="button" id="presetBadge">名前札風</button>
+          <button type="button" id="presetDark">濃色タグ</button>
+        </div>
+        <div class="preset-note">プリセット後も全項目を自由に変更できます。</div>
+      </div>
+    </section>
+
+    <div>
+      <section class="panel">
+        <h2>プレビュー</h2>
+        <div class="preview-wrap">
+          <div class="preview-stage" id="previewStage">
+            <div class="speaker-pane">
+              <div class="portrait" aria-label="ソフィーの立ち絵"></div>
+              <div class="name-badge" id="nameBadge">ソフィー</div>
+            </div>
+            <div class="message-pane">プラグイン！ルミエル.EXE トランスミッション！<span class="next">▼</span></div>
+          </div>
+        </div>
+        <div class="hint">名前札はドラッグできます。座標は実ゲームと同じく、会話ウィンドウ左上を基準にしたpx値です。</div>
+      </section>
+
+      <section class="panel" style="margin-top:20px">
+        <h2>ChatGPTへ渡す値</h2>
+        <p class="hint">下のJSONを丸ごと貼って「この値で反映して」と言えば識別できます。</p>
+        <textarea id="jsonOutput" readonly aria-label="ChatGPT用JSON"></textarea>
+        <div class="actions">
+          <button type="button" class="primary" id="copyJson">ChatGPT用JSONをコピー</button>
+          <button type="button" id="selectJson">JSONを全選択</button>
+        </div>
+        <div class="status" id="copyStatus" aria-live="polite"></div>
+        <details>
+          <summary>生成されるCSSも見る</summary>
+          <textarea id="cssOutput" readonly aria-label="生成CSS"></textarea>
+        </details>
+      </section>
+    </div>
+  </div>
+</main>
+<script>
+(() => {
+  "use strict";
+
+  const root = document;
+  const badge = root.getElementById("nameBadge");
+  const stage = root.getElementById("previewStage");
+  const jsonOutput = root.getElementById("jsonOutput");
+  const cssOutput = root.getElementById("cssOutput");
+  const speakerText = root.getElementById("speakerText");
+  const copyStatus = root.getElementById("copyStatus");
+
+  const specs = [
+    {group:"positionControls", key:"left", label:"左位置", min:0, max:500, step:1, value:176},
+    {group:"positionControls", key:"top", label:"上位置", min:0, max:130, step:1, value:12},
+    {group:"sizeControls", key:"fontSize", label:"文字サイズ", min:8, max:36, step:1, value:14},
+    {group:"sizeControls", key:"minWidth", label:"最小幅", min:0, max:320, step:1, value:92},
+    {group:"sizeControls", key:"width", label:"固定幅(0=自動)", min:0, max:420, step:1, value:0},
+    {group:"sizeControls", key:"height", label:"固定高(0=自動)", min:0, max:100, step:1, value:0},
+    {group:"sizeControls", key:"paddingX", label:"左右余白", min:0, max:40, step:1, value:10},
+    {group:"sizeControls", key:"paddingY", label:"上下余白", min:0, max:24, step:1, value:3},
+    {group:"sizeControls", key:"borderWidth", label:"枠線太さ", min:0, max:8, step:1, value:0},
+    {group:"sizeControls", key:"borderRadius", label:"角丸", min:0, max:30, step:1, value:0}
+  ];
+
+  const values = Object.fromEntries(specs.map(s => [s.key, s.value]));
+  values.fontWeight = 900;
+  values.lineHeight = 1.25;
+
+  const controls = new Map();
+  for (const spec of specs) {
+    const row = document.createElement("div");
+    row.className = "control";
+    const label = document.createElement("label");
+    label.htmlFor = spec.key + "Range";
+    label.textContent = spec.label;
+    const range = document.createElement("input");
+    range.type = "range";
+    range.id = spec.key + "Range";
+    range.min = spec.min;
+    range.max = spec.max;
+    range.step = spec.step;
+    range.value = spec.value;
+    const number = document.createElement("input");
+    number.type = "number";
+    number.id = spec.key;
+    number.min = spec.min;
+    number.max = spec.max;
+    number.step = spec.step;
+    number.value = spec.value;
+    row.append(label, range, number);
+    root.getElementById(spec.group).appendChild(row);
+    controls.set(spec.key, {range, number, spec});
+
+    const set = raw => {
+      const parsed = Number(raw);
+      const next = Number.isFinite(parsed) ? Math.min(spec.max, Math.max(spec.min, parsed)) : spec.value;
+      values[spec.key] = next;
+      range.value = String(next);
+      number.value = String(next);
+      render();
+    };
+    range.addEventListener("input", e => set(e.target.value));
+    number.addEventListener("input", e => set(e.target.value));
+  }
+
+  const sizeGroup = root.getElementById("sizeControls");
+  const weightRow = document.createElement("div");
+  weightRow.className = "color-row";
+  weightRow.innerHTML = '<label for="fontWeight">文字の太さ</label><select id="fontWeight"><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900" selected>900</option></select>';
+  sizeGroup.appendChild(weightRow);
+  const lineHeightRow = document.createElement("div");
+  lineHeightRow.className = "color-row";
+  lineHeightRow.innerHTML = '<label for="lineHeight">行高</label><input id="lineHeight" type="number" min="1" max="2.5" step="0.05" value="1.25">';
+  sizeGroup.appendChild(lineHeightRow);
+
+  const backgroundColor = root.getElementById("backgroundColor");
+  const backgroundOpacity = root.getElementById("backgroundOpacity");
+  const backgroundOpacityRange = root.getElementById("backgroundOpacityRange");
+  const textColor = root.getElementById("textColor");
+  const borderColor = root.getElementById("borderColor");
+  const fontWeight = root.getElementById("fontWeight");
+  const lineHeight = root.getElementById("lineHeight");
+
+  function clampOpacity(raw) {
+    const n = Number(raw);
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  }
+
+  function hexToRgba(hex, opacityPercent) {
+    const clean = String(hex).replace("#", "");
+    const n = Number.parseInt(clean, 16);
+    const r = (n >> 16) & 255;
+    const g = (n >> 8) & 255;
+    const b = n & 255;
+    const a = clampOpacity(opacityPercent) / 100;
+    return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`;
+  }
+
+  function stylePayload() {
+    return {
+      format: "spell-operator/dialog-name-style@1",
+      target: ".dialog-name",
+      coordinateOrigin: "field-dialog-top-left",
+      desktop: {
+        left: values.left,
+        top: values.top,
+        width: values.width === 0 ? "auto" : values.width,
+        height: values.height === 0 ? "auto" : values.height,
+        minWidth: values.minWidth,
+        fontSize: values.fontSize,
+        fontWeight: values.fontWeight,
+        lineHeight: values.lineHeight,
+        paddingX: values.paddingX,
+        paddingY: values.paddingY,
+        backgroundColor: backgroundColor.value,
+        backgroundOpacity: clampOpacity(backgroundOpacity.value),
+        textColor: textColor.value,
+        borderWidth: values.borderWidth,
+        borderColor: borderColor.value,
+        borderRadius: values.borderRadius
+      }
+    };
+  }
+
+  function cssFor(payload) {
+    const s = payload.desktop;
+    const width = s.width === "auto" ? "auto" : `${s.width}px`;
+    const height = s.height === "auto" ? "auto" : `${s.height}px`;
+    return `.dialog-name{\n  left:${s.left}px!important;\n  top:${s.top}px!important;\n  width:${width}!important;\n  height:${height}!important;\n  min-width:${s.minWidth}px!important;\n  padding:${s.paddingY}px ${s.paddingX}px!important;\n  background:${hexToRgba(s.backgroundColor, s.backgroundOpacity)}!important;\n  color:${s.textColor}!important;\n  border:${s.borderWidth}px solid ${s.borderColor}!important;\n  border-radius:${s.borderRadius}px!important;\n  font-size:${s.fontSize}px!important;\n  font-weight:${s.fontWeight}!important;\n  line-height:${s.lineHeight}!important;\n}`;
+  }
+
+  function render() {
+    values.fontWeight = Number(fontWeight.value) || 900;
+    const lh = Number(lineHeight.value);
+    values.lineHeight = Number.isFinite(lh) ? Math.max(1, Math.min(2.5, lh)) : 1.25;
+    const opacity = clampOpacity(backgroundOpacity.value);
+    backgroundOpacity.value = String(opacity);
+    backgroundOpacityRange.value = String(opacity);
+
+    badge.textContent = speakerText.value || "ソフィー";
+    badge.style.left = `${values.left}px`;
+    badge.style.top = `${values.top}px`;
+    badge.style.width = values.width === 0 ? "auto" : `${values.width}px`;
+    badge.style.height = values.height === 0 ? "auto" : `${values.height}px`;
+    badge.style.minWidth = `${values.minWidth}px`;
+    badge.style.padding = `${values.paddingY}px ${values.paddingX}px`;
+    badge.style.background = hexToRgba(backgroundColor.value, opacity);
+    badge.style.color = textColor.value;
+    badge.style.borderWidth = `${values.borderWidth}px`;
+    badge.style.borderColor = borderColor.value;
+    badge.style.borderRadius = `${values.borderRadius}px`;
+    badge.style.fontSize = `${values.fontSize}px`;
+    badge.style.fontWeight = String(values.fontWeight);
+    badge.style.lineHeight = String(values.lineHeight);
+
+    const payload = stylePayload();
+    jsonOutput.value = JSON.stringify(payload, null, 2);
+    cssOutput.value = cssFor(payload);
+  }
+
+  function setValue(key, value) {
+    const entry = controls.get(key);
+    if (!entry) return;
+    values[key] = value;
+    entry.range.value = String(value);
+    entry.number.value = String(value);
+  }
+
+  function applyPreset(preset) {
+    Object.entries(preset.values || {}).forEach(([key, value]) => setValue(key, value));
+    if (preset.backgroundColor) backgroundColor.value = preset.backgroundColor;
+    if (preset.backgroundOpacity != null) {
+      backgroundOpacity.value = String(preset.backgroundOpacity);
+      backgroundOpacityRange.value = String(preset.backgroundOpacity);
+    }
+    if (preset.textColor) textColor.value = preset.textColor;
+    if (preset.borderColor) borderColor.value = preset.borderColor;
+    if (preset.fontWeight) fontWeight.value = String(preset.fontWeight);
+    if (preset.lineHeight) lineHeight.value = String(preset.lineHeight);
+    render();
+  }
+
+  root.getElementById("presetCurrent").addEventListener("click", () => applyPreset({
+    values:{left:176,top:12,fontSize:14,minWidth:92,width:0,height:0,paddingX:10,paddingY:3,borderWidth:0,borderRadius:0},
+    backgroundColor:"#ffe8a3",backgroundOpacity:0,textColor:"#202128",borderColor:"#555d6a",fontWeight:900,lineHeight:1.25
+  }));
+  root.getElementById("presetBadge").addEventListener("click", () => applyPreset({
+    values:{left:176,top:10,fontSize:14,minWidth:96,width:0,height:0,paddingX:12,paddingY:5,borderWidth:2,borderRadius:5},
+    backgroundColor:"#fff0b8",backgroundOpacity:100,textColor:"#202128",borderColor:"#555d6a",fontWeight:900,lineHeight:1.25
+  }));
+  root.getElementById("presetDark").addEventListener("click", () => applyPreset({
+    values:{left:176,top:10,fontSize:14,minWidth:100,width:0,height:0,paddingX:12,paddingY:5,borderWidth:1,borderRadius:5},
+    backgroundColor:"#343a46",backgroundOpacity:100,textColor:"#ffffff",borderColor:"#6f7787",fontWeight:800,lineHeight:1.25
+  }));
+
+  [speakerText, backgroundColor, textColor, borderColor, fontWeight, lineHeight].forEach(el => el.addEventListener("input", render));
+  backgroundOpacityRange.addEventListener("input", e => {backgroundOpacity.value = e.target.value; render();});
+  backgroundOpacity.addEventListener("input", e => {backgroundOpacityRange.value = String(clampOpacity(e.target.value)); render();});
+
+  let drag = null;
+  badge.addEventListener("pointerdown", event => {
+    if (event.button !== 0 && event.pointerType === "mouse") return;
+    drag = {pointerId:event.pointerId, startX:event.clientX, startY:event.clientY, left:values.left, top:values.top};
+    badge.setPointerCapture(event.pointerId);
+    badge.classList.add("dragging");
+    event.preventDefault();
+  });
+  badge.addEventListener("pointermove", event => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const nextLeft = Math.round(Math.max(0, Math.min(stage.clientWidth - 20, drag.left + event.clientX - drag.startX)));
+    const nextTop = Math.round(Math.max(0, Math.min(stage.clientHeight - 20, drag.top + event.clientY - drag.startY)));
+    setValue("left", nextLeft);
+    setValue("top", nextTop);
+    render();
+  });
+  const finishDrag = event => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    drag = null;
+    badge.classList.remove("dragging");
+    if (badge.hasPointerCapture(event.pointerId)) badge.releasePointerCapture(event.pointerId);
+  };
+  badge.addEventListener("pointerup", finishDrag);
+  badge.addEventListener("pointercancel", finishDrag);
+
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_) {}
+    jsonOutput.focus();
+    jsonOutput.select();
+    try { return document.execCommand("copy"); } catch (_) { return false; }
+  }
+
+  root.getElementById("copyJson").addEventListener("click", async () => {
+    const ok = await copyText(jsonOutput.value);
+    copyStatus.textContent = ok ? "コピーしました。このままChatGPTへ貼ってください。" : "自動コピーできませんでした。JSONを全選択して手動コピーしてください。";
+  });
+  root.getElementById("selectJson").addEventListener("click", () => {
+    jsonOutput.focus();
+    jsonOutput.select();
+    copyStatus.textContent = "JSONを全選択しました。";
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
