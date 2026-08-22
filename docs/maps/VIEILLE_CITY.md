@@ -36,4 +36,5 @@ This first implementation contains roads only.
 
 ## Temporary access
 
-No permanent city entrance, buildings, events, or destination connections are defined by this initial road-only implementation.
+- The field menu `イードウ` includes `ビエイユシティ` for development access.
+- No permanent city entrance, buildings, or events are defined by this initial road-only implementation.
