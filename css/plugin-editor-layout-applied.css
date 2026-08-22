@@ -1,4 +1,48 @@
-/* Applied from spell-operator/plugin-editor-layout@1. Desktop plug-in editor only. */
+/* Applied from spell-operator/plugin-editor-layout@1. Plug-in editor only. */
+
+.plugin-grimoire-toggle {
+  width: 100%;
+  min-height: 42px;
+  padding: 4px 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.plugin-grimoire-toggle:hover,
+.plugin-grimoire-toggle:focus-visible {
+  color: var(--pc-cyan, #7ce0ff);
+  outline: 0;
+}
+
+.plugin-grimoire-toggle .plugin-library-status {
+  white-space: nowrap;
+}
+
+.plugin-right-pane.grimoire-collapsed {
+  grid-template-rows: auto 0 minmax(0, 1fr) !important;
+}
+
+.plugin-right-pane.grimoire-collapsed .plugin-code-library-pane {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.plugin-right-pane.grimoire-collapsed .plugin-library-body,
+.plugin-right-pane.grimoire-collapsed #plugin-grimoire-resizer {
+  display: none !important;
+}
+
+.plugin-right-pane.grimoire-collapsed .plugin-run-pane {
+  min-height: 0;
+}
+
+.plugin-right-pane.grimoire-open .plugin-library-body {
+  display: grid;
+}
+
 @media (min-width: 761px) {
   .plugin-editor-shell {
     --plugin-editor-left: 64%;
@@ -12,7 +56,14 @@
 
   .plugin-right-pane {
     --plugin-grimoire-height: 30%;
+  }
+
+  .plugin-right-pane.grimoire-open {
     grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(0, 1fr) !important;
+  }
+
+  .plugin-right-pane.grimoire-collapsed {
+    grid-template-rows: auto 0 minmax(0, 1fr) !important;
   }
 
   .plugin-resizer::before {
@@ -68,5 +119,14 @@
     border-radius: 12px !important;
     font-size: 11px !important;
     line-height: 1.15 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .plugin-right-pane.grimoire-open {
+    grid-template-rows: minmax(0, 42%) 2px minmax(0, 1fr) !important;
+  }
+  .plugin-right-pane.grimoire-collapsed {
+    grid-template-rows: auto 0 minmax(0, 1fr) !important;
   }
 }
