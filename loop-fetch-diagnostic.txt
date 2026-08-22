@@ -1,0 +1,6 @@
+ancient_gust zip_http=404 url=https://peritune.com/music/Peritune_Ancient_Gust_loop.zip
+ancient_gust loop_not_replaced
+resort5 zip_http=404 url=https://peritune.com/music/PerituneMaterial_Resort5_loop.zip
+resort5 loop_not_replaced
+swift_strike zip_http=404 url=https://peritune.com/music/Peritune_Swift_Strike_loop.zip
+swift_strike loop_not_replaced
