@@ -1,262 +1,438 @@
-# Spell Operator — New ChatGPT Project Handoff
+# Spell Operator — ChatGPT Project 引き継ぎ資料
 
-Updated: 2026-08-17
+Updated: 2026-08-22
 
-This document is the clean handoff for moving Spell Operator into a new ChatGPT Project without inheriting conflicting old project-chat context.
+この資料は、Spell Operator を新しい ChatGPT Project / 新しいチャットへ移したときに、古い会話履歴へ依存せず、現在の仕様・実装・未解決事項から作業を再開するための引き継ぎ資料です。
 
-## 0. Migration rule
+## 0. 最重要ルール
 
-The old ChatGPT Project chat history is **not** a specification source after migration.
+仕様の優先順位は必ず次の順です。
 
-Use this priority order:
+1. 現在の会話でユーザーが明示的に決めた内容
+2. Notion の正本データベース
+3. GitHub の Markdown 仕様書
+4. 現在の実装コード
+5. 過去チャットは調査用。仕様の権威にはしない
 
-1. Explicit decision by the user in the current conversation
-2. Notion database records
-3. Git Markdown specifications / this handoff
-4. Current implementation code
-5. Old chat history only as archaeology, never as authority
+古いチャットと Notion / Git 仕様が衝突する場合、古いチャットを採用しないでください。
 
-If an old chat conflicts with Notion, Git specifications, or a newer explicit user decision, ignore the old chat.
+未決定事項を推測で確定しないこと。依頼範囲外の仕様を勝手に変更しないこと。
 
-## 1. Mandatory startup protocol
+## 1. 新しいチャット開始時に必ず読むもの
 
-Before answering, designing, or implementing Spell Operator:
+Spell Operator の回答・設計・実装を始める前に、次を実際に読み込むこと。
 
-1. Read Notion: `Spell Operator 攻略・仕様Wiki`
+### Notion
+
+1. `Spell Operator 攻略・仕様Wiki`
    - https://app.notion.com/p/3bf19583748e81b9a285c1e1686db1e2
-2. Read Notion: `AI参照・仕様同期ルール`
+2. `AI参照・仕様同期ルール`
    - https://app.notion.com/p/3bf19583748e8138aefdfce2079758a3
-3. Read only the Notion databases relevant to the task.
-4. If implementation is involved, read Git in this order:
-   - `AGENTS.md`
-   - `docs/SPEC_INDEX.md`
-   - `docs/PROJECT_HANDOFF.md`
-   - relevant specification file if one exists
-   - actual current code
+3. 依頼に関係する Notion データベース / レコード
 
-Do not assume old Project memory is available or correct.
+### GitHub
 
-## 2. Source of truth
+Repository: `cureflash/spell-operator`
 
-- Notion databases are the canonical source for decided game/story specifications.
-- Git Markdown is the implementation-facing mirror.
-- Code is an implementation, not a specification by itself.
-- If code contains behavior that is not confirmed in Notion/Git specs, treat it as provisional implementation.
-- When the user confirms a new specification, update Notion and the relevant Git specification.
-- Never fill unresolved details by guessing.
-- Never change unrelated behavior.
+実装を扱う場合は、次の順で確認する。
 
-## 3. Notion records populated during migration
+1. `AGENTS.md`
+2. `docs/SPEC_INDEX.md`
+3. `docs/PROJECT_HANDOFF.md`
+4. `docs/GAME_SPEC.md`
+5. `docs/RUNTIME_ARCHITECTURE.md`
+6. 対象章・マップ等の仕様書
+7. 現在の実装コード
 
-The Notion database containers were mostly empty before this migration. The following current story/design records were added so the new Project does not need old chat history.
+Notion が正本、Git Markdown が実装向けミラー、コードは仕様の実装です。
 
-### Chapter
+## 2. 現在のゲーム像
 
-- `第1章 最初の暗号`
+- 2D見下ろし型の冒険RPG。
+- フィールド探索、謎解き、実際のPythonプログラミング、コマンド式戦闘を一つのゲーム進行に統合する。
+- プログラミングは教材モードではなく、世界内の情報解析・術式構築・攻略手段。
+- 魔導書はソースコードではなく **要求仕様**。
+- ソフィーが実際に Python コードを書く。
+- ルミエルは魔法知識と魔法行使を担当する。
+- 戦闘中にコードは書かない。事前に書いてテスト・登録した術式を戦闘で使う。
 
-### Characters / NPCs
-
-- `ソフィー`
-- `ルミエル`
-- `友達（クラスメイト）`
-- `ピジブル`
-- `パーツ屋の店主`
-
-### Areas / maps
-
-- `はじまりの町`
-- `学校`
-- `ピジブルの図書館`
-- `ソフィーの家`
-
-### Puzzles
-
-- `友達のシーザー暗号`
-- `旧式端末の暗号解読`
-
-### Events
-
-- `友達のシーザー暗号`
-- `Unicode対応表を探す`
-- `パーツ屋の旧式端末`
-
-### Dialogue
-
-- `Chapter 1：友達のシーザー暗号 会話`
-
-### World setting
-
-- `ルミエルの魂と魔法`
-
-These records are the canonical starting point for story-related work.
-
-## 4. Current game identity
-
-- Top-down 2D adventure RPG.
-- Field exploration, puzzles, actual Python programming, and command-based combat are integrated into one game progression.
-- Programming is a world-interaction / analysis / spell-construction tool, not a detached worksheet mode.
-- Sophie is the character who actually writes programs.
-- Lumiere handles magical knowledge and actual magic execution.
-- The player does not write code during battle.
-- Spellbooks are **requirements/specifications**, not source-code repositories.
-
-Intended spell workflow:
+基本フロー:
 
 ```text
-Sophie opens her PC
+ソフィーがPCを開く
 ↓
-reads a spellbook specification
+魔導書の要求仕様を読む
 ↓
-writes Python satisfying the requirements
+Pythonを書く
 ↓
-runs tests / debugs
+テスト / デバッグ
 ↓
-registers the spell
+術式登録
 ↓
-Lumiere executes it during exploration or battle
+ルミエルが探索・戦闘で実行
 ```
 
-## 5. Sophie / Lumiere architecture
+## 3. ソフィー / ルミエル
 
-### Sophie
+### ソフィー
 
-- Player-controlled protagonist.
-- Actually writes Python.
-- Handles logic, information processing, and spell-formula construction.
-- Physical/front-line role in battle.
-- 15 years old in the current character material.
+- プレイヤー操作キャラクター。
+- 実際に Python を書く担当。
+- 情報処理・論理・術式構築を担当。
+- 戦闘では物理寄りの前衛。
 
-### Lumiere
+### ルミエル
 
-- Sophie's companion.
-- Handles magic knowledge and actual spellcasting.
-- Android with a human soul installed.
-- Magic reacts to souls rather than bodies, allowing Lumiere to cast magic.
-- Sophie's formula is executed through Lumiere's soul/magic connection.
-- Lumiere cannot independently rewrite her own magic execution system; Sophie acts as the external operator.
+- ソフィーの同行者。
+- 魔法知識と魔法行使を担当。
+- アンドロイドだが、人間の魂がインストールされているため魔法を使える。
+- 魔法は身体ではなく魂に反応する。
+- ソフィーが構築した術式をルミエル側で実行する。
 
-Unresolved lore must remain unresolved:
+未決定のまま維持するもの:
 
-- whose soul is inside Lumiere
-- who installed it and why
-- legal/social status of soul installation
-- relationship between Lumiere's current personality/memories and the original soul
-- whether `マナレイヤ` is the final terminology
+- ルミエルに入っている魂が誰のものか
+- 誰が、なぜ魂をインストールしたか
+- 魂インストールの法的・社会的扱い
+- 現在のルミエル人格と元の魂の関係
+- 魔法ネットワーク / レイヤーの最終用語
 
-## 6. Current Python implementation
+## 4. Python 実行環境
 
-Older chats discussed Python-like interpreters and Skulpt, but the current repository has moved further.
-
-The current implementation runs **real Python through Pyodide**:
+現在は **本物の Python** を使用する。
 
 - `js/python-runner.js`
 - `js/python-worker.mjs`
-- Pyodide `v0.28.3` loaded in a Web Worker
-- user source is parsed/executed as Python
-- tests compare stdin/stdout
-- an abstract computational-cost system is calculated
-- dangerous/runtime-specific calls such as `eval`, `exec`, `compile`, `__import__`, `js`, `pyodide`, and `micropip` are restricted
+- Pyodide `v0.28.3`
+- Web Worker 上で実行
+- stdin / stdout 形式でテスト
+- 抽象計算コストから消費MPを算出
+- `eval`, `exec`, `compile`, `__import__`, `js`, `pyodide`, `micropip` 等は制限
 
-Therefore:
+旧 custom mini-language / Skulpt へ戻さないこと。
 
-- Canonical direction: Python
-- Current runtime: Pyodide
-- Do **not** revert to the old custom mini-language or assume Skulpt is required merely because an older chat mentioned it.
+## 5. 画面スクロール方針
 
-`README.md` still contains some Prototype 0.3 descriptions of the older restricted Python-like language and should not be treated as fully current when it conflicts with the active code.
+ゲーム中は原則としてブラウザ / ページスクロールを要求しない。
 
-## 7. Field / controls / party
+- 通常ゲーム画面は現在の viewport 内に必要情報と主要操作を収める。
+- 収まらない場合は密度調整、タブ、ページ切替等で解決する。
+- 魔導書 / エディタ画面もこの方針に従う。
 
-Current direction and implementation:
+## 6. プログラミング画面の今後のUI方針
 
-- Sophie is player-controlled.
-- Lumiere follows through Sophie's previous tile path rather than simply sharing the same movement vector.
-- The pair are normally shown together in the field.
-- Current field menu:
-  - ステータス
-  - リュック
-  - パソコン
-  - セーブ
-  - とじる
-- Current main keyboard behavior:
-  - movement: Arrow keys / WASD
-  - `Z`: interact / confirm / back behavior where defined
-  - `Enter`: field menu / close menu
-- Dialogue and story overlays stop normal field actions while active.
+現在の実装は textarea ベースだが、最終的には VS Code / Cursor に近い構成へ寄せる。
 
-The exact current behavior is defined by `js/game03-menu.js`, `js/game03-field.js`, `js/friend-conversation.js`, and related active modules, not by older README control text.
+希望レイアウト:
 
-## 8. Current locations
+```text
+左     : エディタ / ファイル・プラグイン系
+中央   : Pythonコード編集領域
+右     : 魔導書（過去のコード） / ルミエル支援
+右下等 : 実行ボタン / 結果表示
+```
 
-Current field code contains:
+ユーザーがペインサイズを変更できるようにする方向。
 
-- `town` — はじまりの町
-- `school` — 学校
-- `library` — ピジブルの図書館
-- `house1` — ソフィーの家 1F
-- `house2` — ソフィーとルミエルの部屋
+ルミエルのセリフ欄が実質的にコンソール / ガイダンス役になるため、エラー専用コンソールを別に増やす必要は低い。
 
-The earlier `魔導工房` concept has been replaced by **ソフィーの家** as the home/base context. The PC is in Sophie and Lumiere's room.
+この VS Code / Cursor 風UIはまだ本実装されていない。
 
-## 9. Chapter 1 — canonical story direction
+## 7. プラグイン — 現在の確定仕様
 
-Current title:
+Notion のゲームシステム `プラグイン` が正本。
+
+通常フィールドで `X`:
+
+1. ソフィーがフィールド会話で正確に
+   `プラグイン！ルミエル.EXE トランスミッション！`
+   と言う。
+2. 台詞は通常の文字送り。
+3. 文字送り途中の `Z` は全文表示のみ。
+4. 全文表示後の次の `Z` でプラグイン確定。
+5. 専用SE `可愛く輝く1` を再生。
+6. フィールドBGMを停止。
+7. ゲーム画面を完全に隠す不透明な全画面演出へ切り替える。
+8. `kirayuki1` のキラ雪演出を1回再生。
+9. 画像失敗時は発光演出だけでも必ず表示。
+10. 演出終了後、最初の利用可能な Python 課題を自動選択してエディタへ直接入る。
+
+メニューの `パソコン` は別ルート。
+
+- プラグイン台詞なし
+- キラ雪なし
+- 直接魔導書一覧へ入る
+
+プラグイン / PC 用 BGM `Dreambyte` は新しいPCセッションに入るたび 0:00 から再生する。
+同一セッション内の魔導書一覧 ↔ エディタでは再スタートしない。
+
+## 8. 2026-08-22 Runtime リファクタリング後の構造
+
+PR #28 `Refactor runtime controllers and audio architecture` を main にマージ済み。
+
+現在の公開キャッシュ番号:
+
+```text
+field-model.js?v=4
+game.js?v=88
+```
+
+公開URL:
+
+`https://cureflash.github.io/spell-operator/?v=88`
+
+### Runtime bootstrap
+
+`js/game.js`
+
+- runtime module manifest を持つ。
+- GAME START は全モジュール読み込み完了まで disabled。
+- 重要SEの preload 完了も待つ。
+- 成功後 `window.SpellRuntimeBoot.ready === true`。
+
+### Audio
+
+`js/audio-manager.js` がブラウザ音声の実再生を一元管理する。
+
+- BGM
+- 会話SE `dialog-pop`
+- プラグインSE `plugin-sparkle`
+- 共通SE音量
+- 共通AudioContext
+- HTMLAudioによる同一音源fallback
+
+音声機能ごとに別 AudioContext を作らない。
+
+診断:
+
+```js
+SpellAudio.status()
+SpellAudio.sfxStatus("dialog-pop")
+SpellAudio.sfxStatus("plugin-sparkle")
+```
+
+### Plug-in
+
+`js/plugin-controller.js` が通常フィールドのプラグイン導線を単独で所有する。
+
+担当:
+
+- X入力
+- 台詞
+- Z文字送り
+- 確定Z
+- SE
+- BGM停止
+- 全画面Kirayuki演出
+- 入力ロック
+- PC起動
+- 最初のPython課題を開く
+
+旧 `plugin-se.js`, `plugin-transition.js`, `plugin-editor-entry.js` は削除済み。
+
+診断:
+
+```js
+SpellPlugin.status()
+SpellPlugin.testSound()
+```
+
+### Field input
+
+`js/field-input-controller.js`
+
+- 移動入力のレート制限
+- 1入力バッファ
+- 会話 / メニュー / 演出中の移動遮断
+
+### Field scene
+
+`js/field-scene-controller.js`
+
+- ソフィー
+- ルミエル
+- 敵
+- 看板
+
+のDOM配置を `#field-world` に統一する。
+
+### Field model
+
+`js/field-model.js`
+
+- ソフィーの論理移動
+- ルミエルの前タイル追従
+- 旧セーブデータの追従位置補正
+- House 2F の階段通路例外
+
+を所有する。
+
+旧 `house-movement-fix.js`, `follower-normalize.js` 等で monkey patch しない。
+
+### Menu / イードウ
+
+`js/game03-menu.js` が以下を所有。
+
+- メインメニュー
+- ステータス
+- 設定
+- BGM / SE 音量変更
+- イードウの目的地選択
+- `○○に移動するの？`
+- はい / いいえ
+- `イードウ！`
+- fade
+- 補助画面の戻る処理
+
+旧 `ido-confirm-dialog-fix.js` / `z-escape.js` は削除済み。
+
+## 9. 削除済みの後付け patch
+
+PR #28 で以下を廃止した。
+
+- `movement-step-lock.js`
+- `house-movement-fix.js`
+- `follower-normalize.js`
+- `party-lockstep.js`
+- `map-scroll-fix.js`
+- `ido-confirm-dialog-fix.js`
+- `z-escape.js`
+- `plugin-se.js`
+- `plugin-transition.js`
+- `plugin-editor-entry.js`
+- `game02-core.js`
+- `game02-battle.js`
+
+今後、同じ挙動を直すためだけの `*-fix.js` を安易に追加しない。
+担当controller / modelへ修正を入れる。
+
+詳細は `docs/RUNTIME_ARCHITECTURE.md`。
+
+## 10. プラグインSEの現在の注意点
+
+リポジトリに保存されている
+
+`assets/audio/sfx/plugin-sparkle.base64`
+
+は、元データが末尾3 Base64文字欠損している。
+
+現在の `audio-manager.js` は、この特定アセットにだけ既知の `VVV` tail repair を行ってから復元する。
+
+これは「別音を鳴らすfallback」ではない。
+元の `可愛く輝く1` を復元するためのアセット固有互換処理。
+
+長期的には、この壊れたBase64を正常なバイナリ音声アセットへ置き換え、repairコードを削除するのが望ましい。
+
+### 現在の最重要未確認点
+
+PR #28 / v88 後、Safari 実機で `可愛く輝く1` が正常に鳴るかはユーザー側の最終確認待ち。
+
+鳴らない場合は追加の推測パッチを入れず、まず:
+
+```js
+SpellPlugin.status()
+SpellAudio.sfxStatus("plugin-sparkle")
+```
+
+の結果を確認する。
+
+## 11. BGM / SE
+
+共通音量設定:
+
+- BGM default `0.5`
+- SE default `0.5`
+- localStorage に永続化
+
+主なBGM:
+
+- フルール村: PeriTune `Village_Fete`
+- PC / 魔導書 / エディタ: PeriTune `Dreambyte`
+- ラメールシティ: `Resort5`
+- 通常戦闘: `Ancient Gust`
+- ボス戦: `Swift_Strike`
+- キョウトシティ予約: `Awayuki`
+
+会話文字送りSE:
+
+- `assets/audio/sfx/dialog-pop.wav`
+- 文字送りの各可視ステップでポッ音
+
+## 12. フィールド / マップの現在方針
+
+ゲーム全体の世界地図は近畿地方 + 三重をモデルにする。
+
+- フルール村 = 奈良県南部相当
+- 他都市は現実の地名を使用可能
+- Johto地方のタウンマップのような「都市 + 道路 + 地形」のつながりを参考にする
+
+世界地図から削除済み候補:
+
+- 舞鶴
+- 姫路
+- 大津
+- 串本
+- 高野山
+- 大台ケ原
+- 松坂
+- 津
+- 志摩
+
+### ラメールシティ
+
+神戸モデル。
+
+1枚の大マップとしての基本配置:
+
+```text
+　　　　　　六甲山（ダンジョン）
+山　　山　　居留地　山
+道路　元町　三宮　　道路（東側から侵入）
+海岸　港１　港２　　海
+```
+
+- 六甲山 = ダンジョン
+- 三宮 = 中心
+- 元町 = 西
+- 外国人居留地 = 北
+- 神戸港 = 南
+- さらに西側に須磨～明石をモデルにした海岸
+- 東側道路から町へ入る
+
+## 13. Chapter 1 — 現在の正本方向
+
+タイトル:
 
 `第1章 最初の暗号`
 
-Current story flow:
+流れ:
 
 ```text
-学校で友達に話しかける
+学校で友達に話す
 ↓
-友達がシーザー暗号を説明
+シーザー暗号を教わる
 ↓
-FDW / 鍵3 の問題
+FDW / key 3
 ↓
-CAT に復号
+CATへ復号
 ↓
-ピジブルの図書館へ
+図書館
 ↓
-Unicode対応表を入手
+Unicode対応表
 ↓
-文字には番号が対応していることを学ぶ
+文字と数値の対応を理解
 ↓
-旧式端末の暗号解読へ
-↓
-Pythonで数値文字列を処理する方向
+後半でPythonによる数値文字列暗号処理
 ```
 
-### Friend character
+### シーザー暗号チュートリアル
 
-- Sophie's schoolmate.
-- Good at programming.
-- Introduces the Caesar-cipher tutorial.
+- 平文 `CAT`
+- 暗号文 `FDW`
+- 鍵 `3`
+- ↑ / ↓ ボタンは **1クリック = 1文字分** 全文を動かす
 
-### Confirmed friend dialogue flow
-
-The current canonical dialogue is stored in Notion under:
-
-`Chapter 1：友達のシーザー暗号 会話`
-
-It ends with Sophie saying:
-
-`面白そう！　解いてみる！`
-
-and then the puzzle starts.
-
-## 10. Caesar tutorial — exact specification
-
-- Plaintext: `CAT`
-- Ciphertext: `FDW`
-- Key: `3`
-- `CAT` is encrypted by shifting each uppercase letter three positions forward.
-- Uppercase A-Z wraps around.
-- The puzzle has `↑` / `↓` controls beside the ciphertext.
-- `↑`: one click moves the whole text **one letter forward**.
-- `↓`: one click moves the whole text **one letter backward**.
-- The key value `3` and the per-click movement value `1` are different concepts.
-
-Expected sequence:
+正しい流れ:
 
 ```text
 FDW
@@ -268,17 +444,9 @@ DBU
 CAT
 ```
 
-Incorrect implementation:
+一回で `FDW → CAT` にしてはいけない。
 
-```text
-FDW → CAT in one click
-```
-
-The purpose is to let the player physically understand the Caesar shift before writing Python.
-
-## 11. Chapter 1 Python-learning direction
-
-The intended later puzzle teaches a chain like:
+### 後半Pythonで教える方向
 
 ```text
 numeric string
@@ -287,172 +455,224 @@ split()
 ↓
 int()
 ↓
-apply key / numeric shift
+数値シフト
 ↓
-convert Unicode number to character
+Unicode番号 → 文字
 ↓
-join / concatenate characters
+join / 連結
 ```
 
-Relevant concepts:
+学習要素:
 
-1. Caesar cipher
-2. key / shift amount
-3. strings
-4. `split()`
-5. `int()`
-6. numeric addition/subtraction
-7. loops
-8. Unicode code points
-9. numeric-to-character conversion
-10. string concatenation / joining
+- Caesar cipher
+- key
+- string
+- split
+- int
+- arithmetic
+- loop
+- Unicode
+- number → character
+- string join
 
-The `Unicode対応表` is an in-game item used as the bridge from Caesar cipher to numeric character encoding.
+## 14. Chapter 1 の provisional 実装
 
-## 12. Important provisional code that is NOT canonical story specification
+`js/game03-story.js` には現在、後半端末について具体値が実装されているが、正本仕様には昇格していない。
 
-`js/game03-story.js` currently contains concrete values for the later terminal puzzle:
+例:
 
-- encrypted string: `080B07FE080907FA0802080B07F0`
-- subtraction offset: `1977`
-- password: `REPAIR7`
-- reward: `200G`
-- `Repair` spellbook reward
+- encrypted string
+- subtraction offset
+- password
+- reward
+- Repair 関連
 
-These values currently exist in code, but during this migration they were intentionally **not promoted to canonical Notion story specification**.
+最終暗号、パスワード、報酬、完全攻略ルートはユーザー確認なしに確定しない。
 
-Treat them as provisional implementation until the user explicitly confirms them.
+## 15. Pythonエラーのルミエルガイド
 
-The canonical Notion records instead mark the final terminal ciphertext, password, complete route, and reward as unresolved.
+実装済み。
 
-## 13. Current story implementation files
+- `data/python-error-dialogues.json`
+- `js/lumiere-python-errors.js`
 
-Main files:
+Python例外クラス名をキーにしてルミエルの説明へ変換する。
 
-- `js/game03-story.js`
-- `js/friend-conversation.js`
-- `js/game03-field.js`
-- `js/game03-menu.js`
-- `js/game03-items.js`
-- `css/story.css`
-- `css/friend-conversation.css`
+例:
 
-Friend conversation is currently a multi-line dialogue event followed by the Caesar puzzle.
+- SyntaxError
+- IndentationError
+- NameError
+- TypeError
+- ZeroDivisionError
+- RecursionError
 
-## 14. Current battle direction
+生のPythonエラーも下に残す。
+単なる出力不一致はPython例外扱いしない。
 
-- Command-based RPG battle.
-- Visual direction combines a Pokémon-like opposing layout with Dragon Quest-like command progression.
-- Sophie is the physical attacker.
-- Lumiere uses registered magic.
-- Code is written/tested before battle, not during battle.
+Notion:
 
-Do not treat current numerical damage formulas or elemental multipliers as final unless separately confirmed in Notion.
+`Pythonエラー・ルミエルナビゲーション`
 
-## 15. Current assets / sprite state
+## 16. 現在の実装テスト
 
-### Sophie
+`tests/field-model.test.js`
 
-The field currently uses:
+- 追従移動
+- House 2F通行例外
+- legacy follower normalization
 
-`assets/characters/sophie_walk_3x4_hd.png`
+を検証。
 
-with a Pipoya-style 3x4 layout:
+`tests/plugin-transition-smoke.md`
 
-- rows: DOWN / LEFT / RIGHT / UP
-- columns: walk A / idle / walk B
+- X
+- 台詞
+- 文字送りZ
+- 確定Z
+- 元SE
+- Kirayuki
+- 直接エディタ
+- メニューPCでは演出なし
 
-### Lumiere
+を手動確認。
 
-The repository contains a custom asset:
+`tests/runtime-refactor-smoke.md`
 
-`assets/characters/lumiere_walk_4dir_8frames.png`
+- boot
+- audio
+- plug-in
+- menu
+- イードウ
+- field movement
 
-However, the active `css/sophie-sprite.css` currently still renders Lumiere using an external generic Pipoya character-chip URL.
+の総合スモーク確認。
 
-This is an implementation discrepancy / pending asset integration. Do not assume the custom Lumiere asset is already wired into the live field.
-
-### Map tiles
-
-`css/pipoya-map.css` currently renders visible map cells from Pipoya map-chip PNGs and disables the older hand-drawn SVG map background.
-
-Current map assets also include Sophie-house tilemap images under `assets/maps/`.
-
-## 16. Old ideas that must NOT silently return
-
-Old project chats contain concepts that are not current canonical specification. Do not reintroduce them without explicit confirmation, including examples such as:
-
-- old long-term antagonist/family plot proposals
-- old Chapter 0 / first-meeting proposals
-- old stolen-grimoire tutorial variants
-- old `feu` / countdown tutorial variants
-- old village/snack-order details
-- old custom mini-language as the final programming language
-- old assumption that Lumiere writes the programs herself
-- old `魔導工房` as Sophie's main base
-
-If such an idea is useful later, present it as a new proposal rather than an existing fact.
-
-## 17. Still unresolved
-
-Do not decide these without the user:
-
-- Sophie and Lumiere's first meeting / origin story
-- long-term antagonist and final objective
-- Lumiere's soul identity and origin
-- social/legal status of soul-installed androids
-- final terminology for the magical network/layer
-- Spell Operator as a profession / qualification system
-- final Chapter 1 terminal ciphertext
-- final Chapter 1 password
-- final Chapter 1 reward
-- complete final Chapter 1 walkthrough
-- final battle damage formula / elemental balance
-- any major character backstory not entered in Notion
-
-## 18. Repository / deployment
+## 17. GitHub / 公開版
 
 Repository:
 
-`cureflash/spell-operator`
+`https://github.com/cureflash/spell-operator`
 
-Current app:
+GitHub Pages:
 
-- static HTML/CSS/JavaScript frontend
-- Python runtime through Pyodide Web Worker
-- GitHub Pages deployment
+`https://cureflash.github.io/spell-operator/`
 
-GitHub Pages has previously served an older version after deployment/build/cache issues. When repository code and public behavior differ, inspect deployment status and cache-version parameters before rewriting correct logic.
+現在のキャッシュ確認用:
 
-## 19. New Project Instructions — copy/paste
+`https://cureflash.github.io/spell-operator/?v=88`
+
+Pages / Safari キャッシュで古いコードが残ることがある。
+
+「コード上は直っているのにゲームで変わらない」場合は、最初に公開HTMLの `game.js?v=...` を確認する。
+
+ユーザーは実装結果について commit SHA より **PRや公開ページのリンク** を優先して提示されることを望んでいる。
+
+## 18. 実装作業の運用
+
+ユーザーが「やって」「実装して」と言った場合、可能な限り実際にGitHub / Notionを変更する。
+
+推奨Gitフロー:
 
 ```text
-This Project is dedicated to Spell Operator.
-
-Do not use old ChatGPT Project conversations as specification authority. At the start of every Spell Operator task, first read Notion “Spell Operator 攻略・仕様Wiki” and “AI参照・仕様同期ルール”, then read only the Notion database records relevant to the task.
-
-When GitHub implementation is involved, read cureflash/spell-operator in this order: AGENTS.md → docs/SPEC_INDEX.md → docs/PROJECT_HANDOFF.md → relevant specification file if present → current implementation code.
-
-Priority is: explicit user decision in the current conversation → Notion database → Git specifications → current code → old chat history only as non-authoritative reference.
-
-Notion is the canonical source for decided game/story specifications. Git Markdown is the implementation-facing mirror. Code does not silently redefine specification.
-
-Never invent unresolved details. Never reintroduce an old discarded idea as if it were current. Change only the requested scope.
-
-Sophie actually writes the Python programs. Lumiere handles magical knowledge and actual magic execution. Lumiere is an android with a human soul, which allows her to use magic.
-
-The current programming direction is real Python. The current repository runtime uses Pyodide in a Web Worker. Do not revert to an old custom mini-language or assume Skulpt is required solely because an old chat mentioned it.
-
-For Chapter 1, use the Notion records as canonical. The friend Caesar tutorial is FDW with key 3, answer CAT, and each arrow click moves only one letter. The later terminal ciphertext/password/reward are still unresolved even though provisional values exist in code.
-
-When a new specification is explicitly confirmed, update the relevant Notion record and Git specification before or together with implementation.
+main確認
+↓
+feature / fix branch
+↓
+変更
+↓
+差分確認
+↓
+PR
+↓
+squash merge
+↓
+公開URL確認
 ```
 
-## 20. First action in the new Project
+新しい確定仕様が入った場合:
 
-After creating the new Project:
+```text
+現在の会話で決定
+↓
+Notion更新
+↓
+Git仕様書更新
+↓
+実装
+```
 
-1. Paste the instructions above into Project Instructions.
-2. Start a new chat.
-3. Tell ChatGPT to read the Notion wiki and this Git handoff before doing any Spell Operator work.
-4. Continue development from the canonical records rather than importing the old Project chat history.
+## 19. 現在の主な未完了 / 次候補
+
+優先的に注意するもの:
+
+1. v88 でプラグインSE `可愛く輝く1` のSafari実機再生確認
+2. 壊れた `plugin-sparkle.base64` を正常バイナリ音源へ置換
+3. Pythonエディタ画面を VS Code / Cursor 風へ刷新
+4. 魔導書 / エディタ画面をページスクロール不要にする
+5. ラメールシティの大マップ実装継続
+6. 近畿モデルの全体ワールドマップ整理
+7. Chapter 1後半の暗号・報酬等の未決定事項をユーザーと確定
+
+## 20. 過去案として勝手に復活させないもの
+
+- 旧 custom mini-language
+- Lumiere自身がコードを書く設定
+- 古い魔導工房をソフィーの主拠点とする案
+- 未確定の長期敵 / 家族設定
+- 旧 Chapter 0 案
+- 旧盗まれた魔導書チュートリアル
+- 旧 `feu` / countdown チュートリアル
+- 古い村やお菓子注文等の未採用ディテール
+
+必要なら新案としてユーザーへ提案し、既存仕様として扱わない。
+
+## 21. 新ChatGPT Project Instructions 用コピペ
+
+```text
+このProjectはゲーム「Spell Operator」専用。
+
+Spell Operatorについて回答・仕様策定・実装を行う前に、必ずNotionの「Spell Operator 攻略・仕様Wiki」と「AI参照・仕様同期ルール」を読む。次に、依頼内容に関係するNotionデータベースを読む。
+
+GitHub実装を扱う場合は cureflash/spell-operator の AGENTS.md → docs/SPEC_INDEX.md → docs/PROJECT_HANDOFF.md → docs/GAME_SPEC.md → docs/RUNTIME_ARCHITECTURE.md → 対象仕様書 → 現在の実装コードの順で確認する。
+
+仕様の優先順位は、現在の会話でユーザーが明示的に決めた内容 → Notion → Git Markdown仕様 → 実装コード → 過去チャットは調査用、の順。
+
+Notionがゲーム設計の正本。Git Markdownは実装向けミラー。コード上の偶然の挙動を仕様に昇格させない。
+
+未決定事項を推測で確定しない。指定範囲外の仕様を変更しない。新しい仕様をユーザーが確定した場合はNotionとGit仕様書を同期してから、または実装と同時に反映する。
+
+ソフィーが実際のPythonを書く。ルミエルは魔法知識と魔法行使を担当する。ルミエルは人間の魂をインストールされたアンドロイドで、そのため魔法を使える。
+
+現在のPython実行系はPyodide v0.28.3 + Web Worker。旧custom mini-languageやSkulptへ戻さない。
+
+2026-08-22のRuntimeリファクタ後は、音声は js/audio-manager.js、通常フィールドのプラグイン導線は js/plugin-controller.js、移動入力は js/field-input-controller.js、フィールドDOM配置は js/field-scene-controller.js、論理移動と追従は js/field-model.js が責任を持つ。後付け *-fix.js を安易に増やさない。
+
+通常フィールドXのプラグインは「プラグイン！ルミエル.EXE トランスミッション！」→文字送り中Zは全文表示→次のZで可愛く輝く1 + 不透明な全画面Kirayuki→最初のPython課題へ直接入る。メニューの「パソコン」は演出なしで魔導書一覧へ入る。
+
+ゲーム中は原則ページスクロールを要求しない。
+
+現在の公開確認URLは https://cureflash.github.io/spell-operator/?v=88 。公開挙動がコードと違う場合は、まずPagesとキャッシュ番号を確認する。
+```
+
+## 22. 新しいチャットで最初に送る依頼
+
+```text
+これからSpell Operatorの開発を続けます。
+
+作業を始める前に、実際に以下を読み込んでください。
+
+1. Notion「Spell Operator 攻略・仕様Wiki」
+2. Notion「AI参照・仕様同期ルール」
+3. 今回の作業に関係するNotionデータベース
+4. GitHub cureflash/spell-operator の AGENTS.md
+5. docs/SPEC_INDEX.md
+6. docs/PROJECT_HANDOFF.md
+7. docs/GAME_SPEC.md
+8. docs/RUNTIME_ARCHITECTURE.md
+9. 現在の実装コード
+
+仕様の優先順位は、現在の会話で明示した決定 → Notion → Git仕様 → 実装 → 過去チャットは参考のみ、です。
+
+読み込みが終わったら、現在の実装状態と未解決事項を簡潔に整理してから作業を開始してください。
+```
