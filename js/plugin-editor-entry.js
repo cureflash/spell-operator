@@ -19,14 +19,24 @@
     document.getElementById("field-action")?.click();
   }
 
-  function openFirstPythonEditor(){
+  async function playPluginTransition(){
+    const transition=window.SpellPluginTransition;
+    if(!transition?.play)return;
+    try{
+      await transition.play();
+    }catch(error){
+      console.warn("Spell plug-in transition failed; opening editor without effect.",error);
+    }
+  }
+
+  async function openFirstPythonEditor(){
+    await playPluginTransition();
     const game=window.SpellGame03;
     if(!game?.openComputer)return;
-    Promise.resolve(game.openComputer()).then(()=>{
-      requestAnimationFrame(()=>{
-        const button=document.querySelector("#screen-hub [data-python-spellbook]");
-        if(button instanceof HTMLElement)button.click();
-      });
+    await Promise.resolve(game.openComputer());
+    requestAnimationFrame(()=>{
+      const button=document.querySelector("#screen-hub [data-python-spellbook]");
+      if(button instanceof HTMLElement)button.click();
     });
   }
 
