@@ -32,28 +32,43 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `イードウ` is the game-wide fast-travel command, analogous to Pokémon's Fly or Dragon Quest's Zoom.
 - Choosing `イードウ` replaces the main menu list with a destination list.
 - The destination list uses `↑/↓` for selection and `Z` to warp. `Enter` or `Escape` returns to the main field menu without moving.
-- At the current implementation stage, the destination list contains only `ラメールシティ`.
+- At the current implementation stage, the destination list contains `フルール村` and `ラメールシティ`.
+- Selecting `フルール村` activates map ID `town` directly.
 - Selecting `ラメールシティ` activates map ID `la_mer_city` directly.
 - `la_mer_city` is the stable map ID used by the travel command and save data. The dedicated La Mer City field map may be implemented or replaced independently without changing the `イードウ` command contract.
 - Additional destinations can be appended to the travel destination list later.
+
+## Audio volume settings
+
+- BGM and SE have independent global volume settings.
+- The default BGM volume is `0.5`.
+- The default SE volume is `0.5`.
+- The field menu contains `設定`, which opens the audio settings menu.
+- `BGM音量` and `SE音量` can each be adjusted from `0%` to `100%` in `10%` increments with `←/→`.
+- Changes are applied immediately.
+- `音量を初期値に戻す` restores both values to `50%`.
+- Audio settings are stored separately in browser `localStorage` and persist across sessions.
+- BGM playback reads the global BGM setting.
+- Dialogue text sounds and other SE that use the shared setting read the global SE setting.
+- Dialogue text sounds must not apply an additional gain multiplier above the selected SE volume.
 
 ## BGM
 
 - `フルール村` uses PeriTune's `Village_Fete` as its field BGM.
 - The BGM applies to the current first-village field maps: `town`, `school`, `library`, `house1`, and `house2`.
 - `Village_Fete` loops continuously while the player remains on those field maps.
-- The BGM playback volume is `0.6` on the shared HTML audio element.
+- BGM playback uses the global BGM volume setting; its default is `0.5`.
 - Leaving the field screen for another game screen pauses the current field BGM; returning resumes the relevant field track.
 - Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
 - Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
 - `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 - `キョウトシティ` is pre-registered to use PeriTune `Awayuki` when the `kyoto_city` map is implemented. Runtime asset: `assets/audio/bgm/awayuki.mp3`.
 - Normal battles use PeriTune `Ancient Gust`. Runtime asset: `assets/audio/bgm/ancient-gust.mp3`.
-- `ラメールシティ` is pre-registered to use PeriTune `Resort5` when the `la_mer_city` map is implemented. Runtime asset: `assets/audio/bgm/resort5.mp3`.
+- `ラメールシティ` uses PeriTune `Resort5`. Runtime asset: `assets/audio/bgm/resort5.mp3`.
 - Boss battles use PeriTune `Swift_Strike`. Runtime asset: `assets/audio/bgm/swift-strike.mp3`.
 - The current battle screen defaults to the normal-battle track. Future boss encounters can select the boss track with `SpellBgm.prepareBattle("boss")` before or during the battle transition, or by setting the battle state as a boss battle (`boss`, `isBoss`, or `type: "boss"`).
 - `SpellBgm.prepareBattle("normal")` explicitly selects the normal battle track.
-- The future field-map BGM registry currently reserves `kyoto_city -> Awayuki` and `la_mer_city -> Resort5`.
+- The field-map BGM registry currently includes `kyoto_city -> Awayuki` and `la_mer_city -> Resort5`.
 
 ## Field dialog text
 
@@ -86,7 +101,8 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - Whitespace-only steps do not play the sound.
 - The runtime asset is `assets/audio/sfx/dialog-pop.wav`.
 - The source sound is Kenney Interface Sounds `click_003.wav`, licensed CC0 1.0 Universal.
-- The dialog sound-effect playback volume is `0.35`.
+- The dialog sound-effect playback volume follows the global SE setting; the default is `0.5`.
+- The Web Audio and fallback playback paths use the selected SE value directly and do not add an extra amplification multiplier.
 - The sound-effect layer is attached through `SpellDialogTyping.setStepListener()` so text rendering and audio remain separate systems.
 - Browser autoplay restrictions are respected; sound may remain silent until the player has interacted with the page.
 
