@@ -174,9 +174,12 @@ SpellDialogTyping.resume();
 - The right upper area is the grimoire for previously saved code.
 - A saved code entry can be selected and copied. It is not automatically inserted into the current editor; the player pastes it normally.
 - Execution controls are below the grimoire on the right.
-- There is no dedicated console panel.
-- The bottom pane is shared by Lumiere dialogue and program/test output.
-- Lumiere speech and program/test output are visually distinguishable within that shared pane.
+- The right execution area contains a dedicated `実行結果 / 出力` pane for technical execution information.
+- The bottom pane is reserved for Lumiere dialogue and uses the normal field-style dialogue window.
+- Test failures keep detailed output/test information in the execution-output pane while Lumiere gives a short response in the bottom pane.
+- The editor includes a `ヒントを聞く` button. Hint text is shown as Lumiere dialogue in the bottom pane.
+- Hint use currently consumes no item, but hint eligibility and consumption are routed through a replaceable policy service so an inventory-item requirement can be added later.
+- The future hint item type and quantity are not specified.
 - The editor/right-pane boundary, grimoire/execution boundary, and upper-workspace/bottom-pane boundary are draggable.
 - The plug-in menu's Lumiere/menu boundary and upper/bottom boundary are also draggable.
 - Pane-size persistence between sessions is not specified.
@@ -187,7 +190,7 @@ SpellDialogTyping.resume();
 - The Python exception class name is the internal lookup key, for example `SyntaxError`, `NameError`, or `TypeError`.
 - Lumiere's dialogue text is stored in the editable runtime table `data/python-error-dialogues.json` and must not be duplicated as per-error hardcoded strings in the execution or UI logic.
 - `js/lumiere-python-errors.js` loads the table and converts `compileError`, per-test runtime `error` strings, and rejected runner failures before the grimoire UI displays them.
-- The raw Python error remains available internally for classification but is not shown in a separate raw-error console. The player-facing exception result is Lumiere's explanation in the shared bottom pane.
+- The original Python exception/test information is shown in the dedicated editor execution-output pane, while Lumiere's explanation is shown separately in the bottom dialogue pane.
 - An exception class missing from the table uses the table's `default` dialogue.
-- A test failure caused only by output mismatch is not a Python exception and keeps the normal test-failure display in the shared bottom pane.
+- A test failure caused only by output mismatch is not a Python exception. Detailed mismatch information remains in the execution-output pane and Lumiere gives a short failure response separately.
 - Dialogue-table fetches bypass the browser cache so changing only `data/python-error-dialogues.json` is sufficient to change Lumiere's lines without editing the Python runner or grimoire code.
