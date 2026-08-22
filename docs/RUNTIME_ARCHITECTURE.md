@@ -86,7 +86,7 @@ After the transition, the controller stops at the plug-in menu. It does not choo
 
 - a dedicated `実行結果 / 出力` pane inside the execution area
 - keeping technical execution output separate from Lumiere's bottom dialogue
-- short contextual Lumiere reactions for running, failed, passed, and error states
+- short contextual Lumiere reactions for running, failed, passed, judge, and error states
 - the `ヒントを聞く` editor control
 
 `js/plugin-hints.js` owns hint retrieval and hint-use policy:
@@ -95,8 +95,19 @@ After the transition, the controller stops at the plug-in menu. It does not choo
 - currently allows free hint use
 - exposes separate `canUse` and `consume` policy hooks so a future inventory item requirement can be added without changing the editor UI
 - must not hardcode a future hint-item type or quantity until that design is confirmed
+- does not implement staged hints or full-code disclosure yet
 
-The Python test logic remains owned by `js/python-grimoire.js`; workspace and assistant modules reuse the existing editor/run/output DOM controls rather than duplicating Python execution behavior.
+`js/plugin-answer-judge.js` owns random-case final answer judging:
+
+- generates valid random inputs for the current supported programming problem
+- currently generates 10 random cases per judgment
+- loads canonical reference solutions from `data/python-reference-solutions.json`
+- runs the reference solution first and uses its actual stdout as the expected output for each generated input
+- runs the player's code against the same input set through `SpellPython.runSuite()`
+- reports a failing random input plus player/expected output in the technical output pane
+- records a fully passing submission as the learned spell while preserving a more efficient saved implementation
+
+The Python execution engine and fixed test logic remain owned by `js/python-grimoire.js`; workspace, assistant, and answer-judge modules reuse `SpellPython.runSuite()` rather than implementing another Python runtime.
 
 Diagnostics:
 
@@ -108,6 +119,7 @@ SpellPluginWorkspace.renderCodeLibrary()
 SpellPluginTutorial.play()
 SpellPluginEditorAssistant.sync()
 SpellPluginHints.status()
+SpellAnswerJudge.generateInputs("fire", 10)
 ```
 
 ## Field input and scene ownership
