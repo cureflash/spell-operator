@@ -197,10 +197,17 @@
     if (!button) return false;
     menuWrap.querySelectorAll("button.command").forEach(item => {
       const selected = item === button;
-      item.classList.toggle("is-selected", selected);
-      ensureCursor(item).textContent = selected ? "▶" : "";
-      if (selected) item.setAttribute("aria-current", "true");
-      else item.removeAttribute("aria-current");
+      if (item.classList.contains("is-selected") !== selected) {
+        item.classList.toggle("is-selected", selected);
+      }
+      const cursor = ensureCursor(item);
+      const cursorText = selected ? "▶" : "";
+      if (cursor.textContent !== cursorText) cursor.textContent = cursorText;
+      if (selected) {
+        if (item.getAttribute("aria-current") !== "true") item.setAttribute("aria-current", "true");
+      } else if (item.hasAttribute("aria-current")) {
+        item.removeAttribute("aria-current");
+      }
     });
     if (focus) {
       try { button.focus({ preventScroll: true }); }
@@ -285,7 +292,7 @@
   syncSelection();
 
   window.SpellBattleUiCore = {
-    version: "2026-08-22-dq-command-v3",
+    version: "2026-08-23-dq-command-v4",
     syncSelection,
     moveSelection,
     renderLog,
