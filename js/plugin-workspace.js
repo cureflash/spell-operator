@@ -9,9 +9,18 @@
   if (!hub || !debug) return;
 
   const TUTORIAL_URL = "data/plugin-tutorial-dialogues.json";
+  const MENU_HINTS = {
+    editor: "エディタでは、私に書き込むPythonのプログラムを編集できるよ。",
+    tutorial: "プラグイン画面とエディタの使い方を、もう一度説明するよ。",
+    custom: "カスタムはまだ準備中だよ。今は選ぶことだけできるの。",
+    back: "プラグインを終了して、フィールドに戻るよ。"
+  };
+
   let tutorialPromise = null;
-  let introShown = false;
   let selectedLibraryKey = null;
+  let hubMenuIndex = 0;
+  let hubMenuItems = [];
+  let hubWasActive = false;
 
   const el = (tag, className, text) => {
     const node = document.createElement(tag);
@@ -19,6 +28,30 @@
     if (text != null) node.textContent = text;
     return node;
   };
+
+  function makeConversationBox(textId, initialText) {
+    const box = el("section", "field-dialog plugin-field-dialog");
+    box.dataset.portrait = "lumiere";
+
+    const speaker = el("div", "dialog-speaker");
+    const portrait = el("div", "dialog-portrait has-character-portrait");
+    portrait.setAttribute("aria-hidden", "true");
+    portrait.style.backgroundImage = 'url("assets/characters/portraits/lumiere/neutral.jpg?v=2")';
+    portrait.style.backgroundSize = "cover";
+    portrait.style.backgroundPosition = "center";
+    portrait.style.backgroundRepeat = "no-repeat";
+    const name = el("div", "dialog-name", "ルミエル");
+    speaker.append(portrait, name);
+
+    const message = el("div", "dialog-message");
+    const text = el("div", "plugin-conversation-text", initialText);
+    text.id = textId;
+    const next = el("span", "dialog-next", "▼");
+    message.append(text, next);
+
+    box.append(speaker, message);
+    return { box, text, name, next };
+  }
 
   function setHubDialogue(text) {
     const output = document.getElementById("plugin-hub-dialogue");
@@ -41,7 +74,7 @@
         })
         .catch(error => {
           console.warn("Plug-in tutorial dialogue could not be loaded.", error);
-          return { plugin_intro: [] };
+          return { menu_hints: MENU_HINTS, plugin_intro: [] };
         });
     }
     return tutorialPromise;
@@ -50,7 +83,46 @@
   async function playTutorial() {
     const table = await loadTutorial();
     const lines = Array.isArray(table?.plugin_intro) ? table.plugin_intro.filter(Boolean) : [];
-    setHubDialogue(lines.length ? lines.map(line => `ルミエル「${line}」`).join("\n\n") : "ルミエル「説明データを読み込めなかったみたい。」");
+    setHubDialogue(lines.length ? lines.join("\n\n") : "説明データを読み込めなかったみたい。");
+  }
+
+  function currentHubMenuKey() {
+    return hubMenuItems[hubMenuIndex]?.dataset.pluginMenuKey || "editor";
+  }
+
+  function showMenuHint(key) {
+    const normalized = key || "editor";
+    setHubDialogue(MENU_HINTS[normalized] || MENU_HINTS.editor);
+    loadTutorial().then(table => {
+      if (currentHubMenuKey() !== normalized) return;
+      const hint = table?.menu_hints?.[normalized];
+      if (typeof hint === "string" && hint.trim()) setHubDialogue(hint.trim());
+    });
+  }
+
+  function selectHubMenu(index, { focus = true, announce = true } = {}) {
+    if (!hubMenuItems.length) return;
+    const count = hubMenuItems.length;
+    hubMenuIndex = ((index % count) + count) % count;
+
+    hubMenuItems.forEach((button, i) => {
+      const selected = i === hubMenuIndex;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-selected", selected ? "true" : "false");
+      button.tabIndex = selected ? 0 : -1;
+    });
+
+    const selected = hubMenuItems[hubMenuIndex];
+    if (focus) {
+      try { selected.focus({ preventScroll: true }); } catch (_) { selected.focus(); }
+    }
+    if (announce) showMenuHint(selected.dataset.pluginMenuKey);
+  }
+
+  function activateHubMenu() {
+    const selected = hubMenuItems[hubMenuIndex];
+    if (!selected || selected.getAttribute("aria-disabled") === "true") return;
+    selected.click();
   }
 
   function firstUnlockedSpellbook() {
@@ -63,7 +135,7 @@
   function openEditorFromMenu() {
     const key = firstUnlockedSpellbook();
     if (!key) {
-      setHubDialogue("ルミエル「今は開ける魔導書がないみたい。」");
+      setHubDialogue("今は開ける魔導書がないみたい。");
       return;
     }
     const trigger = document.createElement("button");
@@ -94,6 +166,7 @@
     returnField.textContent = "戻る";
     returnField.className = "plugin-menu-button secondary";
     returnField.removeAttribute("style");
+    returnField.dataset.pluginMenuKey = "back";
 
     const shell = el("div", "plugin-hub-shell plugin-workspace");
     shell.id = "plugin-hub-shell";
@@ -113,35 +186,44 @@
     const menuPane = el("section", "panel plugin-menu-pane");
     menuPane.append(el("p", "eyebrow", "PLUGIN MENU"), el("h2", "", "メニュー"));
     const menuList = el("div", "plugin-menu-list");
-    const editorButton = el("button", "plugin-menu-button primary", "エディタ");
+
+    const editorButton = el("button", "plugin-menu-button secondary", "エディタ");
     editorButton.id = "plugin-open-editor";
     editorButton.type = "button";
+    editorButton.dataset.pluginMenuKey = "editor";
+
     const tutorialButton = el("button", "plugin-menu-button secondary", "チュートリアル");
     tutorialButton.id = "plugin-open-tutorial";
     tutorialButton.type = "button";
-    const customButton = el("button", "plugin-menu-button secondary", "カスタム");
+    tutorialButton.dataset.pluginMenuKey = "tutorial";
+
+    const customButton = el("button", "plugin-menu-button secondary is-disabled", "カスタム");
     customButton.id = "plugin-open-custom";
     customButton.type = "button";
-    customButton.disabled = true;
+    customButton.dataset.pluginMenuKey = "custom";
+    customButton.setAttribute("aria-disabled", "true");
     customButton.title = "未実装";
+
     menuList.append(editorButton, tutorialButton, customButton, returnField);
     menuPane.append(menuList);
+    hubMenuItems = [editorButton, tutorialButton, customButton, returnField];
 
     upper.append(lumierePane, columnResizer, menuPane);
 
     const rowResizer = makeResizer("horizontal", "上部とルミエルのセリフ欄の高さを変更");
-    const dialoguePane = el("section", "panel plugin-dialogue-pane");
-    const dialogueHead = el("div", "plugin-dialogue-head");
-    dialogueHead.append(el("span", "plugin-speaker", "ルミエル"), el("span", "plugin-output-tag", "DIALOGUE"));
-    const dialogue = el("pre", "plugin-dialogue-text", "メニューを選んでね。");
-    dialogue.id = "plugin-hub-dialogue";
-    dialoguePane.append(dialogueHead, dialogue);
+    const dialogue = makeConversationBox("plugin-hub-dialogue", MENU_HINTS.editor);
 
-    shell.append(upper, rowResizer, dialoguePane);
+    shell.append(upper, rowResizer, dialogue.box);
     hub.replaceChildren(shell);
 
     editorButton.addEventListener("click", openEditorFromMenu);
     tutorialButton.addEventListener("click", playTutorial);
+
+    hubMenuItems.forEach((button, index) => {
+      button.addEventListener("focus", () => selectHubMenu(index, { focus: false, announce: true }));
+      button.addEventListener("pointerenter", () => selectHubMenu(index, { focus: false, announce: true }));
+      button.addEventListener("pointerdown", () => selectHubMenu(index, { focus: false, announce: true }));
+    });
 
     bindResizer(columnResizer, {
       container: upper,
@@ -159,6 +241,8 @@
       min: 0.48,
       max: 0.80
     });
+
+    selectHubMenu(0, { focus: false, announce: true });
   }
 
   function buildEditor() {
@@ -228,21 +312,19 @@
     upper.append(editorPane, columnResizer, rightPane);
 
     const rowResizer = makeResizer("horizontal", "エディタ領域とルミエルのセリフ欄の高さを変更");
-    const dialoguePane = el("section", "panel plugin-dialogue-pane plugin-editor-dialogue");
-    const dialogueHead = el("div", "plugin-dialogue-head");
-    const speaker = el("span", "plugin-speaker", "ルミエル / 実行結果");
-    const tag = el("span", "plugin-output-tag", "OUTPUT");
-    tag.id = "plugin-output-kind";
-    dialogueHead.append(speaker, tag);
-    output.classList.add("plugin-dialogue-text", "plugin-runtime-output");
-    dialoguePane.append(dialogueHead, output);
+    const dialogue = makeConversationBox("plugin-editor-dialogue-text", "Pythonコードを書いてテスト実行してみてね。");
+    dialogue.box.classList.add("plugin-editor-dialogue");
+    dialogue.name.id = "plugin-editor-dialogue-name";
+    dialogue.next.id = "plugin-editor-dialogue-next";
 
-    shell.append(upper, rowResizer, dialoguePane);
+    output.classList.add("plugin-runtime-source");
+
+    shell.append(upper, rowResizer, dialogue.box, output);
     debug.replaceChildren(shell);
 
     copy.addEventListener("click", copySelectedCode);
     new MutationObserver(() => {
-      classifyRuntimeOutput();
+      syncRuntimeDialogue();
       renderCodeLibrary();
     }).observe(output, { childList: true, subtree: true, characterData: true });
 
@@ -272,7 +354,7 @@
     });
 
     renderCodeLibrary();
-    classifyRuntimeOutput();
+    syncRuntimeDialogue();
   }
 
   function savedCodeEntries() {
@@ -339,17 +421,30 @@
       area.remove();
     }
     setDebugOutput("ルミエル「コードをコピーしたよ。エディタに貼り付けて使ってね。」", "lumiere");
-    classifyRuntimeOutput();
+    syncRuntimeDialogue();
   }
 
-  function classifyRuntimeOutput() {
+  function syncRuntimeDialogue() {
     const output = document.getElementById("console-output");
-    const tag = document.getElementById("plugin-output-kind");
-    if (!output || !tag) return;
-    const text = output.textContent || "";
-    const isLumiere = text.includes("ルミエル「");
-    output.dataset.outputKind = isLumiere ? "lumiere" : "program";
-    tag.textContent = isLumiere ? "LUMIERE" : "OUTPUT";
+    const textEl = document.getElementById("plugin-editor-dialogue-text");
+    const nameEl = document.getElementById("plugin-editor-dialogue-name");
+    const nextEl = document.getElementById("plugin-editor-dialogue-next");
+    if (!output || !textEl || !nameEl || !nextEl) return;
+
+    const source = String(output.textContent || "");
+    const lumiereMatch = source.match(/ルミエル「([\s\S]*?)」/);
+    if (lumiereMatch) {
+      nameEl.textContent = "ルミエル";
+      textEl.textContent = lumiereMatch[1].trim();
+      nextEl.hidden = false;
+      output.dataset.outputKind = "lumiere";
+      return;
+    }
+
+    nameEl.textContent = "実行結果";
+    textEl.textContent = source || "実行結果はここに表示されます。";
+    nextEl.hidden = true;
+    output.dataset.outputKind = "program";
   }
 
   function bindResizer(handle, { container, owner, axis, variable, min, max }) {
@@ -388,25 +483,56 @@
     screen.style.setProperty("--plugin-screen-height", `${height}px`);
   }
 
+  function editable(target) {
+    return Boolean(target?.closest?.("input, textarea, [contenteditable='true']"));
+  }
+
+  function handleHubKeydown(event) {
+    if (!hub.classList.contains("active") || editable(event.target)) return;
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      selectHubMenu(hubMenuIndex - 1);
+      return;
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      selectHubMenu(hubMenuIndex + 1);
+      return;
+    }
+
+    const confirm = event.code === "KeyZ" || event.key === "z" || event.key === "Z" || event.key === "Enter";
+    if (!confirm) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    activateHubMenu();
+  }
+
   function syncActiveScreen() {
-    const active = hub.classList.contains("active") || debug.classList.contains("active");
-    document.body.classList.toggle("plugin-workspace-active", active);
+    const hubActive = hub.classList.contains("active");
+    const debugActive = debug.classList.contains("active");
+    document.body.classList.toggle("plugin-workspace-active", hubActive || debugActive);
     updateWorkspaceHeight(hub);
     updateWorkspaceHeight(debug);
 
-    if (hub.classList.contains("active") && !introShown) {
-      introShown = true;
-      playTutorial();
+    if (hubActive && !hubWasActive) {
+      selectHubMenu(hubMenuIndex, { focus: false, announce: true });
+      requestAnimationFrame(() => selectHubMenu(hubMenuIndex, { focus: true, announce: false }));
     }
-    if (debug.classList.contains("active")) {
+    hubWasActive = hubActive;
+
+    if (debugActive) {
       renderCodeLibrary();
-      classifyRuntimeOutput();
+      syncRuntimeDialogue();
     }
   }
 
   buildHub();
   buildEditor();
 
+  document.addEventListener("keydown", handleHubKeydown, true);
   const screenObserver = new MutationObserver(syncActiveScreen);
   screenObserver.observe(hub, { attributes: true, attributeFilter: ["class"] });
   screenObserver.observe(debug, { attributes: true, attributeFilter: ["class"] });
