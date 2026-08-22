@@ -99,15 +99,16 @@
     }
     if(y>=12&&y<=14){
       if(x<=7)return"tree la-mer-mountain";
-      if(inRect(x,y,8,10,13,14)){
+      if(inRect(x,y,8,12,19,14)){
         const local=x-8,shop=Math.floor(local/3)+1,doorX=9+(shop-1)*3;
         if(y===12)return"roof la-mer-shop";
         if(y===14&&x===doorX)return"door la-mer-shop";
         return"building la-mer-shop";
       }
-      if(inRect(x,y,20,12,25,14)){
+      if(x===20||x===21)return"path la-mer-stone";
+      if(inRect(x,y,22,12,25,14)){
         if(y===12)return"roof la-mer-center";
-        if(y===14&&(x===22||x===23))return"door la-mer-center";
+        if(y===14&&x===23)return"door la-mer-center";
         return"building la-mer-center";
       }
       if(x>=26)return"grass";
@@ -117,7 +118,7 @@
     if(y>=18&&y<=20){
       if(x<=4)return"tree la-mer-mountain";
       if(x<=7)return"grass";
-      if(inRect(x,y,8,11,18,20))return y===18?"roof la-mer-shop":"building la-mer-shop";
+      if(inRect(x,y,8,18,11,20))return y===18?"roof la-mer-shop":"building la-mer-shop";
       if(inRect(x,y,15,18,19,20))return y===18?"roof la-mer-shop":"building la-mer-shop";
       if(x>=20&&x<=25)return"path la-mer-plaza";
       if(x>=26)return"grass";
