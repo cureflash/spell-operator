@@ -26,6 +26,7 @@
     .then(()=>load("js/movement-step-lock.js?v=1"))
     .then(()=>load("js/house-movement-fix.js?v=1"))
     .then(()=>load("js/game03-items.js?v=3"))
+    .then(()=>load("js/plugin-transition.js?v=1"))
     .then(()=>load("js/game03-menu.js?v=17"))
     .then(()=>load("js/game03-story.js?v=10"))
     .then(()=>load("js/friend-conversation.js?v=3"))
