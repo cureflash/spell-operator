@@ -1,0 +1,77 @@
+name: Fetch PeriTune BGM pack
+
+on:
+  push:
+    branches:
+      - asset/peritune-bgm-pack
+    paths:
+      - .github/workflows/fetch-peritune-bgm-pack.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download game BGM assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/audio/bgm
+
+          fetch_track() {
+            local key="$1"
+            local loop_zip="$2"
+            local full_mp3="$3"
+            local output="$4"
+            local work="/tmp/${key}"
+            rm -rf "$work"
+            mkdir -p "$work"
+
+            if curl -L --fail --retry 2 --silent --show-error "$loop_zip" -o "$work/loop.zip"; then
+              if unzip -jo "$work/loop.zip" '*.mp3' -d "$work/extracted" >/dev/null 2>&1; then
+                local loop_file
+                loop_file="$(find "$work/extracted" -type f -iname '*.mp3' | head -n 1 || true)"
+                if [ -n "$loop_file" ]; then
+                  cp "$loop_file" "$output"
+                  echo "$key: loop asset"
+                  return
+                fi
+              fi
+            fi
+
+            curl -L --fail --retry 3 --silent --show-error "$full_mp3" -o "$output"
+            echo "$key: full MP3 fallback"
+          }
+
+          fetch_track \
+            ancient_gust \
+            'https://peritune.com/music/Peritune_Ancient_Gust_loop.zip' \
+            'https://peritune.com/music/Peritune_Ancient_Gust.mp3' \
+            'assets/audio/bgm/ancient-gust.mp3'
+
+          fetch_track \
+            resort5 \
+            'https://peritune.com/music/PerituneMaterial_Resort5_loop.zip' \
+            'https://peritune.com/music/PerituneMaterial_Resort5.mp3' \
+            'assets/audio/bgm/resort5.mp3'
+
+          fetch_track \
+            swift_strike \
+            'https://peritune.com/music/Peritune_Swift_Strike_loop.zip' \
+            'https://peritune.com/music/Peritune_Swift_Strike.mp3' \
+            'assets/audio/bgm/swift-strike.mp3'
+
+          test -s assets/audio/bgm/ancient-gust.mp3
+          test -s assets/audio/bgm/resort5.mp3
+          test -s assets/audio/bgm/swift-strike.mp3
+
+      - name: Commit downloaded assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/audio/bgm/ancient-gust.mp3 assets/audio/bgm/resort5.mp3 assets/audio/bgm/swift-strike.mp3
+          git commit -m "Add PeriTune city and battle BGM assets" || exit 0
+          git push
