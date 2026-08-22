@@ -50,6 +50,26 @@ The menu contains, in this order:
 - The bottom area is only Lumiere dialogue and keeps the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
 - Test failure does not turn the bottom area into a console. Lumiere gives a short response such as `これだとダメそうね。出力結果を確認してみて。` while the detailed result remains in the output pane.
 - Python exceptions may still be translated into Lumiere guidance, but the technical exception/result text remains separately inspectable in the output pane.
+- Output mismatch is a test failure (`TEST FAILED`), not a Python exception.
+
+### Current desktop layout values
+
+The current `spell-operator/plugin-editor-layout@1` tuning is:
+
+- editor width: 64%
+- upper workspace: 91%
+- Lumiere dialogue: 9%
+- divider thickness: 2px
+- grimoire height: 30%
+- execution output minimum height: 120px
+- execution pane gap: 2px
+- dialogue portrait column: 70px
+- dialogue message top padding: 23px
+- dialogue text size: 14px
+- problem/specification maximum height: 126px
+- code editor text size: 13px
+
+The speaker-name badge inside the plug-in editor dialogue is reduced specifically for the 70px portrait column. This does not change the normal field dialogue speaker-name sizing.
 
 ## Answer judging
 
