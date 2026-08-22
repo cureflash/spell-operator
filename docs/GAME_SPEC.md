@@ -69,7 +69,7 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
 - Plug-in/computer screens use PeriTune `Dreambyte` as their BGM. This includes both the grimoire list (`screen-hub`) and the Python/grimoire editor (`screen-debug`).
 - `Dreambyte` continues without restarting when moving between the grimoire list and editor, and pauses when leaving the plug-in/computer screens for field, battle, or another screen.
-- Dreambyte source: `https://peritune.com/music/Peritune_Dreambyte.mp3`; source page: `https://peritune.com/blog/2026/01/17/dreambyte/`. It was published in January 2026 and remains under CC BY 4.0.
+- Dreambyte source: `https://peritune.com/music/PeriTune_Dreambyte.mp3`; source page: `https://peritune.com/blog/2026/01/17/dreambyte/`. It was published in January 2026 and remains under CC BY 4.0.
 - `キョウトシティ` is pre-registered to use PeriTune `Awayuki` when the `kyoto_city` map is implemented. Runtime asset: `assets/audio/bgm/awayuki.mp3`.
 - Normal battles use PeriTune `Ancient Gust`. Runtime asset: `assets/audio/bgm/ancient-gust.mp3`.
 - `ラメールシティ` uses PeriTune `Resort5`. Runtime asset: `assets/audio/bgm/resort5.mp3`.
@@ -155,6 +155,9 @@ SpellDialogTyping.resume();
 - From the normal field, pressing `X` starts plug-in access.
 - Pressing `X` does not immediately change screens. Sophie first says exactly: `プラグイン！ルミエル.EXE トランスミッション！` in the field dialog.
 - The plug-in line uses the normal discrete field-dialog pacing and no longer overrides the global pace with the old 30 ms setting.
-- After the plug-in line has finished rendering, pressing `Z` closes the dialog and opens the programming computer screen.
-- If `Z` is pressed before the plug-in line finishes rendering, that press only finishes the line; the next `Z` opens the programming computer screen.
-- Existing programming and spell-testing behavior is reused; this specification changes the field entry sequence, not the Python runtime or spell-test rules.
+- After the plug-in line has finished rendering, pressing `Z` closes the dialog and plays the Kirayuki plug-in transition once.
+- The transition uses `kirayuki1` / `キラキラ雪放射` from the supplied `キラ雪.zip`; the runtime asset is `assets/effects/plugin/kirayuki1.webp`.
+- The programming computer screen opens only after the Kirayuki animation completes.
+- If `Z` is pressed before the plug-in line finishes rendering, that press only finishes the line; the next `Z` starts the transition.
+- The Kirayuki transition applies only to the normal-field `X` plug-in sequence; other direct computer/menu entry points keep their existing behavior.
+- Existing programming and spell-testing behavior is reused; this specification changes the field entry transition, not the Python runtime or spell-test rules.
