@@ -25,10 +25,18 @@ The menu contains, in this order:
 
 `カスタム` is reserved only. Its behavior is not specified yet.
 
+- Up/down arrow keys move the current menu selection.
+- The selected menu item is visually highlighted.
+- The bottom Lumiere dialogue changes whenever the menu selection changes and explains the selected item.
+- The initial selection is `エディタ`, so the initial bottom dialogue explains the editor.
+- The bottom area reuses the same dialogue-window structure and appearance as normal field conversation: Lumiere portrait, speaker name, and message pane. Do not use a separate dark `DIALOGUE` console-style panel.
+
 ## Tutorial
 
-- `チュートリアル` replays Lumiere's plug-in/editor explanation.
-- Tutorial dialogue is stored outside UI/controller code so the same script can be used for the first explanation and replay.
+- Selecting `チュートリアル` shows its menu guidance in the normal dialogue window.
+- Activating `チュートリアル` displays Lumiere's plug-in/editor explanation.
+- Tutorial dialogue is stored outside UI/controller code.
+- Do not automatically replace the initial `エディタ` guidance with the tutorial body when the plug-in menu first opens.
 
 ## Editor workspace
 
@@ -39,8 +47,9 @@ The menu contains, in this order:
 - Execution controls are below the grimoire on the right.
 - There is no separate console panel.
 - The bottom area is the shared Lumiere dialogue / program-output area.
+- When Lumiere speaks in the editor, the bottom area uses the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
 - Python exceptions are converted to Lumiere guidance. Do not show a separate raw-error console.
-- Normal program/test output uses the same bottom area but is visually distinguished from Lumiere speech.
+- Normal program/test output uses the same bottom area but uses `実行結果` as the speaker label so it is distinguishable from Lumiere speech.
 
 ## Resizing and scrolling
 
