@@ -5,10 +5,12 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 ## Field controls
 
 - Movement: Arrow keys / WASD.
-- `Z`: interact / confirm / back behavior where defined.
-- `Enter`: field menu / close menu behavior where defined.
-- `X`: start plug-in access to Lumiere.
+- `Z`: interact / confirm. It must not be used as the normal cancel/back key.
+- `X`: cancel / back while a menu, sub-screen, or cancellable prompt is open.
+- Normal-field exception: when no menu, overlay, or plug-in prompt is open, `X` starts plug-in access to Lumiere as before.
+- `Enter`: opens the field menu where defined. It is not the primary cancel/back key.
 - Story overlays, dialogs, and open menus keep priority over normal field shortcuts.
+- Inside editable text fields, normal character entry takes priority; typing `x` in the Python editor must remain possible.
 
 ## Game screen scrolling policy
 
@@ -37,11 +39,13 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - A `はい / いいえ` confirmation menu is shown while Lumiere asks.
 - If the confirmation line is still typing, the first `Z` only finishes the line; a subsequent `Z` confirms the selected answer.
 - Choosing `いいえ` cancels the move and returns to the destination list.
+- Pressing `X` at the confirmation cancels the move and returns to the destination list.
+- Pressing `X` in the destination list returns to the main field menu; pressing `X` in the main field menu closes it.
 - Choosing `はい` makes Lumiere say exactly `イードウ！`.
 - After `イードウ！` finishes rendering, the dialogue remains open and waits for another `Z`. That `Z` closes the line and starts the fade: the screen fades completely to black, the destination map is activated while blacked out, then the screen fades back in.
 - `Z` pressed while `イードウ！` is still rendering does not start the fade.
 - Player movement and menu input are locked during the casting/wait/fade transition.
-- `Enter` or `Escape` backs out of the confirmation or destination list without moving.
+- `Escape` may remain as a secondary keyboard fallback, but the displayed and canonical cancel/back control is `X`.
 - Additional destinations can be appended to the travel destination list later.
 
 ## Audio volume settings
@@ -89,7 +93,8 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
   - `！` / `!` and `？` / `?`: +160 ms.
   - `…`: +110 ms.
   - newline: +120 ms.
-- While a line is still typing, pressing `Z` finishes that line first. A subsequent `Z` performs the normal dialog advance/close action.
+- While a line is still typing, pressing `Z` finishes that line first. A subsequent `Z` performs the normal dialog advance/confirm action.
+- `X` is used to cancel only when the current dialogue/prompt explicitly supports cancellation; it does not replace normal `Z` dialogue advance.
 - Dialog pacing can be customized per line with a `typing` object passed to `SpellField.showDialog()`.
 - Supported `typing` options:
   - `charMs`: base milliseconds between discrete text updates.
@@ -157,10 +162,11 @@ SpellDialogTyping.resume();
 ## Plug-in
 
 - "Plug-in" means Sophie connects to the computer inside Lumiere so Sophie can write programs into Lumiere.
-- From the normal field, pressing `X` starts plug-in access.
+- From the normal field, pressing `X` starts plug-in access when no higher-priority menu, overlay, or prompt is open.
 - Pressing `X` does not immediately change screens. Sophie first says exactly: `プラグイン！ルミエル.EXE トランスミッション！` in the field dialog.
 - The plug-in line uses the normal discrete field-dialog pacing and no longer overrides the global pace with the old 30 ms setting.
 - After the plug-in line has finished rendering, pressing `Z` closes the dialog and plays the Kirayuki plug-in transition once.
+- Pressing `X` while the plug-in confirmation line is open cancels that plug-in attempt and returns to the normal field.
 - The transition uses `kirayuki1` / `キラキラ雪放射` from the supplied `キラ雪.zip`; the runtime asset is `assets/effects/plugin/kirayuki1.webp`.
 - The supplied `可愛く輝く1.mp3` SE starts together with the Kirayuki animation and follows the global SE volume setting.
 - The browser runtime uses a lightweight audio encode stored at `assets/audio/sfx/plugin-sparkle.base64`, decoded to `audio/mpeg` when the transition module loads.
@@ -169,6 +175,7 @@ SpellDialogTyping.resume();
 - The Kirayuki transition applies only to the normal-field `X` plug-in sequence; direct computer/menu entry opens the plug-in menu without the transition or plug-in SE.
 - The plug-in menu is divided into upper-left Lumiere portrait, upper-right menu, and bottom Lumiere dialogue areas.
 - The menu contains `エディタ`, `チュートリアル`, `カスタム`, and `戻る` in that order.
+- `Z` confirms the selected plug-in menu item; `X` returns from the plug-in menu to the field.
 - `カスタム` is reserved and has no defined behavior yet.
 - `チュートリアル` replays the same externally stored Lumiere explanation script used for the first explanation.
 - Detailed workspace layout rules are mirrored in `docs/PLUGIN_WORKSPACE.md`.
@@ -176,18 +183,38 @@ SpellDialogTyping.resume();
 ## Plug-in editor workspace
 
 - The Python editor is on the left.
-- The right upper area is the grimoire for previously saved code.
-- A saved code entry can be selected and copied. It is not automatically inserted into the current editor; the player pastes it normally.
-- Execution controls are below the grimoire on the right.
+- The right side primarily contains execution controls and the dedicated execution/output pane.
+- Previously saved code is accessed through a collapsible `魔導書` tab on the right. The tab is closed by default and opens only when selected.
+- When the grimoire tab is closed, the execution/output pane expands vertically into the freed space.
+- A saved code entry can be selected and copied while the grimoire is open. It is not automatically inserted into the current editor; the player pastes it normally.
 - The right execution area contains a dedicated `実行結果 / 出力` pane for technical execution information.
 - The bottom pane is reserved for Lumiere dialogue and uses the normal field-style dialogue window.
 - Test failures keep detailed output/test information in the execution-output pane while Lumiere gives a short response in the bottom pane.
 - The editor includes a `ヒントを聞く` button. Hint text is shown as Lumiere dialogue in the bottom pane.
 - Hint use currently consumes no item, but hint eligibility and consumption are routed through a replaceable policy service so an inventory-item requirement can be added later.
 - The future hint item type and quantity are not specified.
-- The editor/right-pane boundary, grimoire/execution boundary, and upper-workspace/bottom-pane boundary are draggable.
+- The editor/right-pane boundary, the grimoire/execution boundary while the grimoire is open, and the upper-workspace/bottom-pane boundary are draggable.
 - The plug-in menu's Lumiere/menu boundary and upper/bottom boundary are also draggable.
 - Pane-size persistence between sessions is not specified.
+- `X` returns from the editor to the plug-in menu when focus is not inside an editable text field.
+
+## Spell learning state
+
+- Spellbook unlock state, learned state, editor draft/source state, and first-clear presentation flags are distinct concepts.
+- Unlocking a spellbook only makes its programming problem available; it does not make the spell usable in battle.
+- `テスト実行` is rehearsal and must never set learned state.
+- A spell becomes learned only when `解答を判定` passes all current judge cases.
+- Judge success sets the learned-status flag and stores or improves the corresponding battle implementation.
+- Battle spell availability checks learned state first. An unlearned spell must not be cast even if a draft or stale source exists.
+- Learned status is included in magic save data and restored on load. Legacy saves without an explicit learned-status field migrate a valid registered spell to learned status for compatibility.
+- For the current debugging phase only, an untouched unlearned Fire editor is initially seeded with:
+
+```python
+n = int(input())
+print(n * 2)
+```
+
+- The Fire debug seed does not itself learn Fire. `コードをクリア` empties it immediately, and after the draft has been cleared or edited it is not automatically reinserted in the same session.
 
 ## Python error guidance by Lumiere
 
