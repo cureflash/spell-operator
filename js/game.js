@@ -16,7 +16,7 @@
     "css/npc-pipoya.css?v=4",
     "css/computer.css?v=5",
     "css/plugin-editor-assistant.css?v=3",
-    "css/plugin-editor-layout-applied.css?v=3",
+    "css/plugin-editor-layout-applied.css?v=4",
     "css/pipoya-map.css?v=2",
     "css/house-maps.css?v=1",
     "css/house-rooms-v2.css?v=2",
@@ -27,9 +27,11 @@
   const modules = [
     "js/audio-settings.js?v=1",
     "js/audio-manager.js?v=1",
+    "js/plugin-clear-audio.js?v=1",
     { wait: () => Promise.all([
       window.SpellAudio?.preloadSfx?.("dialog-pop"),
-      window.SpellAudio?.preloadSfx?.("plugin-sparkle")
+      window.SpellAudio?.preloadSfx?.("plugin-sparkle"),
+      window.SpellAudio?.preloadSfx?.("plugin-clear")
     ]) },
     "js/python-runner.js?v=6",
     "js/interpreter.js?v=3",
@@ -38,9 +40,9 @@
     "js/python-grimoire.js?v=1",
     "js/plugin-hints.js?v=1",
     "js/plugin-workspace.js?v=2",
-    "js/plugin-editor-assistant.js?v=5",
-    "js/plugin-answer-judge.js?v=2",
-    "js/plugin-execution-controller.js?v=2",
+    "js/plugin-editor-assistant.js?v=6",
+    "js/plugin-answer-judge.js?v=3",
+    "js/plugin-execution-controller.js?v=3",
     "js/map-transition.js?v=3",
     "js/game03-items.js?v=3",
     "js/game03-story.js?v=10",
