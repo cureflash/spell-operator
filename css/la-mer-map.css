@@ -1,0 +1,34 @@
+/* La Mer City road/pavement surfaces.
+ * Use the same Pipoya 32x32 map chips as the rest of Spell Operator.
+ * AI-generated La Mer art is reserved for large decorative stamps; it must not
+ * replace the canonical road/stone/harbor ground tiles.
+ */
+#field-map .field-tile.path.la-mer-road{
+  background-image:var(--pipo-dirt)!important;
+  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
+  background-position:0 calc(var(--tile-size)*-4)!important;
+}
+
+#field-map .field-tile.path.la-mer-pavement{
+  background-image:var(--pipo-dirt2)!important;
+  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
+  background-position:0 calc(var(--tile-size)*-4)!important;
+}
+
+#field-map .field-tile.path.la-mer-stone{
+  background-image:var(--pipo-dirt3)!important;
+  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
+  background-position:calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important;
+}
+
+#field-map .field-tile.path.la-mer-harbor{
+  background-image:var(--pipo-dirt4)!important;
+  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
+  background-position:0 calc(var(--tile-size)*-4)!important;
+}
+
+#field-map .field-tile.path.la-mer-plaza{
+  background-image:var(--pipo-dirt2)!important;
+  background-size:calc(var(--tile-size)*2) calc(var(--tile-size)*5)!important;
+  background-position:calc(var(--tile-size)*-1) calc(var(--tile-size)*-4)!important;
+}
