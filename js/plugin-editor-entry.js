@@ -1,53 +1,6 @@
 (() => {
   "use strict";
 
-  const SE_SOURCE = "assets/audio/sfx/plugin-sparkle.base64";
-  const directSe = new Audio();
-  directSe.preload = "auto";
-  let directSeReady = false;
-  let directSeLoadPromise = null;
-
-  function currentSfxVolume(){
-    const value=window.SpellAudioSettings?.get?.("sfx");
-    return Number.isFinite(value)?Math.max(0,Math.min(1,value)):0.5;
-  }
-
-  function preloadDirectSe(){
-    if(directSeLoadPromise)return directSeLoadPromise;
-    directSeLoadPromise=fetch(SE_SOURCE,{cache:"force-cache"})
-      .then(response=>{
-        if(!response.ok)throw new Error(`plug-in SE fetch failed: ${response.status}`);
-        return response.text();
-      })
-      .then(encoded=>{
-        const clean=encoded.replace(/\s+/g,"");
-        directSe.src=`data:audio/mpeg;base64,${clean}`;
-        directSe.load();
-        if(directSe.readyState>=2){directSeReady=true;return true;}
-        return new Promise(resolve=>{
-          let settled=false;
-          const finish=value=>{
-            if(settled)return;
-            settled=true;
-            directSeReady=value;
-            resolve(value);
-          };
-          directSe.addEventListener("loadeddata",()=>finish(true),{once:true});
-          directSe.addEventListener("canplaythrough",()=>finish(true),{once:true});
-          directSe.addEventListener("error",()=>finish(false),{once:true});
-          setTimeout(()=>finish(directSe.readyState>=2),3000);
-        });
-      })
-      .catch(error=>{
-        console.warn("Original plug-in SE preload failed",error);
-        directSeReady=false;
-        return false;
-      });
-    return directSeLoadPromise;
-  }
-
-  preloadDirectSe();
-
   function isZKey(event){
     return event.code==="KeyZ"||event.key==="z"||event.key==="Z";
   }
@@ -67,27 +20,14 @@
   }
 
   function playOriginalSeOnGesture(){
-    const volume=currentSfxVolume();
-    if(volume<=0)return;
-
-    if(!(directSeReady||directSe.readyState>=2)){
-      console.warn("Original plug-in SE is not ready; no fallback sound will be played.");
-      preloadDirectSe();
-      return;
-    }
-
     try{
-      directSe.pause();
-      directSe.currentTime=0;
-      directSe.volume=volume;
-      const promise=directSe.play();
-      if(promise?.catch){
-        promise.catch(error=>{
-          console.warn("Original plug-in SE playback failed; fallback is disabled.",error);
-        });
+      window.SpellPluginSe?.prepareFromGesture?.();
+      const played=window.SpellPluginSe?.playOriginal?.();
+      if(played===false){
+        console.warn("Original plug-in SE did not start. No alternate sound is enabled.");
       }
     }catch(error){
-      console.warn("Original plug-in SE playback failed; fallback is disabled.",error);
+      console.warn("Original plug-in SE playback failed. No alternate sound is enabled.",error);
     }
   }
 
@@ -115,6 +55,7 @@
   function onKeydown(event){
     if(!isZKey(event)||!pluginPromptReady())return;
 
+    // Start the already-prepared original sound inside the final Z gesture.
     playOriginalSeOnGesture();
     event.preventDefault();
     event.stopImmediatePropagation();
