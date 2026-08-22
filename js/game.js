@@ -31,7 +31,7 @@
       window.SpellAudio?.preloadSfx?.("dialog-pop"),
       window.SpellAudio?.preloadSfx?.("plugin-sparkle")
     ]) },
-    "js/python-runner.js?v=3",
+    "js/python-runner.js?v=4",
     "js/interpreter.js?v=3",
     "js/game03-core.js?v=8",
     { src: "js/lumiere-python-errors.js?v=4", optional: true },
