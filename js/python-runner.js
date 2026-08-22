@@ -19,7 +19,7 @@
     readyPromise=new Promise((resolve,reject)=>{readyResolve=resolve;readyReject=reject});
     try{
       // Classic Worker is used deliberately for iPad/Safari compatibility.
-      worker=new Worker("js/python-worker-classic.js?v=1");
+      worker=new Worker("js/python-worker-classic.js?v=2");
     }catch(error){
       setLastError(error);
       readyReject?.(error);
