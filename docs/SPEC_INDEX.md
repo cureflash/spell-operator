@@ -24,6 +24,7 @@ The Notion wiki contains the structured databases for chapters, walkthrough step
 - `chapters/CHAPTER_01.md` — Chapter 1 implementation-facing specification when created.
 - `maps/FLEUR_VILLAGE.md` — フルール村の新規ゲーム開始地点と施設スプライト登録。
 - `maps/LA_MER_CITY.md` — ラメールシティ integrated field layout and its temporary warp access route.
+- `maps/VIEILLE_CITY.md` — ビエイユシティの京都モデル・碁盤目道路のみの初期実装。
 - Future chapters use the same pattern: `chapters/CHAPTER_02.md`, etc.
 
 ## Synchronization rule
