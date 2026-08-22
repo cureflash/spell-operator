@@ -51,6 +51,19 @@ The menu contains, in this order:
 - Test failure does not turn the bottom area into a console. Lumiere gives a short response such as `これだとダメそうね。出力結果を確認してみて。` while the detailed result remains in the output pane.
 - Python exceptions may still be translated into Lumiere guidance, but the technical exception/result text remains separately inspectable in the output pane.
 
+## Answer judging
+
+- The editor includes a separate `解答を判定` button in addition to `テスト実行`.
+- Final answer judging uses newly generated random valid inputs for the current programming problem.
+- The current judge generates 10 random cases per judgment.
+- The canonical reference Python solutions are stored separately in `data/python-reference-solutions.json`.
+- The judge runs the reference solution against each generated input and uses the reference program's actual stdout as the expected output for that case.
+- The player's code is then run against the same input set. A case passes only when its normalized stdout matches the expected stdout and no Python exception occurs.
+- A failed judgment shows at least one failing random input, the player's output, and the expected output in the `実行結果 / 出力` pane.
+- Lumiere's bottom dialogue remains separate and gives only a short response to the judgment result.
+- Passing all random cases records the submitted code as a learned/battle-usable spell using the existing MP/cost model; a less efficient submission does not replace a better saved implementation.
+- Reference solution code is judge data. It is not shown automatically in the editor or in normal hint output.
+
 ## Hint
 
 - The editor includes a `ヒントを聞く` button.
@@ -60,6 +73,7 @@ The menu contains, in this order:
 - The current policy allows hints without consuming an item.
 - The hint service exposes separate eligibility and consumption hooks so a later specification can require an inventory item without rewriting the editor UI.
 - The future item type and quantity are not specified yet and must not be hardcoded now.
+- A possible future multi-stage hint system, including a later stage where Lumiere may provide complete code, is under consideration only. It is not implemented and its rules are not yet part of the specification.
 
 ## Resizing and scrolling
 
