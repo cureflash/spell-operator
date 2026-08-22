@@ -17,6 +17,7 @@ The Notion wiki contains the structured databases for chapters, walkthrough step
 
 - `PROJECT_HANDOFF.md` — ChatGPT Project startup rules, current design context, and handoff material.
 - `GAME_SPEC.md` — game-wide implementation rules and stable global specifications.
+- `UI_TUNING.md` — developer UI tuning tools and machine-readable adjustment payload formats.
 - `chapters/CHAPTER_01.md` — Chapter 1 implementation-facing specification when created.
 - Future chapters use the same pattern: `chapters/CHAPTER_02.md`, etc.
 
