@@ -38,7 +38,7 @@
     "js/python-grimoire.js?v=1",
     "js/plugin-hints.js?v=1",
     "js/plugin-workspace.js?v=2",
-    "js/plugin-editor-assistant.js?v=3",
+    "js/plugin-editor-assistant.js?v=4",
     "js/plugin-answer-judge.js?v=1",
     "js/map-transition.js?v=3",
     "js/game03-items.js?v=3",
