@@ -62,6 +62,9 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
 - Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
 - `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+- Plug-in/computer screens use PeriTune `Dreambyte` as their BGM. This includes both the grimoire list (`screen-hub`) and the Python/grimoire editor (`screen-debug`).
+- `Dreambyte` continues without restarting when moving between the grimoire list and editor, and pauses when leaving the plug-in/computer screens for field, battle, or another screen.
+- Dreambyte source: `https://peritune.com/music/Peritune_Dreambyte.mp3`; source page: `https://peritune.com/blog/2026/01/17/dreambyte/`. It was published in January 2026 and remains under CC BY 4.0.
 - `キョウトシティ` is pre-registered to use PeriTune `Awayuki` when the `kyoto_city` map is implemented. Runtime asset: `assets/audio/bgm/awayuki.mp3`.
 - Normal battles use PeriTune `Ancient Gust`. Runtime asset: `assets/audio/bgm/ancient-gust.mp3`.
 - `ラメールシティ` uses PeriTune `Resort5`. Runtime asset: `assets/audio/bgm/resort5.mp3`.
