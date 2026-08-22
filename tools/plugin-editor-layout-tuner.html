@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spell Operator - プラグインエディタ画面調整</title>
+<style>
+:root{color-scheme:dark;--bg:#12141d;--panel:#1d2130;--line:#3a4157;--text:#f2f3f8;--muted:#aeb5c8;--accent:#8d79ef;--accent2:#b7aaff;--cyan:#7ce0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}main{max-width:1480px;margin:0 auto;padding:20px}h1{margin:0 0 6px;font-size:24px}h2{margin:0 0 10px;font-size:17px}p{color:var(--muted);line-height:1.6}.app{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.controls{display:grid;gap:14px;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto}.group{border-top:1px solid var(--line);padding-top:12px}.group:first-child{border-top:0;padding-top:0}.group-title{font-weight:800;margin-bottom:8px}.control{display:grid;grid-template-columns:126px 1fr 66px;gap:7px;align-items:center;margin:8px 0}.control label{font-size:12px;color:#dfe2ec}.control input[type=range]{width:100%}input[type=number],select,textarea{width:100%;border:1px solid #59617a;border-radius:6px;background:#10131c;color:#fff;padding:7px;font:inherit}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}button{border:1px solid #6a728c;border-radius:7px;background:#2b3042;color:#fff;padding:8px 11px;font-weight:750;cursor:pointer}button.primary{background:#6554d8;border-color:#9a88ff}.hint{font-size:12px;color:#9fa8bf}.preview-wrap{overflow:auto;background:#0b0d14;border:1px solid #30364a;border-radius:10px;padding:14px}.stage{width:1120px;height:720px;background:linear-gradient(135deg,#202236,#10131d);padding:12px;display:grid;grid-template-rows:minmax(0,1fr) 8px 170px;font-family:ui-monospace,"SFMono-Regular",Consolas,"Noto Sans JP",monospace}.upper{display:grid;grid-template-columns:64% 8px 1fr;min-height:0}.divider{background:rgba(124,224,255,.22);border-radius:999px}.card{min-width:0;min-height:0;background:#1b2030;border:1px solid #374159;border-radius:10px;color:#edf0f7;overflow:hidden}.editor{padding:12px;display:grid;grid-template-rows:auto 132px minmax(0,1fr);gap:8px}.editor-head,.run-head,.grimoire-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.eyebrow{font-size:10px;letter-spacing:.12em;color:#beaefc}.title{font-size:22px;font-weight:800}.pill{padding:5px 8px;border-radius:999px;background:#303548;color:#aeb5c8;font-size:11px}.problem{padding:10px;border-radius:8px;background:#252b3e;color:#c9cfdd;overflow:auto;font-size:12px;line-height:1.55}.code{padding:14px;border:1px solid #41687a;border-radius:8px;background:#0d1118;color:#d7f3ff;font-size:16px;white-space:pre-wrap}.right{display:grid;grid-template-rows:62% 8px minmax(0,1fr);min-height:0}.grimoire{padding:11px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px}.grimoire-box{background:#090d12;border:1px solid #30384f;border-radius:8px;padding:10px;color:#cfd6e5;font-size:11px;overflow:auto}.copy{justify-self:end}.run{padding:10px;display:grid;grid-template-rows:auto auto auto minmax(58px,1fr) auto;gap:7px}.run-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.run-buttons button{background:#8874ed;border-color:#a996ff}.run-buttons .hint-btn{grid-column:1/-1;background:#202538}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.metric{background:#272d40;border-radius:8px;padding:8px;font-size:10px;color:#aeb5c8}.metric strong{display:block;color:#fff;font-size:14px;margin-top:2px}.output-wrap{display:grid;grid-template-rows:auto minmax(0,1fr);gap:5px;min-height:0}.output-head{display:flex;justify-content:space-between;font-size:10px;color:#aeb5c8;font-weight:800}.output{margin:0;min-height:0;overflow:auto;border:1px solid #30384f;border-radius:8px;background:#090d12;color:#ffe3a8;padding:9px;font-size:11px;line-height:1.45;white-space:pre-wrap}.back{width:100%}.dialog{display:grid;grid-template-columns:160px 1fr;background:#fffef2;color:#202128;border:4px solid #333946;border-radius:8px;box-shadow:inset 0 0 0 2px #adb5c4;overflow:hidden;min-height:0}.portrait{background:#e6a157 url("../assets/characters/portraits/lumiere/neutral.jpg?v=2") center/cover no-repeat;border-right:3px solid #555d6a;min-height:0}.message{position:relative;padding:45px 42px 14px 18px;font-family:ui-monospace,"Noto Sans JP",monospace;font-size:14px;line-height:1.6;overflow:hidden}.name{position:absolute;left:12px;top:10px;padding:3px 28px;border-radius:999px;background:#ffe8a3;font-weight:900}.next{position:absolute;right:12px;bottom:7px}.output-area textarea{min-height:250px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;line-height:1.45}.status{min-height:1.4em;color:#9fe0af;font-size:12px}@media(max-width:900px){main{padding:12px}.app{grid-template-columns:1fr}.controls{position:static;max-height:none}.control{grid-template-columns:115px 1fr 64px}}
+</style>
+</head>
+<body>
+<main>
+<h1>プラグインエディタ画面 調整ツール</h1>
+<p>数値を動かして画面比率を調整してください。決まったら下の「ChatGPT用JSON」をこのチャットへそのまま貼れば、その値を本編へ反映できます。</p>
+<div class="app">
+<section class="panel controls">
+  <div class="group" id="layoutControls"><div class="group-title">画面分割</div></div>
+  <div class="group" id="rightControls"><div class="group-title">右側・Output</div></div>
+  <div class="group" id="dialogControls"><div class="group-title">ルミエル会話欄</div></div>
+  <div class="group" id="editorControls"><div class="group-title">エディタ</div></div>
+  <div class="group">
+    <div class="group-title">プリセット</div>
+    <div class="actions">
+      <button id="presetCurrent">現在値</button>
+      <button id="presetHalfDialog">会話を約半分</button>
+      <button id="presetOutput">Output優先</button>
+    </div>
+    <div class="hint">プリセット後も個別の数値を変更できます。</div>
+  </div>
+</section>
+<div>
+<section class="panel">
+<h2>プレビュー</h2>
+<div class="preview-wrap">
+<div class="stage" id="stage">
+  <div class="upper" id="upper">
+    <section class="card editor" id="editorPane">
+      <div class="editor-head"><div><div class="eyebrow">PYTHON EDITOR</div><div class="title">Fire — Python仕様テスト</div></div><span class="pill">未修得</span></div>
+      <div class="problem" id="problem">仕様<br>魔導炉に整数 N が1つ入力される。炎の出力値として N の2倍を1行に出力せよ。<br><br>入力　整数 N（0 ≤ N ≤ 10000）<br>出力　N × 2 を整数で1行に出力する。</div>
+      <div class="code">print("str")</div>
+    </section>
+    <div class="divider" id="verticalDivider"></div>
+    <aside class="right" id="rightPane">
+      <section class="card grimoire">
+        <div class="grimoire-head"><div><div class="eyebrow">GRIMOIRE</div><strong>魔導書</strong></div><span class="hint">過去のコード</span></div>
+        <div class="grimoire-box">保存されたコードはまだありません。<br><br>魔法を修得すると、ここから過去のコードを参照できます。</div>
+        <button class="copy">コピー</button>
+      </section>
+      <div class="divider"></div>
+      <section class="card run" id="runPane">
+        <div class="run-head"><strong>実行</strong><span class="pill" style="color:#ffd0d6">TEST FAILED</span></div>
+        <div class="run-buttons"><button>▶ テスト実行</button><button>解答を判定</button><button class="hint-btn">ヒントを聞く</button></div>
+        <div class="metrics"><div class="metric">計算コスト<strong>8</strong></div><div class="metric">消費MP<strong>—</strong></div><div class="metric">結果<strong>不合格</strong></div></div>
+        <div class="output-wrap"><div class="output-head"><span>実行結果 / 出力</span><span>OUTPUT</span></div><pre class="output" id="output">TEST: 0 / 6
+判定: 不合格
+
+あなたの出力:
+str
+
+期待する出力:
+14</pre></div>
+        <button class="back">魔導書一覧へ戻る</button>
+      </section>
+    </aside>
+  </div>
+  <div class="divider" id="horizontalDivider"></div>
+  <section class="dialog" id="dialog">
+    <div class="portrait" id="portrait"></div>
+    <div class="message" id="message"><span class="name">ルミエル</span>これだとダメそうね。出力結果を確認してみて。<span class="next">▼</span></div>
+  </section>
+</div>
+</div>
+<div class="hint" style="margin-top:8px">プレビューは本編の比率を再現した固定サイズです。ここで決める値は本編CSS用の値として出力されます。</div>
+</section>
+<section class="panel output-area" style="margin-top:16px">
+<h2>ChatGPTへ渡す値</h2>
+<p class="hint">JSONを丸ごとコピーして、このチャットに貼ってください。</p>
+<textarea id="jsonOutput" readonly></textarea>
+<div class="actions"><button class="primary" id="copyJson">ChatGPT用JSONをコピー</button><button id="selectJson">全選択</button></div>
+<div class="status" id="copyStatus"></div>
+<details><summary>生成CSSも見る</summary><textarea id="cssOutput" readonly></textarea></details>
+</section>
+</div>
+</div>
+</main>
+<script>
+(() => {
+"use strict";
+const specs=[
+ {group:"layoutControls",key:"editorWidthPercent",label:"エディタ幅 %",min:45,max:78,step:1,value:64},
+ {group:"layoutControls",key:"dialogueHeightPercent",label:"会話高さ %",min:8,max:32,step:1,value:24},
+ {group:"layoutControls",key:"dividerPx",label:"境界太さ px",min:2,max:16,step:1,value:8},
+ {group:"rightControls",key:"grimoireHeightPercent",label:"魔導書高さ %",min:30,max:72,step:1,value:62},
+ {group:"rightControls",key:"outputMinHeightPx",label:"Output最低高",min:40,max:260,step:5,value:58},
+ {group:"rightControls",key:"runGapPx",label:"実行欄の間隔",min:2,max:14,step:1,value:7},
+ {group:"dialogControls",key:"dialoguePortraitWidthPx",label:"顔欄の幅 px",min:70,max:180,step:2,value:160},
+ {group:"dialogControls",key:"dialogueMessageTopPx",label:"本文上余白 px",min:22,max:55,step:1,value:45},
+ {group:"dialogControls",key:"dialogueFontSizePx",label:"会話文字 px",min:10,max:18,step:1,value:14},
+ {group:"editorControls",key:"problemMaxHeightPx",label:"問題欄高さ px",min:70,max:190,step:2,value:132},
+ {group:"editorControls",key:"codeFontSizePx",label:"コード文字 px",min:11,max:22,step:1,value:16}
+];
+const values=Object.fromEntries(specs.map(s=>[s.key,s.value]));
+const controls=new Map();
+const $=id=>document.getElementById(id);
+for(const s of specs){
+ const row=document.createElement("div");row.className="control";
+ const label=document.createElement("label");label.textContent=s.label;label.htmlFor=s.key+"Range";
+ const range=document.createElement("input");range.type="range";range.id=s.key+"Range";range.min=s.min;range.max=s.max;range.step=s.step;range.value=s.value;
+ const number=document.createElement("input");number.type="number";number.id=s.key;number.min=s.min;number.max=s.max;number.step=s.step;number.value=s.value;
+ row.append(label,range,number);$(s.group).appendChild(row);controls.set(s.key,{range,number,s});
+ const set=v=>{let n=Number(v);if(!Number.isFinite(n))n=s.value;n=Math.min(s.max,Math.max(s.min,n));values[s.key]=n;range.value=n;number.value=n;render()};
+ range.addEventListener("input",e=>set(e.target.value));number.addEventListener("input",e=>set(e.target.value));
+}
+function payload(){return {format:"spell-operator/plugin-editor-layout@1",target:"plugin-editor-workspace",desktop:{...values,editorUpperPercent:Number((100-values.dialogueHeightPercent).toFixed(2))},notes:{outputMismatchState:"TEST FAILED, not PYTHON ERROR",dialoguePurpose:"Lumiere dialogue only",outputPurpose:"technical execution output only"}}}
+function cssFor(p){const v=p.desktop;return `.plugin-editor-shell{\n  --plugin-editor-left:${v.editorWidthPercent}%;\n  --plugin-editor-upper:${v.editorUpperPercent}%;\n  grid-template-rows:minmax(0,var(--plugin-editor-upper)) ${v.dividerPx}px minmax(0,1fr);\n}\n.plugin-editor-upper{grid-template-columns:minmax(0,var(--plugin-editor-left)) ${v.dividerPx}px minmax(0,1fr);}\n.plugin-right-pane{\n  --plugin-grimoire-height:${v.grimoireHeightPercent}%;\n  grid-template-rows:minmax(0,var(--plugin-grimoire-height)) ${v.dividerPx}px minmax(0,1fr);\n}\n.plugin-code-pane .hint-box{max-height:${v.problemMaxHeightPx}px;}\n.plugin-code-pane #code-editor{font-size:${v.codeFontSizePx}px;}\n.plugin-run-pane{gap:${v.runGapPx}px;}\n.plugin-execution-output{min-height:${v.outputMinHeightPx}px;}\n.plugin-field-dialog{grid-template-columns:${v.dialoguePortraitWidthPx}px 1fr!important;}\n.plugin-field-dialog .dialog-message{padding-top:${v.dialogueMessageTopPx}px!important;}\n.plugin-conversation-text{font-size:${v.dialogueFontSizePx}px;}`}
+function render(){
+ const p=payload(),v=p.desktop,stage=$("stage"),upper=$("upper"),right=$("rightPane"),dialog=$("dialog"),message=$("message"),problem=$("problem"),output=$("output");
+ stage.style.gridTemplateRows=`minmax(0,1fr) ${v.dividerPx}px ${v.dialogueHeightPercent}%`;
+ upper.style.gridTemplateColumns=`${v.editorWidthPercent}% ${v.dividerPx}px minmax(0,1fr)`;
+ right.style.gridTemplateRows=`${v.grimoireHeightPercent}% ${v.dividerPx}px minmax(0,1fr)`;
+ right.querySelector(".run").style.gap=v.runGapPx+"px";
+ dialog.style.gridTemplateColumns=`${v.dialoguePortraitWidthPx}px 1fr`;
+ message.style.paddingTop=v.dialogueMessageTopPx+"px";message.style.fontSize=v.dialogueFontSizePx+"px";
+ problem.style.maxHeight=v.problemMaxHeightPx+"px";$("editorPane").style.gridTemplateRows=`auto ${v.problemMaxHeightPx}px minmax(0,1fr)`;
+ $("editorPane").querySelector(".code").style.fontSize=v.codeFontSizePx+"px";
+ output.style.minHeight=v.outputMinHeightPx+"px";
+ document.querySelectorAll(".divider").forEach(d=>{d.style.minWidth=v.dividerPx+"px";d.style.minHeight=v.dividerPx+"px"});
+ $("jsonOutput").value=JSON.stringify(p,null,2);$("cssOutput").value=cssFor(p);
+}
+function apply(obj){for(const [k,v] of Object.entries(obj)){if(!controls.has(k))continue;const c=controls.get(k),n=Math.min(c.s.max,Math.max(c.s.min,Number(v)));values[k]=n;c.range.value=n;c.number.value=n}render()}
+$("presetCurrent").onclick=()=>apply({editorWidthPercent:64,dialogueHeightPercent:24,dividerPx:8,grimoireHeightPercent:62,outputMinHeightPx:58,runGapPx:7,dialoguePortraitWidthPx:160,dialogueMessageTopPx:45,dialogueFontSizePx:14,problemMaxHeightPx:132,codeFontSizePx:16});
+$("presetHalfDialog").onclick=()=>apply({dialogueHeightPercent:12,dialoguePortraitWidthPx:105,dialogueMessageTopPx:31,grimoireHeightPercent:52,outputMinHeightPx:120});
+$("presetOutput").onclick=()=>apply({dialogueHeightPercent:12,grimoireHeightPercent:42,outputMinHeightPx:170,runGapPx:5,dialoguePortraitWidthPx:100,dialogueMessageTopPx:30});
+$("copyJson").onclick=async()=>{try{await navigator.clipboard.writeText($("jsonOutput").value);$("copyStatus").textContent="コピーしました。"}catch{$("jsonOutput").select();document.execCommand("copy");$("copyStatus").textContent="コピーしました。"}};
+$("selectJson").onclick=()=>{$("jsonOutput").focus();$("jsonOutput").select()};
+render();
+})();
+</script>
+</body>
+</html>
