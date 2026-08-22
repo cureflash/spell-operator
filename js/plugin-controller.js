@@ -188,20 +188,17 @@
     if (dialogOpen()) document.getElementById("field-action")?.click();
   }
 
-  async function openFirstEditor() {
+  async function openPluginMenu() {
     await playVisualTransition();
     await Promise.resolve(G.openComputer?.());
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    const button = document.querySelector("#screen-hub [data-python-spellbook]");
-    if (button instanceof HTMLElement) button.click();
   }
 
   function confirm() {
     audio.prepareFromGesture();
     audio.playSfx("plugin-sparkle");
     closePrompt();
-    openFirstEditor().catch(error => {
-      console.error("Spell plug-in editor entry failed", error);
+    openPluginMenu().catch(error => {
+      console.error("Spell plug-in menu entry failed", error);
       G.openComputer?.();
     });
   }
