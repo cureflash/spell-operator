@@ -39,24 +39,33 @@
   }
 
   function resultKind(status) {
-    if (/PYTHON ERROR|ERROR/i.test(status)) return "error";
-    if (/TEST FAILED|FAILED/i.test(status)) return "failed";
-    if (/TEST PASS|PASS/i.test(status)) return "passed";
-    if (/RUNNING/i.test(status)) return "running";
+    if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status)) return "error";
+    if (/TEST FAILED|JUDGE FAILED|FAILED/i.test(status)) return "failed";
+    if (/TEST PASS|JUDGE PASS|PASS/i.test(status)) return "passed";
+    if (/RUNNING|JUDGING/i.test(status)) return "running";
     return "neutral";
   }
 
   function fallbackDialogue(raw, status) {
+    if (/JUDGING/i.test(status) || raw.includes("模範解答と照合しています")) {
+      return "解答を判定するね。ちょっと待ってて。";
+    }
     if (/RUNNING/i.test(status) || raw.includes("準備してテストしています")) {
       return "実行しているよ。少し待ってね。";
+    }
+    if (/JUDGE FAILED/i.test(status)) {
+      return "これだとまだダメそうね。判定結果を確認してみて。";
     }
     if (/TEST FAILED|FAILED/i.test(status) || raw.includes("不合格") || raw.includes("不正解")) {
       return "これだとダメそうね。出力結果を確認してみて。";
     }
+    if (/JUDGE PASS/i.test(status)) {
+      return "正解！ ちゃんといろんな入力でも動いてるよ。";
+    }
     if (/TEST PASS|PASS/i.test(status) || raw.includes("ALL TESTS PASSED")) {
       return "うまくいったね。これなら大丈夫そう。";
     }
-    if (/PYTHON ERROR|ERROR/i.test(status) || /(?:^|\n)[A-Za-z_][A-Za-z0-9_]*Error:/.test(raw) || raw.includes("Python:")) {
+    if (/PYTHON ERROR|JUDGE ERROR|ERROR/i.test(status) || /(?:^|\n)[A-Za-z_][A-Za-z0-9_]*Error:/.test(raw) || raw.includes("Python:")) {
       return "Pythonの実行中に問題が起きたみたい。実行結果を確認してみて。";
     }
     if (raw.includes("コードが空")) return "まだコードが書かれていないみたい。";
