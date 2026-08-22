@@ -222,10 +222,13 @@
     }
 
     if (isX(event)) {
-      if (start()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (promptOpen && dialogOpen()) {
+        closePrompt();
+        return;
       }
+      start();
       return;
     }
 
