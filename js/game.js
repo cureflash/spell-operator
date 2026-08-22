@@ -25,6 +25,10 @@
   const modules = [
     "js/audio-settings.js?v=1",
     "js/audio-manager.js?v=1",
+    { wait: () => Promise.all([
+      window.SpellAudio?.preloadSfx?.("dialog-pop"),
+      window.SpellAudio?.preloadSfx?.("plugin-sparkle")
+    ]) },
     "js/python-runner.js?v=1",
     "js/interpreter.js?v=3",
     "js/game03-core.js?v=8",
