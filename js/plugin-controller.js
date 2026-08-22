@@ -224,10 +224,7 @@
     if (isX(event)) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      if (promptOpen && dialogOpen()) {
-        closePrompt();
-        return;
-      }
+      if (promptOpen && dialogOpen()) return;
       start();
       return;
     }
