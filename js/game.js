@@ -62,6 +62,7 @@
     "js/game-bgm.js?v=8",
     "js/character-portraits.js?v=3",
     "js/battle-dq-ui.js?v=6",
+    { src: "js/battle-log-display.js?v=1", optional: true },
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
     "js/game03-menu.js?v=19",
