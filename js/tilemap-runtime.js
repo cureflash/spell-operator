@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_PREFIX = "spell-operator-tilemap:";
-  const FALLBACKS = { house2: "assets/maps/house2-layout.json?v=1" };
+  const FALLBACKS = { house2: "assets/maps/house2-layout.json?v=2" };
   const layouts = Object.create(null);
   let activeModel = null;
 
@@ -43,27 +43,87 @@
     return localLayout(mapId) || layouts[mapId] || null;
   }
 
-  function collisionSet(layout) {
-    if (!layout || !Array.isArray(layout.collision)) return null;
-    const width = Number(layout.width) || 0;
+  function validDimensions(layout) {
+    const width = Number(layout?.width), height = Number(layout?.height);
+    if (!Number.isInteger(width) || !Number.isInteger(height)) return null;
+    if (width < 1 || height < 1 || width > 80 || height > 60) return null;
+    return { width, height };
+  }
+
+  function collisionSet(layout, width) {
+    if (!layout || !Array.isArray(layout.collision)) return new Set();
     const blocked = new Set();
     layout.collision.forEach((value, index) => {
-      if (!value || !width) return;
-      blocked.add(`${index % width},${Math.floor(index / width)}`);
+      if (value) blocked.add(`${index % width},${Math.floor(index / width)}`);
     });
     return blocked;
   }
 
-  function applyCollision(mapId) {
-    const layout = normalizedLayout(mapId);
-    if (!layout || !activeModel) return;
-    if (Number(layout.width) !== activeModel.width || Number(layout.height) !== activeModel.height) return;
-    const blocked = collisionSet(layout);
-    if (blocked) activeModel.blocked = blocked;
+  function rebuildHouseGrid(mapId, width, height) {
+    const world = document.getElementById("field-world");
+    if (!world || world.dataset.map !== mapId) return;
+    world.style.gridTemplateColumns = `repeat(${width},var(--tile-size))`;
+    world.style.gridTemplateRows = `repeat(${height},var(--tile-size))`;
+    world.style.width = `calc(${width} * var(--tile-size))`;
+    world.style.height = `calc(${height} * var(--tile-size))`;
+
+    world.querySelectorAll(":scope > .field-tile").forEach(el => el.remove());
+    const frag = document.createDocumentFragment();
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const tile = document.createElement("div");
+        tile.className = "field-tile house-floor";
+        tile.dataset.x = String(x);
+        tile.dataset.y = String(y);
+        frag.appendChild(tile);
+      }
+    }
+    world.insertBefore(frag, world.firstChild);
   }
 
-  function applyVisual(mapId) {
-    const layout = normalizedLayout(mapId);
+  function restoreEntityFromSnapshot(entity, snap, width, height) {
+    if (!entity || !snap) return false;
+    if (!Number.isFinite(snap.x) || !Number.isFinite(snap.y)) return false;
+    if (snap.x < 0 || snap.y < 0 || snap.x >= width || snap.y >= height) return false;
+    Object.assign(entity, snap);
+    return true;
+  }
+
+  function syncEntityElement(selector, entity) {
+    const el = document.querySelector(selector);
+    if (!el || !entity) return;
+    el.style.setProperty("--x", entity.x);
+    el.style.setProperty("--y", entity.y);
+    if (entity.facing) el.dataset.facing = entity.facing;
+  }
+
+  function applyModel(mapId, layout, snapshot = null) {
+    const dims = validDimensions(layout);
+    if (!dims || !activeModel) return;
+    activeModel.width = dims.width;
+    activeModel.height = dims.height;
+    activeModel.blocked = collisionSet(layout, dims.width);
+
+    if (snapshot) {
+      restoreEntityFromSnapshot(activeModel.player, snapshot.player, dims.width, dims.height);
+      restoreEntityFromSnapshot(activeModel.follower, snapshot.follower, dims.width, dims.height);
+    }
+
+    const events = layout.fixedEvents || layout.events || {};
+    if (!activeModel.inBounds(activeModel.player.x, activeModel.player.y)) {
+      restoreEntityFromSnapshot(activeModel.player, events.playerStart, dims.width, dims.height);
+    }
+    if (!activeModel.inBounds(activeModel.follower.x, activeModel.follower.y)) {
+      restoreEntityFromSnapshot(activeModel.follower, events.followerStart, dims.width, dims.height);
+    }
+
+    rebuildHouseGrid(mapId, dims.width, dims.height);
+    syncEntityElement("#field-player", activeModel.player);
+    syncEntityElement("#field-follower", activeModel.follower);
+    requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
+  }
+
+  function applyVisual(mapId, layout) {
     if (!layout?.renderedMap) return;
     const apply = () => {
       const world = document.getElementById("field-world");
@@ -81,13 +141,15 @@
     let tries = 0;
     const timer = setInterval(() => {
       tries += 1;
-      if (apply() || tries > 30) clearInterval(timer);
+      if (apply() || tries > 60) clearInterval(timer);
     }, 16);
   }
 
-  function apply(mapId) {
-    applyCollision(mapId);
-    applyVisual(mapId);
+  function apply(mapId, snapshot = null) {
+    const layout = normalizedLayout(mapId);
+    if (!layout) return;
+    applyModel(mapId, layout, snapshot);
+    applyVisual(mapId, layout);
   }
 
   function installFieldPatch() {
@@ -96,7 +158,7 @@
     const original = field.activateMap.bind(field);
     const patched = (mapId, options = {}) => {
       const result = original(mapId, options);
-      apply(mapId);
+      apply(mapId, options?.snapshot || null);
       return result;
     };
     patched.__spellTilemapPatched = true;
