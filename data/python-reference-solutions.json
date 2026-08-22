@@ -1,0 +1,4 @@
+{
+  "fire": "n = int(input())\nprint(n * 2)\n",
+  "repair": "h, m = map(int, input().split())\nprint(m - h)\n"
+}
