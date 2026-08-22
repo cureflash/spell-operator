@@ -40,15 +40,17 @@ The seams between sectors are adjusted only enough to make the intended routes c
 
 ## Road / ground tiles
 
-The provisional road network uses the same canonical Pipoya FREE RPG Tileset 32x32 map chips already used by Spell Operator. AI-generated La Mer art is not used as the road surface.
+The La Mer road network uses the AI-derived white-stone ground pattern in `assets/tiles/la_mer/ground.svg`.
 
-- General roads: Pipoya `Dirt1`
-- Urban pavement / shopping streets: Pipoya `Dirt2`
-- Foreign settlement stone paving: Pipoya `Dirt3`
-- Harbor pavement: Pipoya `Dirt4`
-- Plazas: Pipoya `Dirt2` alternate chip
+- General roads: AI white-stone pattern
+- Urban pavement / Motomachi: same 3×3 pattern with offset origin
+- Foreign settlement stone paving: same pattern with offset origin
+- Harbor pavement: same pattern with a slightly darker treatment
+- Plazas: same pattern with another offset origin
 
-The existing continuous route geometry in `js/la-mer-expanded.js` is retained for this provisional pass. Sea is rendered separately as a blue base plus wave/highlight effect. Large AI-generated buildings, bridges, boats, market stalls, and props may remain as provisional decorative stamps above the canonical ground layer.
+`css/la-mer-map.css` owns these surfaces. Pipoya road chips are not used for the La Mer road surface.
+
+The logical route geometry and collision in `js/la-mer-expanded.js` are retained. Sea is rendered separately as a blue base plus wave/highlight effect.
 
 ## Rendering
 
@@ -60,22 +62,26 @@ The existing continuous route geometry in `js/la-mer-expanded.js` is retained fo
 
 ## AI加工タイル素材・仮配置
 
-2026-08-22時点の外観検討用として、AI生成の港町素材案を32pxグリッドへ再構成した仮素材を登録している。
+AI生成の港町素材案を32pxグリッドへ再構成した仮素材を登録している。
 
 - アトラス: `assets/tiles/la_mer_ai_pack.svg`
 - 地面3×3: `assets/tiles/la_mer/ground.svg`
+- 噴水: `assets/tiles/la_mer/fountain.svg`
+- ベンチ: `assets/tiles/la_mer/bench.svg`
+- 花壇: `assets/tiles/la_mer/flowerbed.svg`
+- 街灯: `assets/tiles/la_mer/lamp.svg`
 - エディタ素材セット名: `ラメールシティ AI加工素材`
-- 分類: 地面 / 橋 / 建物 / 港 / 市場 / 小物
-- 大型素材は 3×3、8×4、7×8、7×9、9×9、9×4、6×4 等の矩形スタンプとして扱う。
+- 大型素材は複数マスの矩形スタンプとして扱う。
 - 海面は画像タイルを全面敷き詰めるのではなく、青色ベース + 波・反射エフェクトで表現する。
-- 白石畳はエディタ用の仮素材として保持するが、通常ゲームの道路・石畳・港舗装はPipoya系の正式マップチップを使う。
 
-通常ゲームでは `js/la-mer-ai-preview.js` が**外観検討用の仮配置**を重ねる。
+通常ゲームでは `js/la-mer-ai-preview.js` が外観検討用の仮配置を重ねる。
 
 仮配置対象:
 - 三宮: 青屋根建物A/B
 - 港1: 市場、ボート、石橋、街灯
 - 港2: 市場、ランドマーク建物、ボート、街灯
+- 外国人居留地: 噴水、ベンチ、花壇、街灯
+- 道路 / 石畳 / 港舗装 / 広場: AI白石畳3×3
 - 海: 青色ベース + 水面エフェクト
 
 この仮配置は既存の `144 x 104` 論理座標・既存の移動経路・セクター構造を変更しない。最終配置ではなく、マップエディタで調整するための叩き台である。
