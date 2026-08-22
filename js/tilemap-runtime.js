@@ -20,13 +20,15 @@
   function dims(layout){const width=Number(layout?.width),height=Number(layout?.height);if(!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width>180||height>140)return null;return{width,height};}
   function collisionSet(layout,width){if(!Array.isArray(layout?.collision))return null;const s=new Set();layout.collision.forEach((v,i)=>{if(v)s.add(`${i%width},${Math.floor(i/width)}`)});return s;}
   function spec(mapId,base){const layout=get(mapId),d=dims(layout);if(!d)return base;const blocked=collisionSet(layout,d.width);return{...base,...d,blocked:blocked||base.blocked};}
-  function event(mapId,key,fallback=null){const events=get(mapId)?.events||get(mapId)?.fixedEvents||{},v=events?.[key];if(!v||!Number.isFinite(v.x)||!Number.isFinite(v.y))return fallback;return{...fallback,...v};}
+  function event(mapId,key,fallback=null){const layout=get(mapId),events=layout?.events||layout?.fixedEvents||{},v=events?.[key];if(!v||!Number.isFinite(v.x)||!Number.isFinite(v.y))return fallback;return{...fallback,...v};}
   const same=(a,b)=>Boolean(a&&b&&a.x===b.x&&a.y===b.y);
 
   function rebuildGrid(mapId,width,height){
     const world=document.getElementById("field-world");if(!world||world.dataset.map!==mapId)return;
     world.style.gridTemplateColumns=`repeat(${width},var(--tile-size))`;world.style.gridTemplateRows=`repeat(${height},var(--tile-size))`;world.style.width=`calc(${width} * var(--tile-size))`;world.style.height=`calc(${height} * var(--tile-size))`;
-    world.querySelectorAll(":scope > .field-tile").forEach(el=>el.remove());const frag=document.createDocumentFragment();
+    world.querySelectorAll(":scope > .field-tile").forEach(el=>el.remove());
+    if(width*height>3000)return;
+    const frag=document.createDocumentFragment();
     for(let y=0;y<height;y++)for(let x=0;x<width;x++){const t=document.createElement("div");t.className="field-tile custom-map-floor";t.dataset.x=x;t.dataset.y=y;t.style.background="transparent";t.style.border="0";t.style.boxShadow="none";frag.appendChild(t)}
     world.insertBefore(frag,world.firstChild);
   }
