@@ -156,6 +156,7 @@ SpellDialogTyping.resume();
   - `assets/characters/portraits/lumiere/battle.jpg`
 - The normal battle UI uses the `battle` expression for Sophie and Lumiere. Dedicated danger/KO/fainted portraits are not specified yet and continue to use `neutral`.
 - When Sophie or Lumiere performs an enemy-targeting attack in battle, only the attacking character's currently visible battle portrait briefly moves up and down. This applies to normal attacks and offensive magic such as `Fire`; non-attacking actions such as `Repair` do not play the attack bounce.
+- When Sophie or Lumiere takes enemy attack damage, only the damaged character's currently visible battle portrait briefly moves downward and returns to its normal position. This is the visual counterpart to the attacker's upward motion.
 - `SpellField.showDialog()` accepts an optional `expression` property. Existing dialogue that omits it uses `neutral`.
 - Additional expressions can be registered without changing the dialogue layout through `SpellPortraits.register(character, expression, src)`.
 - `SpellPortraits.prepare(expression)` can prepare an expression for the next field-dialog portrait update when existing internal field code invokes its local dialog function directly.
