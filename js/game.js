@@ -19,7 +19,7 @@
     "css/npc-pipoya.css?v=4",
     "css/computer.css?v=5",
     "css/plugin-editor-assistant.css?v=3",
-    "css/plugin-editor-layout-applied.css?v=7",
+    "css/plugin-editor-layout-applied.css?v=8",
     "css/grimoire-first-clear.css?v=3",
     "css/pipoya-map.css?v=2",
     "css/house-maps.css?v=1",
