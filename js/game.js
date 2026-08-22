@@ -51,7 +51,7 @@
     "js/game03-story.js?v=10",
     "js/friend-conversation.js?v=3",
     "js/game03-battle.js?v=6",
-    { src: "js/battle-ui-core-patch.js?v=2", optional: true },
+    { src: "js/battle-ui-core-patch.js?v=3", optional: true },
     "js/tilemap-runtime.js?v=5",
     { wait: () => window.SpellTilemapRuntime?.ready },
     "js/game03-field.js?v=20",
