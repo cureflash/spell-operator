@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Spell Operator Python Runtime Integration Test</title>
+  <style>
+    body{font-family:system-ui,sans-serif;margin:0;background:#111522;color:#eef2ff;padding:20px}
+    main{max-width:900px;margin:auto}.card{background:#1b2132;border:1px solid #39425d;border-radius:12px;padding:16px;margin-bottom:14px}
+    button{font:inherit;font-weight:800;padding:12px 18px;border:0;border-radius:8px;background:#8c7cf4;color:white}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#090d12;border:1px solid #30384f;border-radius:8px;padding:12px;min-height:90px}
+    .pass{color:#9ef0b9}.fail{color:#ffadb8}
+  </style>
+</head>
+<body>
+<main>
+  <h1>本番Pythonランナー統合診断</h1>
+  <p>ゲーム本体と同じ <code>js/python-runner.js</code> / <code>js/python-worker.mjs</code> を使用します。</p>
+  <div class="card"><button id="run">診断開始</button> <span id="status">未実行</span></div>
+  <div class="card"><h2>結果</h2><pre id="out"></pre></div>
+  <div class="card"><h2>ChatGPT用JSON</h2><pre id="json"></pre></div>
+</main>
+<script src="js/python-runner.js?v=6"></script>
+<script>
+(() => {
+  const runButton = document.getElementById('run');
+  const status = document.getElementById('status');
+  const out = document.getElementById('out');
+  const json = document.getElementById('json');
+
+  function errorData(error){return error ? {name:String(error.name||'Error'),message:String(error.message||error),stack:String(error.stack||'')} : null}
+
+  runButton.addEventListener('click', async () => {
+    runButton.disabled = true;
+    status.textContent = '実行中';
+    status.className = '';
+    out.textContent = '';
+    const report = {
+      format:'spell-operator/python-production-runtime-diagnostic@1',
+      generatedAt:new Date().toISOString(),
+      environment:{userAgent:navigator.userAgent,secureContext:isSecureContext,workerSupported:'Worker' in window,webAssemblySupported:'WebAssembly' in window},
+      runtimeMode:window.SpellPython?.runtimeMode || null,
+      tests:[],
+      failure:null,
+      finalStatus:'RUNNING'
+    };
+
+    const cases = [
+      {name:'print', source:'print("str")', tests:[{input:'',output:'str\n'}]},
+      {name:'input', source:'n = int(input())\nprint(n * 2)', tests:[{input:'7\n',output:'14\n'}]}
+    ];
+
+    try {
+      const warm = await window.SpellPython.warmup();
+      report.warmup = warm || true;
+      for (const item of cases) {
+        try {
+          const result = await window.SpellPython.runSuite(item.source,item.tests,{timeoutMs:7000});
+          const entry = {name:item.name,result,passed:Boolean(result?.ok),error:null};
+          report.tests.push(entry);
+          out.textContent += `${item.name}: ${entry.passed ? 'PASS' : 'FAIL'}\n${JSON.stringify(result,null,2)}\n\n`;
+          if (!entry.passed) throw new Error(`${item.name} did not pass.`);
+        } catch (error) {
+          report.tests.push({name:item.name,passed:false,error:errorData(error)});
+          throw error;
+        }
+      }
+      report.finalStatus='PASS';
+      status.textContent='PASS'; status.className='pass';
+    } catch (error) {
+      report.failure=errorData(error);
+      report.runnerLastError=errorData(window.SpellPython?.lastError);
+      report.finalStatus='FAILED';
+      status.textContent='FAILED'; status.className='fail';
+      out.textContent += `ERROR\n${String(error?.stack||error)}`;
+    } finally {
+      json.textContent=JSON.stringify(report,null,2);
+      runButton.disabled=false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
