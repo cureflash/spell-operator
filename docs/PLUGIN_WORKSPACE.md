@@ -9,6 +9,7 @@ This document mirrors the confirmed plug-in workspace specification from Notion 
 - The field-menu computer route may open the same plug-in menu without the cinematic transition.
 - The common menu control contract is `Z` = confirm and `X` = cancel/back.
 - The normal field is the exception to the cancel binding: while no menu, overlay, or plug-in prompt is open, `X` starts plug-in access as before.
+- Once the field plug-in prompt has started, pressing `X` must not cancel or close it. `X` is consumed with no action until the prompt/transition finishes; `Z` is the only key that advances the plug-in sequence.
 
 ## Plug-in menu
 
