@@ -2,11 +2,9 @@
   "use strict";
 
   const EFFECT_SOURCE = "assets/effects/plugin/kirayuki1.webp";
-  const SE_SOURCE = "assets/audio/sfx/plugin-sparkle.base64";
   const FRAME_COUNT = 10;
   const FRAME_MS = 154;
   const EFFECT_DURATION_MS = FRAME_COUNT * FRAME_MS;
-  const ARM_WINDOW_MS = 500;
   const IMAGE_LOAD_TIMEOUT_MS = 2500;
 
   const image = new Image();
@@ -18,164 +16,6 @@
   let canvas = null;
   let context = null;
   let playing = null;
-  let armedUntil = 0;
-  let openComputerWrapped = false;
-
-  let audioContext = null;
-  let decodedBuffer = null;
-  let audioLoadPromise = null;
-  let fallbackUrlPromise = null;
-  const fallbackAudio = new Audio();
-  fallbackAudio.preload = "auto";
-
-  function currentSfxVolume() {
-    const value = window.SpellAudioSettings?.get?.("sfx");
-    return Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0.5;
-  }
-
-  function base64Bytes() {
-    return fetch(SE_SOURCE, { cache: "force-cache" })
-      .then(response => {
-        if (!response.ok) throw new Error(`plug-in SE fetch failed: ${response.status}`);
-        return response.text();
-      })
-      .then(encoded => {
-        const binary = atob(encoded.replace(/\s+/g, ""));
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-        return bytes;
-      });
-  }
-
-  function ensureWebAudio() {
-    const Context = window.AudioContext || window.webkitAudioContext;
-    if (!Context) return Promise.resolve(false);
-
-    // Create the context only after a real user gesture. This mirrors the
-    // dialog SE path that already works on Safari/Chrome.
-    if (!audioContext) audioContext = new Context();
-    const resume = audioContext.state === "suspended" ? audioContext.resume() : Promise.resolve();
-
-    if (!audioLoadPromise) {
-      audioLoadPromise = base64Bytes()
-        .then(bytes => audioContext.decodeAudioData(bytes.buffer.slice(0)))
-        .then(buffer => {
-          decodedBuffer = buffer;
-          return true;
-        })
-        .catch(error => {
-          console.warn("Spell plug-in SE decode failed", error);
-          return false;
-        });
-    }
-
-    return Promise.all([resume, audioLoadPromise]).then(([, loaded]) => Boolean(loaded));
-  }
-
-  function unlockAudio() {
-    ensureWebAudio().catch(error => console.warn("Spell plug-in audio unlock failed", error));
-  }
-
-  // Unlock early on the same user gestures that successfully unlock dialog SE.
-  document.addEventListener("pointerdown", unlockAudio, { capture: true });
-  document.addEventListener("keydown", unlockAudio, { capture: true });
-
-  function playWebAudioSparkle() {
-    if (!audioContext || audioContext.state !== "running" || !decodedBuffer) return false;
-    if (currentSfxVolume() <= 0) return true;
-    try {
-      const source = audioContext.createBufferSource();
-      const gain = audioContext.createGain();
-      source.buffer = decodedBuffer;
-      gain.gain.value = currentSfxVolume();
-      source.connect(gain);
-      gain.connect(audioContext.destination);
-      source.start(0);
-      return true;
-    } catch (error) {
-      console.warn("Spell plug-in Web Audio playback failed", error);
-      return false;
-    }
-  }
-
-  function playSynthSparkle() {
-    if (!audioContext || audioContext.state !== "running" || currentSfxVolume() <= 0) return false;
-    try {
-      const now = audioContext.currentTime;
-      const master = audioContext.createGain();
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(Math.max(0.02, currentSfxVolume() * 0.32), now + 0.015);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.62);
-      master.connect(audioContext.destination);
-
-      [1174.66, 1567.98, 2093.00].forEach((frequency, index) => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(frequency, now + index * 0.06);
-        gain.gain.setValueAtTime(0.0001, now + index * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.5, now + index * 0.06 + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.06 + 0.34);
-        osc.connect(gain);
-        gain.connect(master);
-        osc.start(now + index * 0.06);
-        osc.stop(now + index * 0.06 + 0.36);
-      });
-      return true;
-    } catch (error) {
-      console.warn("Spell plug-in synthesized fallback failed", error);
-      return false;
-    }
-  }
-
-  function ensureFallbackUrl() {
-    if (fallbackUrlPromise) return fallbackUrlPromise;
-    fallbackUrlPromise = base64Bytes()
-      .then(bytes => URL.createObjectURL(new Blob([bytes], { type: "audio/mpeg" })))
-      .then(url => {
-        fallbackAudio.src = url;
-        fallbackAudio.load();
-        return url;
-      })
-      .catch(error => {
-        console.warn("Spell plug-in HTMLAudio preload failed", error);
-        fallbackUrlPromise = null;
-        return null;
-      });
-    return fallbackUrlPromise;
-  }
-
-  function playHtmlAudioFallback() {
-    if (currentSfxVolume() <= 0) return;
-    const start = () => {
-      try {
-        fallbackAudio.pause();
-        fallbackAudio.currentTime = 0;
-        fallbackAudio.volume = currentSfxVolume();
-        const promise = fallbackAudio.play();
-        if (promise?.catch) promise.catch(error => console.warn("Spell plug-in HTMLAudio playback blocked", error));
-      } catch (error) {
-        console.warn("Spell plug-in HTMLAudio playback failed", error);
-      }
-    };
-    if (fallbackAudio.src) start();
-    else ensureFallbackUrl().then(url => { if (url) start(); });
-  }
-
-  function playSound() {
-    if (currentSfxVolume() <= 0) return;
-    if (playWebAudioSparkle()) return;
-
-    // If the real MP3 has not finished decoding yet, still provide an audible
-    // sparkle immediately instead of failing silently.
-    if (playSynthSparkle()) {
-      ensureWebAudio().catch(() => {});
-      return;
-    }
-
-    playHtmlAudioFallback();
-    ensureWebAudio().catch(() => {});
-  }
 
   function ensureCanvas() {
     if (canvas) return;
@@ -317,7 +157,6 @@
     playing = (async () => {
       ensureCanvas();
       pauseFieldBgm();
-      playSound();
       showEffectScreen();
 
       try {
@@ -346,50 +185,8 @@
     return playing;
   }
 
-  function isZKey(event) {
-    return event.code === "KeyZ" || event.key === "z" || event.key === "Z";
-  }
-
-  function onKeydown(event) {
-    if (playing) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-    if (!isZKey(event)) return;
-    const dialog = document.getElementById("field-dialog");
-    if (dialog?.dataset.pluginPrompt !== "1") return;
-    if (window.SpellDialogTyping?.isTyping?.()) return;
-    unlockAudio();
-    armedUntil = performance.now() + ARM_WINDOW_MS;
-  }
-
-  function installOpenComputerWrapper() {
-    if (openComputerWrapped) return true;
-    const game = window.SpellGame03;
-    if (!game || typeof game.openComputer !== "function") return false;
-    const originalOpenComputer = game.openComputer;
-    game.openComputer = function (...args) {
-      if (performance.now() > armedUntil) return originalOpenComputer.apply(this, args);
-      armedUntil = 0;
-      return play().then(() => originalOpenComputer.apply(this, args));
-    };
-    openComputerWrapped = true;
-    return true;
-  }
-
-  window.addEventListener("keydown", onKeydown, true);
-  if (!installOpenComputerWrapper()) {
-    const timer = setInterval(() => {
-      if (installOpenComputerWrapper()) clearInterval(timer);
-    }, 50);
-    setTimeout(() => clearInterval(timer), 5000);
-  }
-
   window.SpellPluginTransition = {
     play,
-    unlockAudioFromGesture: unlockAudio,
-    testSound: playSound,
     isPlaying: () => Boolean(playing)
   };
 })();
