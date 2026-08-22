@@ -2,7 +2,7 @@
   "use strict";
   const G=window.SpellGame03,$=G.$,state=G.state;
   let fieldMenuOpen=false,fieldMenuIndex=0,fieldMenuMode="main";
-  let pendingTravel=null,travelCasting=false;
+  let pendingTravel=null,travelCasting=false,travelChoiceReady=false;
 
   const fieldMenuItems=[
     {label:"ステータス",action:()=>{closeFieldMenu();openStatus();}},
@@ -37,6 +37,12 @@
   function ensureUi(){
     const tools=document.querySelector(".field-tools");if(tools&&!$("#field-menu")){const b=document.createElement("button");b.id="field-menu";b.className="mini-button";b.textContent="MENU";tools.insertBefore(b,tools.firstChild)}
     const fieldWindow=document.querySelector("#screen-field .field-window");if(fieldWindow&&!$("#field-main-menu")){const menu=document.createElement("div");menu.id="field-main-menu";menu.className="field-main-menu hidden";menu.setAttribute("role","menu");menu.innerHTML=`<div class="field-main-menu-title">MENU</div><div id="field-menu-money" class="field-main-menu-money">0 G</div><div id="field-main-menu-items" class="field-main-menu-items"></div><div class="field-main-menu-help">↑↓ 選択　Z 決定　Enter 閉じる</div>`;fieldWindow.appendChild(menu)}
+    if(fieldWindow&&!$("#ido-choice-menu")){
+      const choice=document.createElement("div");choice.id="ido-choice-menu";choice.className="ido-choice-menu hidden";choice.setAttribute("role","menu");choice.setAttribute("aria-label","イードウ確認");fieldWindow.appendChild(choice);
+      const style=document.createElement("style");style.textContent=`
+        .ido-choice-menu{position:absolute;right:5%;bottom:5%;width:150px;z-index:46;padding:6px;background:#fffef2;color:#202128;border:4px solid #333946;border-radius:7px;box-shadow:inset 0 0 0 2px #adb5c4,0 8px 20px rgba(0,0,0,.28);display:grid;gap:2px;font-family:ui-monospace,"Noto Sans JP",monospace}.ido-choice-menu.hidden{display:none}.ido-choice-item{min-height:38px;padding:0 9px;display:grid;grid-template-columns:20px 1fr;align-items:center;text-align:left;background:transparent;color:#202128;border:0;font-weight:900}.ido-choice-item.selected{background:#efeafc}.ido-choice-item .menu-cursor{visibility:hidden;color:#6f54a6}.ido-choice-item.selected .menu-cursor{visibility:visible}@media(max-width:760px){.ido-choice-menu{right:4%;bottom:4%;width:130px}.ido-choice-item{min-height:34px}}
+      `;document.head.appendChild(style);
+    }
     const help=document.querySelector("#screen-field .field-help");if(help&&!help.querySelector("[data-menu-help]")){const span=document.createElement("span");span.dataset.menuHelp="1";span.textContent="メニュー：Enter";help.appendChild(span)}
     const main=document.querySelector("main.shell");if(main&&!$("#screen-status")){const section=document.createElement("section");section.id="screen-status";section.className="screen";section.innerHTML=`<div class="status-screen-wrap"><div class="status-toolbar"><div><p class="kicker">PARTY STATUS</p><h2>ステータス</h2></div><button id="status-back" class="secondary">フィールドへ戻る</button></div><div id="status-grid" class="status-grid"></div></div>`;main.insertBefore(section,$("#screen-hub")||null);G.screens.status=section}
     if(!$("#ido-fade")){
@@ -46,49 +52,60 @@
     $("#spell-loadout")?.remove();
   }
 
+  function renderTravelChoice(){
+    const box=$("#ido-choice-menu");if(!box)return;
+    box.innerHTML=travelConfirmItems.map((item,index)=>`<button type="button" class="ido-choice-item${index===fieldMenuIndex?" selected":""}" data-ido-choice-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("");
+  }
+  function showTravelChoice(){travelChoiceReady=true;renderTravelChoice();$("#ido-choice-menu")?.classList.remove("hidden")}
+  function hideTravelChoice(){travelChoiceReady=false;$("#ido-choice-menu")?.classList.add("hidden")}
+
   function renderFieldMenu(){
     const box=$("#field-main-menu-items");if(!box)return;
     const items=activeFieldMenuItems(),money=$("#field-menu-money"),title=$("#field-main-menu .field-main-menu-title"),help=$("#field-main-menu .field-main-menu-help");
     if(money)money.textContent=`${state.money} G`;
-    if(title)title.textContent=fieldMenuMode==="travel"||fieldMenuMode==="travel-confirm"?"イードウ":fieldMenuMode==="settings"?"設定":"MENU";
-    if(help)help.textContent=fieldMenuMode==="travel"?"↑↓ 選択　Z 決定　Enter 戻る":fieldMenuMode==="travel-confirm"?"↑↓ 選択　Z 決定":fieldMenuMode==="settings"?"↑↓ 選択　←→ 音量変更　Z 決定　Enter 戻る":"↑↓ 選択　Z 決定　Enter 閉じる";
-    box.innerHTML=items.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("");
+    if(title)title.textContent=fieldMenuMode.startsWith("travel")?"イードウ":fieldMenuMode==="settings"?"設定":"MENU";
+    if(help)help.textContent=fieldMenuMode==="travel"?"↑↓ 選択　Z 決定　Enter 戻る":fieldMenuMode==="settings"?"↑↓ 選択　←→ 音量変更　Z 決定　Enter 戻る":"↑↓ 選択　Z 決定　Enter 閉じる";
+    box.innerHTML=items.map((item,index)=>`<button type="button" class="field-main-menu-item${index===fieldMenuIndex?" selected":""}" data-field-menu-index="${index}"><span class="menu-cursor">▶</span><span>${item.label}</span></button>`).join("")
   }
   function fieldScreenActive(){return Boolean(G.screens.field?.classList.contains("active"))}
   function dialogIsOpen(){const d=$("#field-dialog");return Boolean(d&&!d.classList.contains("hidden"))}
   function storyOverlayIsOpen(){return Boolean(window.SpellStory?.isOverlayOpen?.())}
   function isOpen(){return fieldMenuOpen||travelCasting}
   function openFieldMenu(){if(!fieldScreenActive()||dialogIsOpen()||storyOverlayIsOpen()||travelCasting)return;fieldMenuOpen=true;fieldMenuMode="main";fieldMenuIndex=0;renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
-  function closeFieldMenu(){fieldMenuOpen=false;fieldMenuMode="main";fieldMenuIndex=0;pendingTravel=null;$("#field-main-menu")?.classList.add("hidden")}
+  function closeFieldMenu(){fieldMenuOpen=false;fieldMenuMode="main";fieldMenuIndex=0;pendingTravel=null;hideTravelChoice();$("#field-main-menu")?.classList.add("hidden")}
   function toggleFieldMenu(){fieldMenuOpen?closeFieldMenu():openFieldMenu()}
   function openTravelMenu(){fieldMenuMode="travel";fieldMenuIndex=0;renderFieldMenu()}
   function openSettingsMenu(){fieldMenuMode="settings";fieldMenuIndex=0;renderFieldMenu()}
-  function returnFromSubMenu(){const label=fieldMenuMode.startsWith("travel")?"イードウ":"設定";fieldMenuMode="main";pendingTravel=null;fieldMenuIndex=Math.max(0,fieldMenuItems.findIndex(item=>item.label===label));renderFieldMenu()}
+  function returnFromSubMenu(){const label=fieldMenuMode.startsWith("travel")?"イードウ":"設定";fieldMenuMode="main";pendingTravel=null;hideTravelChoice();fieldMenuIndex=Math.max(0,fieldMenuItems.findIndex(item=>item.label===label));renderFieldMenu();$("#field-main-menu")?.classList.remove("hidden")}
 
   function closeTravelDialog(){if(dialogIsOpen())$("#field-action")?.click()}
-  function requestTravel(mapId,label){
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  async function waitForDialogTyping(){while(window.SpellDialogTyping?.isTyping?.())await delay(30)}
+  async function requestTravel(mapId,label){
     pendingTravel={mapId,label};
     fieldMenuMode="travel-confirm";
     fieldMenuIndex=0;
-    renderFieldMenu();
+    hideTravelChoice();
+    $("#field-main-menu")?.classList.add("hidden");
     window.SpellField?.showDialog?.({speaker:"lumiere",text:`${label}に移動するの？`});
+    await waitForDialogTyping();
+    if(pendingTravel?.mapId===mapId&&fieldMenuMode==="travel-confirm"&&!travelCasting)showTravelChoice();
   }
   function cancelTravel(){
     closeTravelDialog();
+    hideTravelChoice();
     pendingTravel=null;
     fieldMenuMode="travel";
     fieldMenuIndex=0;
     renderFieldMenu();
-  }
-  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-  async function waitForDialogTyping(){
-    while(window.SpellDialogTyping?.isTyping?.())await delay(30);
+    $("#field-main-menu")?.classList.remove("hidden")
   }
   async function confirmTravel(){
-    if(!pendingTravel||travelCasting)return;
+    if(!pendingTravel||travelCasting||!travelChoiceReady)return;
     const destination={...pendingTravel};
     travelCasting=true;
     fieldMenuOpen=false;
+    hideTravelChoice();
     $("#field-main-menu")?.classList.add("hidden");
     closeTravelDialog();
     await delay(40);
@@ -108,16 +125,19 @@
     pendingTravel=null;
     fieldMenuMode="main";
     fieldMenuIndex=0;
-    travelCasting=false;
+    travelCasting=false
   }
 
-  function moveFieldMenu(delta){const items=activeFieldMenuItems();fieldMenuIndex=(fieldMenuIndex+delta+items.length)%items.length;renderFieldMenu()}
+  function moveFieldMenu(delta){const items=activeFieldMenuItems();fieldMenuIndex=(fieldMenuIndex+delta+items.length)%items.length;if(fieldMenuMode==="travel-confirm")renderTravelChoice();else renderFieldMenu()}
   function adjustAudio(delta){if(fieldMenuMode!=="settings")return false;const item=activeFieldMenuItems()[fieldMenuIndex];if(!item?.setting)return false;window.SpellAudioSettings?.adjust?.(item.setting,delta);renderFieldMenu();return true}
   function activateFieldMenu(index=fieldMenuIndex){
-    if(fieldMenuMode==="travel-confirm"&&window.SpellDialogTyping?.handleAdvance?.())return;
+    if(fieldMenuMode==="travel-confirm"){
+      if(window.SpellDialogTyping?.handleAdvance?.())return;
+      if(!travelChoiceReady)return;
+    }
     const item=activeFieldMenuItems()[index];
     if(item?.setting){adjustAudio(.1);return}
-    item?.action?.();
+    item?.action?.()
   }
   function statRows(stats,key){const p=state.party[key],rows=[["HP",`${p.hp} / ${stats.hp}`],["MP",`${p.mp} / ${G.maxMpFor(stats,p.level)}`],["攻撃",stats.attack],["防御",stats.defense],["特攻",stats.spAttack],["特防",stats.spDefense],["素早さ",stats.speed]];return rows.map(([name,value])=>`<div><dt>${name}</dt><dd>${value}</dd></div>`).join("")}
   function memberCard(key){const progress=state.party[key],species=G.partySpecies[key],stats=G.getMemberStats(key),next=G.expToNext(progress.level),pct=Math.max(0,Math.min(100,(progress.exp/next)*100)),equipKey=state.equipment[key],equip=G.itemDefinitions[equipKey],equipText=equip?`${equip.name}（${equip.description}）`:"装備なし";return `<article class="status-card"><div class="status-card-head"><h3>${species.name}</h3><span class="status-level">Lv.${progress.level}</span></div><dl class="status-stats">${statRows(stats,key)}</dl><div class="status-equipment"><strong>装備</strong><span>${equipText}</span></div><div class="status-exp"><div class="status-exp-row"><span>EXP</span><span>${progress.exp} / ${next}</span></div><div class="exp-bar"><div class="exp-bar-fill" style="width:${pct}%"></div></div></div></article>`}
@@ -131,7 +151,7 @@
     if(!dialog||!window.SpellField?.showDialog)return false;
     dialog.dataset.pluginPrompt="1";
     window.SpellField.showDialog({speaker:"sophie",text:"プラグイン！ルミエル.EXE トランスミッション！",typing:{allowSkip:true}});
-    return true;
+    return true
   }
   function continuePlugin(){
     const dialog=$("#field-dialog");
@@ -139,7 +159,7 @@
     delete dialog.dataset.pluginPrompt;
     $("#field-action")?.click();
     G.openComputer?.();
-    return true;
+    return true
   }
   function isZKey(e){return e.code==="KeyZ"||e.key==="z"||e.key==="Z"}
   function isXKey(e){return e.code==="KeyX"||e.key==="x"||e.key==="X"}
@@ -151,14 +171,14 @@
       if(isEnterKey(event)||event.key==="Escape"){
         event.preventDefault();event.stopImmediatePropagation();
         if(fieldMenuMode==="travel-confirm"){cancelTravel();return}
-        if(fieldMenuMode!=="main")returnFromSubMenu();else closeFieldMenu();return;
+        if(fieldMenuMode!=="main")returnFromSubMenu();else closeFieldMenu();return
       }
       if(event.key==="ArrowUp"||event.key==="w"||event.key==="W"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(-1);return}
       if(event.key==="ArrowDown"||event.key==="s"||event.key==="S"){event.preventDefault();event.stopImmediatePropagation();moveFieldMenu(1);return}
       if(fieldMenuMode==="settings"&&(event.key==="ArrowLeft"||event.key==="a"||event.key==="A")){event.preventDefault();event.stopImmediatePropagation();adjustAudio(-.1);return}
       if(fieldMenuMode==="settings"&&(event.key==="ArrowRight"||event.key==="d"||event.key==="D")){event.preventDefault();event.stopImmediatePropagation();adjustAudio(.1);return}
       if(isZKey(event)){event.preventDefault();event.stopImmediatePropagation();activateFieldMenu();return}
-      event.preventDefault();event.stopImmediatePropagation();return;
+      event.preventDefault();event.stopImmediatePropagation();return
     }
     if(!fieldScreenActive())return;
     if(isXKey(event)){if(openPluginPrompt()){event.preventDefault();event.stopImmediatePropagation()}return}
@@ -171,6 +191,7 @@
   ensureUi();
   $("#field-menu")?.addEventListener("click",toggleFieldMenu);
   $("#field-main-menu")?.addEventListener("click",event=>{const b=event.target.closest("[data-field-menu-index]");if(!b)return;fieldMenuIndex=Number(b.dataset.fieldMenuIndex)||0;activateFieldMenu(fieldMenuIndex)});
+  $("#ido-choice-menu")?.addEventListener("click",event=>{const b=event.target.closest("[data-ido-choice-index]");if(!b||!travelChoiceReady)return;fieldMenuIndex=Number(b.dataset.idoChoiceIndex)||0;activateFieldMenu(fieldMenuIndex)});
   $("#status-back")?.addEventListener("click",closeStatus);
   document.addEventListener("keydown",onFieldMenuKeydown,true);
   window.SpellMenu={renderStatus,renderLoadout,renderFieldMenu,openStatus,openFieldMenu,closeFieldMenu,openTravelMenu,openSettingsMenu,toggleFieldMenu,isOpen};
