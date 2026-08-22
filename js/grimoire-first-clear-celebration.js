@@ -132,6 +132,31 @@
     return portraitSrc;
   }
 
+  function onJudgeStateChanged() {
+    const stateEl = document.getElementById("run-state");
+    if (!stateEl || stateEl.textContent.trim() !== "JUDGE PASS") return;
+    const key = String(G.state?.selectedSpellKey || "").trim();
+    if (!key || !markCleared(key)) return;
+    queueMicrotask(() => show(key, "やった！クリアよ！"));
+  }
+
+  function installJudgePassObserver() {
+    const stateEl = document.getElementById("run-state");
+    if (!stateEl || stateEl.dataset.firstClearObserved === "1") return false;
+    stateEl.dataset.firstClearObserved = "1";
+    new MutationObserver(onJudgeStateChanged).observe(stateEl, {
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
+    return true;
+  }
+
+  function installJudgeObserverWhenReady() {
+    if (installJudgePassObserver()) return;
+    requestAnimationFrame(installJudgeObserverWhenReady);
+  }
+
   document.addEventListener("keydown", event => {
     if (!isOpen()) return;
     const advance = event.key === "Enter" || event.key === " " || event.key === "z" || event.key === "Z" || event.key === "Escape";
@@ -145,6 +170,7 @@
 
   installMagicPersistence();
   ensureOverlay();
+  installJudgeObserverWhenReady();
 
   window.SpellGrimoireFirstClear = {
     show,
