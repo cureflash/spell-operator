@@ -18,6 +18,16 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - The grimoire screen shown after plug-in is subject to this policy.
 - This rule is being documented now; the grimoire screen implementation is intentionally not changed yet.
 
+## BGM
+
+- The first village uses PeriTune's `Village_Fete` as its field BGM.
+- The BGM applies to the current first-village field maps: `town`, `school`, `library`, `house1`, and `house2`.
+- `Village_Fete` loops continuously while the player remains on those field maps.
+- Leaving the field screen for another game screen such as battle or plug-in/computer pauses the BGM; returning to the village field resumes it.
+- Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
+- Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
+- `Village_Fete` was published before March 2026 and remains licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).
+
 ## Field dialog text
 
 - Field dialog text uses discrete game-style message pacing rather than smooth-looking rapid text growth.
