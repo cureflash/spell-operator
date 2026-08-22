@@ -6,6 +6,10 @@
       id: "village_fete",
       src: "https://peritune.com/music/PeriTune_Village_Fete.mp3"
     },
+    dreambyte: {
+      id: "dreambyte",
+      src: "https://peritune.com/music/Peritune_Dreambyte.mp3"
+    },
     awayuki: {
       id: "awayuki",
       src: "assets/audio/bgm/awayuki.mp3"
@@ -41,8 +45,16 @@
   let preparedBattleMode = null;
   let wasBattleActive = false;
 
+  function screenIsActive(id) {
+    return Boolean(document.getElementById(id)?.classList.contains("active"));
+  }
+
   function battleIsActive() {
-    return Boolean(document.getElementById("screen-battle")?.classList.contains("active"));
+    return screenIsActive("screen-battle");
+  }
+
+  function pluginComputerIsActive() {
+    return screenIsActive("screen-hub") || screenIsActive("screen-debug");
   }
 
   function detectedBossBattle() {
@@ -56,6 +68,8 @@
         ? TRACKS.swift_strike
         : TRACKS.ancient_gust;
     }
+
+    if (pluginComputerIsActive()) return TRACKS.dreambyte;
 
     const fieldScreen = document.getElementById("screen-field");
     if (!fieldScreen?.classList.contains("active")) return null;
@@ -129,9 +143,13 @@
 
   const observer = new MutationObserver(sync);
   const fieldScreen = document.getElementById("screen-field");
+  const hubScreen = document.getElementById("screen-hub");
+  const debugScreen = document.getElementById("screen-debug");
   const battleScreen = document.getElementById("screen-battle");
   const fieldWorld = document.getElementById("field-world");
   if (fieldScreen) observer.observe(fieldScreen, { attributes: true, attributeFilter: ["class"] });
+  if (hubScreen) observer.observe(hubScreen, { attributes: true, attributeFilter: ["class"] });
+  if (debugScreen) observer.observe(debugScreen, { attributes: true, attributeFilter: ["class"] });
   if (battleScreen) observer.observe(battleScreen, { attributes: true, attributeFilter: ["class"] });
   if (fieldWorld) observer.observe(fieldWorld, { attributes: true, attributeFilter: ["data-map"] });
 
