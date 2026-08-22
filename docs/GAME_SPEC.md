@@ -10,6 +10,14 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `X`: start plug-in access to Lumiere.
 - Story overlays, dialogs, and open menus keep priority over normal field shortcuts.
 
+## Game screen scrolling policy
+
+- Normal gameplay screens must not require browser/page scrolling to use them.
+- The primary information and controls required on each screen must fit within the current viewport.
+- If a screen would otherwise exceed the viewport, redesign the layout, adjust density, or use tabs/page switching rather than requiring whole-screen scrolling.
+- The grimoire screen shown after plug-in is subject to this policy.
+- This rule is being documented now; the grimoire screen implementation is intentionally not changed yet.
+
 ## Field dialog text
 
 - Field dialog text uses discrete game-style message pacing rather than smooth-looking rapid text growth.
