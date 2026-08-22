@@ -38,8 +38,9 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - If the confirmation line is still typing, the first `Z` only finishes the line; a subsequent `Z` confirms the selected answer.
 - Choosing `いいえ` cancels the move and returns to the destination list.
 - Choosing `はい` makes Lumiere say exactly `イードウ！`.
-- After `イードウ！` finishes rendering, the screen fades completely to black, the destination map is activated while blacked out, then the screen fades back in.
-- Player movement and menu input are locked during the casting/fade transition.
+- After `イードウ！` finishes rendering, the dialogue remains open and waits for another `Z`. That `Z` closes the line and starts the fade: the screen fades completely to black, the destination map is activated while blacked out, then the screen fades back in.
+- `Z` pressed while `イードウ！` is still rendering does not start the fade.
+- Player movement and menu input are locked during the casting/wait/fade transition.
 - `Enter` or `Escape` backs out of the confirmation or destination list without moving.
 - Additional destinations can be appended to the travel destination list later.
 
