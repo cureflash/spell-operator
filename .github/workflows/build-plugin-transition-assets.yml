@@ -1,0 +1,44 @@
+name: Build plugin transition assets
+
+on:
+  push:
+    branches:
+      - impl/plugin-kirayuki-se-final
+    paths:
+      - .github/workflows/build-plugin-transition-assets.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build supplied runtime assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/audio/sfx assets/effects/plugin
+          base64 -d assets/audio/sfx/plugin-sparkle.base64 > assets/audio/sfx/plugin-sparkle.mp3
+          git fetch origin impl/plugin-kirayuki-transition
+          git show origin/impl/plugin-kirayuki-transition:assets/effects/plugin/kirayuki1.webp > assets/effects/plugin/kirayuki1.webp
+          cat > assets/effects/plugin/README.md <<'EOF'
+          # Plug-in transition assets
+
+          - `kirayuki1.webp`: runtime sprite sheet derived from the user-supplied `キラ雪.zip / kirayuki1.png` effect material.
+          - `../../audio/sfx/plugin-sparkle.mp3`: lightweight runtime encode of the user-supplied `可愛く輝く1.mp3` SE.
+          - These assets are used only for the Lumiere plug-in transition.
+          EOF
+          rm assets/audio/sfx/plugin-sparkle.base64
+          rm .github/workflows/build-plugin-transition-assets.yml
+      - name: Commit runtime assets
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Build Kirayuki transition assets" || exit 0
+          git push
