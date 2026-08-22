@@ -22,15 +22,7 @@
   const style = document.createElement("style");
   style.id = "la-mer-ai-preview-style";
   style.textContent = `
-    #field-world[data-map="${MAP_ID}"] .la-mer-pavement,
-    #field-world[data-map="${MAP_ID}"] .la-mer-stone,
-    #field-world[data-map="${MAP_ID}"] .la-mer-harbor,
-    #field-world[data-map="${MAP_ID}"] .la-mer-plaza {
-      background-color:#ece7da!important;
-      background-image:url("assets/tiles/la_mer/ground.svg?v=2")!important;
-      background-repeat:repeat!important;
-      background-size:calc(3 * var(--tile-size)) calc(3 * var(--tile-size))!important;
-    }
+    /* Ground/roads deliberately remain owned by the canonical Pipoya map-chip CSS. */
     #field-world[data-map="${MAP_ID}"] .la-mer-virtual-tile.water {
       background-color:#147fb5!important;
       background-image:
