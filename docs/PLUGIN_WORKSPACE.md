@@ -53,21 +53,21 @@ The menu contains, in this order:
 - The bottom area is only Lumiere dialogue and keeps the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
 - Output mismatch is a test failure (`TEST FAILED`), not a Python exception. Lumiere gives a short response such as `これだとダメそうね。出力を確認してみて。` while the stdout pane shows the player's actual output.
 - Real Python-code exceptions and execution-environment failures are distinct. Lumiere may explain a Python exception by type, but a worker/CDN/runtime infrastructure failure must not be described as a Python-code error.
-- The `▼` indicator at the lower-right of the plug-in editor dialogue is positioned low enough to remain fully visible inside the dialogue area.
+- The editor dialogue is tall enough to show the normal one-line Lumiere response without its own vertical scrollbar. The `▼` indicator remains fully visible inside the lower-right corner.
 
 ### Current desktop layout values
 
 The current `spell-operator/plugin-editor-layout@1` tuning is:
 
 - editor width: 64%
-- upper workspace: 88%
-- Lumiere dialogue: 12%
+- upper workspace: 85%
+- Lumiere dialogue: 15%
 - divider thickness: 2px
 - grimoire height: 30%
 - execution output minimum height: 120px
 - execution pane gap: 2px
 - dialogue portrait column: 70px
-- dialogue message top padding: 20px
+- dialogue message top padding: 22px
 - dialogue text size: 14px
 - problem/specification maximum height: 126px
 - code editor text size: 13px
@@ -85,7 +85,7 @@ The speaker-name badge inside the plug-in editor dialogue is reduced specificall
 - After answer judging completes, the execution/output pane shows the random input value and the player's output value for all three judged cases. On a failed case, the expected output may also be shown as judgment information.
 - Lumiere's bottom dialogue remains separate and gives only a short response to the judgment result.
 - Passing all random cases records the submitted code as a learned/battle-usable spell using the existing MP/cost model; a less efficient submission does not replace a better saved implementation.
-- A fully passing judgment invokes the reserved `plugin-clear` SE playback hook. The actual sound asset is not specified yet; when it is supplied it can be registered with `SpellAudio.registerSfx("plugin-clear", ...)` without changing the judge flow.
+- A fully passing judgment plays `plugin-clear`, currently assigned to 魔王魂 `システム46` by 森田交一. The canonical source page and attribution are recorded in `docs/ASSET_CREDITS.md`.
 - Reference solution code is judge data. It is not shown automatically in the editor or in normal hint output.
 
 ## Hint
