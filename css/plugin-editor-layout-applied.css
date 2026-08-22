@@ -2,7 +2,7 @@
 @media (min-width: 761px) {
   .plugin-editor-shell {
     --plugin-editor-left: 64%;
-    --plugin-editor-upper: 91%;
+    --plugin-editor-upper: 88%;
     grid-template-rows: minmax(0, var(--plugin-editor-upper)) 2px minmax(0, 1fr) !important;
   }
 
@@ -41,7 +41,8 @@
   }
 
   .plugin-editor-dialogue .dialog-message {
-    padding-top: 23px !important;
+    padding-top: 20px !important;
+    padding-bottom: 10px !important;
   }
 
   .plugin-editor-dialogue .plugin-conversation-text {
@@ -49,7 +50,7 @@
   }
 
   .plugin-editor-dialogue .dialog-next {
-    bottom: 4px !important;
+    bottom: 2px !important;
   }
 
   /* The speaker label is reduced to match the 70px portrait column. */
