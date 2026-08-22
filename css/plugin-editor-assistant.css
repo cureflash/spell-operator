@@ -1,0 +1,53 @@
+/* Plug-in editor: execution output and Lumiere hint controls. */
+.plugin-run-pane{
+  grid-template-rows:auto auto auto minmax(0,1fr) auto!important;
+  align-content:stretch!important;
+}
+.plugin-run-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+}
+.plugin-hint-button{
+  white-space:nowrap;
+}
+.plugin-execution-output-panel{
+  min-width:0;
+  min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  gap:6px;
+}
+.plugin-execution-output-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:800;
+}
+.plugin-execution-output{
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:9px 10px;
+  overflow:auto;
+  border:1px solid #30384f;
+  border-radius:8px;
+  background:#090d12;
+  color:#bfead2;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  font:11px/1.45 ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+.plugin-execution-output[data-result-kind="error"]{color:#ffd0d6}
+.plugin-execution-output[data-result-kind="failed"]{color:#ffe3a8}
+.plugin-execution-output[data-result-kind="passed"]{color:#bff4d3}
+.plugin-execution-output[data-result-kind="running"]{color:#d9e7ff}
+
+@media(max-width:760px){
+  .plugin-run-actions{grid-template-columns:1fr}
+  .plugin-hint-button{width:100%}
+  .plugin-execution-output{font-size:10px}
+}
