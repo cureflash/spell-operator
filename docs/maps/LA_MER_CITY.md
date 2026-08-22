@@ -38,12 +38,21 @@ Game-space interpretation:
 
 The seams between sectors are adjusted only enough to make the intended routes continuously walkable. The district layouts are not scaled down to fit the combined map.
 
+## Rendering
+
+- The logical map remains `144 x 104` tiles for movement and collision.
+- The browser must not create one DOM node for every logical tile at once.
+- Runtime rendering keeps only a player-centered visible buffer in the DOM. The current budget is `32 x 24 = 768` tile nodes, plus a small set of labels/entities.
+- The visible buffer is refreshed only when the player approaches its safe margin, rather than rebuilding on every single step.
+- This rendering optimization must not change map coordinates, collision, save data, or the continuous one-map design.
+
 ## Temporary access
 
 Until the external city entrance is implemented, the field menu has the temporary `イードウ` command.
 
-- `イードウ → フルール村` warps to map ID `town`.
-- `イードウ → ラメールシティ` warps to map ID `la_mer_city`.
+- `イードウ → フルール村` targets map ID `town`.
+- `イードウ → ラメールシティ` targets map ID `la_mer_city`.
+- Destination choice uses the normal Lumiere confirmation/casting/fade sequence defined in `docs/GAME_SPEC.md`.
 - This is currently a development/access route and does not define the eventual east-edge entrance event.
 
 ## Current interaction scope
