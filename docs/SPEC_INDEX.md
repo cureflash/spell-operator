@@ -20,6 +20,7 @@ The Notion wiki contains the structured databases for chapters, walkthrough step
 - `RUNTIME_ARCHITECTURE.md` — current browser-runtime ownership boundaries, bootstrap, audio, plug-in, field input/scene controllers, and refactoring rules.
 - `PLUGIN_WORKSPACE.md` — plug-in menu, editor/grimoire layout, shared Lumiere/output pane, and resizable workspace rules.
 - `UI_TUNING.md` — developer UI tuning tools and machine-readable adjustment payload formats.
+- `BATTLE_UI.md` — battle message history, Dragon Quest-style command prompts, and the `▶` current-command marker.
 - `chapters/CHAPTER_01.md` — Chapter 1 implementation-facing specification when created.
 - `maps/FLEUR_VILLAGE.md` — フルール村の新規ゲーム開始地点と施設スプライト登録。
 - `maps/LA_MER_CITY.md` — ラメールシティ integrated field layout and its temporary warp access route.

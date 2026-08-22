@@ -19,6 +19,107 @@
     lumiere: { status: "normal", expression: "neutral" }
   };
 
+  const battleLog = document.getElementById("battle-log");
+  const commandMenuWrap = document.querySelector("#screen-battle .battle-menu-wrap");
+  const battleLogLines = [];
+  const MAX_BATTLE_LOG_LINES = 4;
+  let renderedBattleLog = "";
+
+  function normalizeBattleLine(line) {
+    const text = String(line || "").trim();
+    return text
+      .replace(/^ソフィーはどうする？$/, "ソフィーは どうする？")
+      .replace(/^ルミエルはどうする？$/, "ルミエルは どうする？");
+  }
+
+  function shouldKeepBattleLine(line) {
+    if (!line) return false;
+    if (/^(ソフィー|ルミエル)：(?:たたかう|ぼうぎょ)$/.test(line)) return false;
+    if (/^ソフィーの行動を決めた。$/.test(line)) return false;
+    return true;
+  }
+
+  function renderBattleLog() {
+    if (!battleLog) return;
+    renderedBattleLog = battleLogLines.slice(-MAX_BATTLE_LOG_LINES).join("\n");
+    if (battleLog.textContent !== renderedBattleLog) battleLog.textContent = renderedBattleLog;
+  }
+
+  function consumeBattleLogWrite() {
+    if (!battleLog) return;
+    const raw = battleLog.textContent || "";
+    if (raw === renderedBattleLog) return;
+
+    const lines = raw
+      .split(/\r?\n/)
+      .map(normalizeBattleLine)
+      .filter(shouldKeepBattleLine);
+
+    if (lines.some(line => line.includes("が あらわれた！"))) battleLogLines.length = 0;
+    battleLogLines.push(...lines);
+    if (battleLogLines.length > MAX_BATTLE_LOG_LINES) {
+      battleLogLines.splice(0, battleLogLines.length - MAX_BATTLE_LOG_LINES);
+    }
+    renderBattleLog();
+  }
+
+  function installBattleLogHistory() {
+    if (!battleLog) return;
+    new MutationObserver(consumeBattleLogWrite).observe(battleLog, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+    consumeBattleLogWrite();
+  }
+
+  function setSelectedCommand(button) {
+    if (!commandMenuWrap || !button) return;
+    commandMenuWrap.querySelectorAll(".command.is-selected").forEach(item => {
+      if (item === button) return;
+      item.classList.remove("is-selected");
+      item.removeAttribute("aria-current");
+    });
+    if (!button.classList.contains("is-selected")) button.classList.add("is-selected");
+    if (button.getAttribute("aria-current") !== "true") button.setAttribute("aria-current", "true");
+  }
+
+  function syncCommandSelection() {
+    if (!commandMenuWrap) return;
+    const visibleGrid = [...commandMenuWrap.querySelectorAll(".command-grid")]
+      .find(grid => !grid.classList.contains("hidden"));
+    if (!visibleGrid) {
+      commandMenuWrap.querySelectorAll(".command.is-selected").forEach(item => {
+        item.classList.remove("is-selected");
+        item.removeAttribute("aria-current");
+      });
+      return;
+    }
+    const selected = visibleGrid.querySelector(".command.is-selected:not(:disabled)");
+    if (selected) return;
+    const first = visibleGrid.querySelector(".command:not(:disabled)");
+    setSelectedCommand(first);
+  }
+
+  function installCommandSelection() {
+    if (!commandMenuWrap) return;
+    const selectFromEvent = event => {
+      const button = event.target.closest?.(".command");
+      if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
+      setSelectedCommand(button);
+    };
+    commandMenuWrap.addEventListener("pointerdown", selectFromEvent);
+    commandMenuWrap.addEventListener("mouseover", selectFromEvent);
+    commandMenuWrap.addEventListener("focusin", selectFromEvent);
+    new MutationObserver(syncCommandSelection).observe(commandMenuWrap, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "disabled"]
+    });
+    syncCommandSelection();
+  }
+
   function makeCard(character) {
     const card = document.createElement("section");
     card.className = "dq-party-card";
@@ -128,6 +229,8 @@
 
   ensurePanel();
   render();
+  installBattleLogHistory();
+  installCommandSelection();
 
   const legacyTargets = [
     "sophie-hp-text", "lumiere-hp-text",
