@@ -16,8 +16,16 @@
 
   function ensureWorker(){
     if(worker&&readyPromise)return readyPromise;
-    worker=new Worker("js/python-worker.mjs?v=1",{type:"module"});
     readyPromise=new Promise((resolve,reject)=>{readyResolve=resolve;readyReject=reject});
+    try{
+      // Classic Worker is used deliberately for iPad/Safari compatibility.
+      worker=new Worker("js/python-worker-classic.js?v=1");
+    }catch(error){
+      setLastError(error);
+      readyReject?.(error);
+      worker=null;
+      return readyPromise;
+    }
     worker.addEventListener("message",event=>{
       const data=event.data||{};
       if(data.type==="ready"){readyResolve?.();return}
@@ -50,6 +58,7 @@
     runSuite,
     warmup,
     resetWorker,
+    runtimeMode:"classic-worker",
     get lastResult(){return lastResult},
     get lastError(){return lastError}
   };
