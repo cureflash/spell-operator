@@ -260,16 +260,21 @@
     const rightPane = el("aside", "plugin-right-pane grimoire-collapsed");
     rightPane.id = "plugin-right-pane";
 
-    const grimoirePane = el("section", "panel plugin-code-library-pane");
-    const grimoireToggle = el("button", "plugin-panel-head plugin-grimoire-toggle");
+    const tabBar = el("div", "plugin-right-tabs");
+    const grimoireToggle = el("button", "plugin-grimoire-tab");
     grimoireToggle.id = "plugin-grimoire-toggle";
     grimoireToggle.type = "button";
     grimoireToggle.setAttribute("aria-expanded", "false");
-    const grimoireTitle = el("div");
-    grimoireTitle.append(el("p", "eyebrow", "GRIMOIRE"), el("h3", "", "魔導書"));
-    const libraryStatus = el("span", "plugin-library-status", "▶ 開く");
-    grimoireToggle.append(grimoireTitle, libraryStatus);
+    const tabLabel = el("span", "plugin-grimoire-tab-label", "魔導書");
+    const libraryStatus = el("span", "plugin-library-status", "▶");
+    grimoireToggle.append(tabLabel, libraryStatus);
+    tabBar.append(grimoireToggle);
 
+    const rightContent = el("div", "plugin-right-content");
+    rightContent.id = "plugin-right-content";
+
+    const grimoirePane = el("section", "panel plugin-code-library-pane");
+    grimoirePane.id = "plugin-code-library-pane";
     const libraryBody = el("div", "plugin-library-body");
     libraryBody.id = "plugin-library-body";
     libraryBody.hidden = true;
@@ -282,20 +287,23 @@
     copy.type = "button";
     copy.disabled = true;
     libraryBody.append(list, preview, copy);
-    grimoirePane.append(grimoireToggle, libraryBody);
+    grimoirePane.append(libraryBody);
 
     const rightResizer = makeResizer("horizontal", "魔導書と実行欄の高さを変更");
     rightResizer.id = "plugin-grimoire-resizer";
 
-    const runPane = el("section", "panel plugin-run-pane");
+    const runPane = el("section", "panel plugin-run-pane plugin-run-pane-permanent");
+    runPane.id = "plugin-run-pane";
     const runHead = el("div", "plugin-panel-head");
-    runHead.append(el("h3", "", "実行"), runState);
+    runHead.append(el("h3", "", "実行・出力"), runState);
     const runActions = el("div", "plugin-run-actions");
     run.classList.add("plugin-run-button");
     runActions.append(run);
     if (register) runActions.append(register);
     runPane.append(runHead, runActions, metrics, back);
-    rightPane.append(grimoirePane, rightResizer, runPane);
+
+    rightContent.append(grimoirePane, rightResizer, runPane);
+    rightPane.append(tabBar, rightContent);
     upper.append(editorPane, columnResizer, rightPane);
 
     const rowResizer = makeResizer("horizontal", "エディタ領域とルミエルのセリフ欄の高さを変更");
@@ -316,7 +324,7 @@
     }).observe(output, { childList: true, subtree: true, characterData: true });
 
     bindResizer(columnResizer, { container: upper, owner: shell, axis: "x", variable: "--plugin-editor-left", min: 0.42, max: 0.78 });
-    bindResizer(rightResizer, { container: rightPane, owner: rightPane, axis: "y", variable: "--plugin-grimoire-height", min: 0.22, max: 0.68 });
+    bindResizer(rightResizer, { container: rightContent, owner: rightContent, axis: "y", variable: "--plugin-grimoire-height", min: 0.22, max: 0.58 });
     bindResizer(rowResizer, { container: shell, owner: shell, axis: "y", variable: "--plugin-editor-upper", min: 0.54, max: 0.84 });
 
     setGrimoireOpen(false);
@@ -336,7 +344,7 @@
     }
     if (body) body.hidden = !grimoireOpen;
     if (toggle) toggle.setAttribute("aria-expanded", grimoireOpen ? "true" : "false");
-    if (status) status.textContent = grimoireOpen ? "▼ 閉じる" : "▶ 開く";
+    if (status) status.textContent = grimoireOpen ? "▼" : "▶";
     if (grimoireOpen) renderCodeLibrary();
     return grimoireOpen;
   }
@@ -563,6 +571,7 @@
     play: playTutorial
   };
   window.SpellPluginWorkspace = {
+    version: "2026-08-23-grimoire-tab-v2",
     renderCodeLibrary,
     openEditor: openEditorFromMenu,
     setGrimoireOpen,
