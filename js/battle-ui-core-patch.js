@@ -1,0 +1,266 @@
+(() => {
+  "use strict";
+
+  const battleScreen = document.getElementById("screen-battle");
+  const battleLog = document.getElementById("battle-log");
+  const menuWrap = battleScreen?.querySelector(".battle-menu-wrap");
+  if (!battleScreen || !battleLog || !menuWrap) return;
+
+  const style = document.createElement("style");
+  style.id = "spell-battle-ui-core-style";
+  style.textContent = `
+    #screen-battle .battle-command-box {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1.35fr) minmax(220px, .65fr) !important;
+      min-height: 154px;
+      background: #0b0b0f !important;
+      color: #fff !important;
+      border-top: 5px solid #454a55;
+    }
+    #screen-battle .battle-log {
+      display: block !important;
+      min-height: 132px;
+      padding: 16px 18px;
+      overflow: hidden;
+      background: #0b0b0f !important;
+      color: #fff !important;
+      border-right: 4px solid #f4f4f4 !important;
+      white-space: pre-line;
+      font-family: ui-monospace, "Noto Sans JP", monospace;
+      font-size: 15px;
+      line-height: 1.7;
+      text-shadow: 1px 1px 0 #000;
+    }
+    #screen-battle .battle-menu-wrap {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      min-width: 0;
+      padding: 12px 14px !important;
+      background: #0b0b0f !important;
+      color: #fff !important;
+    }
+    #screen-battle .battle-menu-wrap .command-grid.hidden {
+      display: none !important;
+    }
+    #screen-battle .battle-menu-wrap .command-grid:not(.hidden) {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 3px !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    #screen-battle .battle-menu-wrap button.command {
+      display: flex !important;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 38px !important;
+      padding: 4px 8px !important;
+      border: 0 !important;
+      background: transparent !important;
+      color: #fff !important;
+      font-family: ui-monospace, "Noto Sans JP", monospace;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: left;
+      visibility: visible !important;
+      opacity: 1 !important;
+      box-shadow: none !important;
+      outline: 0 !important;
+    }
+    #screen-battle .battle-menu-wrap button.command::before {
+      content: none !important;
+    }
+    #screen-battle .battle-menu-wrap button.command:hover,
+    #screen-battle .battle-menu-wrap button.command:focus,
+    #screen-battle .battle-menu-wrap button.command.is-selected {
+      background: transparent !important;
+      color: #fff !important;
+    }
+    #screen-battle .battle-command-cursor {
+      display: inline-block;
+      flex: 0 0 1.1em;
+      width: 1.1em;
+      color: #fff;
+      text-align: center;
+    }
+    #screen-battle .battle-menu-wrap button.command .battle-command-label {
+      min-width: 0;
+    }
+    #screen-battle .battle-menu-wrap button.command > [id$="-cost"] {
+      margin-left: auto;
+      font-size: 12px;
+      opacity: .9;
+    }
+    @media (max-width: 760px) {
+      #screen-battle .battle-command-box {
+        grid-template-columns: 1fr !important;
+      }
+      #screen-battle .battle-log {
+        border-right: 0 !important;
+        border-bottom: 4px solid #f4f4f4 !important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const logHistory = [];
+  const MAX_LOG_LINES = 4;
+  let renderedLog = "";
+
+  function normalizeLine(line) {
+    return String(line || "").trim()
+      .replace(/^ソフィーはどうする？$/, "ソフィーは どうする？")
+      .replace(/^ルミエルはどうする？$/, "ルミエルは どうする？");
+  }
+
+  function keepLine(line) {
+    if (!line) return false;
+    if (/^(ソフィー|ルミエル)：(?:たたかう|ぼうぎょ)$/.test(line)) return false;
+    if (/^ソフィーの行動を決めた。$/.test(line)) return false;
+    return true;
+  }
+
+  function renderLog() {
+    renderedLog = logHistory.slice(-MAX_LOG_LINES).join("\n");
+    if (battleLog.textContent !== renderedLog) battleLog.textContent = renderedLog;
+  }
+
+  function consumeLog() {
+    const raw = battleLog.textContent || "";
+    if (raw === renderedLog) return;
+    const lines = raw.split(/\r?\n/).map(normalizeLine).filter(keepLine);
+    if (!lines.length) return;
+    if (lines.some(line => line.includes("が あらわれた！"))) logHistory.length = 0;
+    logHistory.push(...lines);
+    if (logHistory.length > MAX_LOG_LINES) {
+      logHistory.splice(0, logHistory.length - MAX_LOG_LINES);
+    }
+    renderLog();
+  }
+
+  new MutationObserver(consumeLog).observe(battleLog, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+  consumeLog();
+
+  function visibleGrid() {
+    return [...menuWrap.querySelectorAll(".command-grid")]
+      .find(grid => !grid.classList.contains("hidden")) || null;
+  }
+
+  function visibleCommands() {
+    const grid = visibleGrid();
+    if (!grid) return [];
+    return [...grid.querySelectorAll("button.command")]
+      .filter(button => !button.disabled && !button.hidden);
+  }
+
+  function ensureCursor(button) {
+    let cursor = button.querySelector(":scope > .battle-command-cursor");
+    if (!cursor) {
+      cursor = document.createElement("span");
+      cursor.className = "battle-command-cursor";
+      cursor.setAttribute("aria-hidden", "true");
+      button.prepend(cursor);
+    }
+    return cursor;
+  }
+
+  function select(button, focus = false) {
+    if (!button) return false;
+    menuWrap.querySelectorAll("button.command").forEach(item => {
+      const selected = item === button;
+      item.classList.toggle("is-selected", selected);
+      ensureCursor(item).textContent = selected ? "▶" : "";
+      if (selected) item.setAttribute("aria-current", "true");
+      else item.removeAttribute("aria-current");
+    });
+    if (focus) {
+      try { button.focus({ preventScroll: true }); }
+      catch (_) { button.focus(); }
+    }
+    return true;
+  }
+
+  function syncSelection() {
+    const commands = visibleCommands();
+    if (!commands.length) {
+      menuWrap.querySelectorAll("button.command").forEach(button => {
+        button.classList.remove("is-selected");
+        ensureCursor(button).textContent = "";
+        button.removeAttribute("aria-current");
+      });
+      return;
+    }
+    const current = commands.find(button => button.classList.contains("is-selected"));
+    select(current || commands[0]);
+  }
+
+  function moveSelection(delta) {
+    const commands = visibleCommands();
+    if (!commands.length) return false;
+    const current = commands.find(button => button.classList.contains("is-selected")) || commands[0];
+    const index = commands.indexOf(current);
+    const next = commands[(index + delta + commands.length) % commands.length];
+    return select(next, true);
+  }
+
+  menuWrap.addEventListener("pointerover", event => {
+    const button = event.target.closest?.("button.command");
+    if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
+    select(button);
+  });
+  menuWrap.addEventListener("focusin", event => {
+    const button = event.target.closest?.("button.command");
+    if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
+    select(button);
+  });
+
+  document.addEventListener("keydown", event => {
+    if (!battleScreen.classList.contains("active")) return;
+    const commands = visibleCommands();
+    if (!commands.length || window.SpellGame03?.state?.busy) return;
+
+    if (["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].includes(event.key)) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      moveSelection(event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1);
+      return;
+    }
+
+    if (event.key === "z" || event.key === "Z" || event.key === "Enter") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const selected = commands.find(button => button.classList.contains("is-selected")) || commands[0];
+      select(selected, true);
+      selected?.click();
+    }
+  }, true);
+
+  new MutationObserver(syncSelection).observe(menuWrap, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "disabled", "hidden"]
+  });
+
+  new MutationObserver(() => {
+    if (battleScreen.classList.contains("active")) syncSelection();
+  }).observe(battleScreen, {
+    attributes: true,
+    attributeFilter: ["class"]
+  });
+
+  menuWrap.querySelectorAll("button.command").forEach(ensureCursor);
+  syncSelection();
+
+  window.SpellBattleUiCore = {
+    version: "2026-08-22-dq-command-v1",
+    syncSelection,
+    moveSelection
+  };
+})();
