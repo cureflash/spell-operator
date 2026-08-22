@@ -56,6 +56,7 @@
     "js/game03-field.js?v=20",
     "js/field-enemy-battle-override.js?v=1",
     "js/la-mer-expanded.js?v=3",
+    "js/vieille-city.js?v=1",
     { src: "js/la-mer-ai-preview.js?v=3", optional: true },
     "js/fleur-start-sprites.js?v=3",
     "js/place-names.js?v=2",
