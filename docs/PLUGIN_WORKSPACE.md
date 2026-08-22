@@ -7,6 +7,8 @@ This document mirrors the confirmed plug-in workspace specification from Notion 
 - The normal field `X` plug-in sequence keeps the existing Sophie line, Kirayuki full-screen transition, and plug-in SE.
 - After the transition finishes, open the plug-in menu. Do not automatically open the first Python editor.
 - The field-menu computer route may open the same plug-in menu without the cinematic transition.
+- The common menu control contract is `Z` = confirm and `X` = cancel/back.
+- The normal field is the exception to the cancel binding: while no menu, overlay, or plug-in prompt is open, `X` starts plug-in access as before.
 
 ## Plug-in menu
 
@@ -26,6 +28,8 @@ The menu contains, in this order:
 `カスタム` is reserved only. Its behavior is not specified yet.
 
 - Up/down arrow keys move the current menu selection.
+- `Z` activates the selected item.
+- `X` cancels the plug-in menu and returns to the field.
 - The selected menu item is visually highlighted.
 - The bottom Lumiere dialogue changes whenever the menu selection changes and explains the selected item.
 - The initial selection is `エディタ`, so the initial bottom dialogue explains the editor.
@@ -41,10 +45,12 @@ The menu contains, in this order:
 ## Editor workspace
 
 - The Python editor occupies the left side.
-- The upper-right area is the grimoire for previously saved code.
-- Selecting saved code shows the code and enables copying it to the clipboard.
-- The grimoire never auto-inserts code into the editor. The player pastes copied code normally.
-- Execution controls are below the grimoire on the right.
+- The right side primarily contains execution controls and the execution/output pane.
+- The grimoire for previously saved code is a collapsible tab on the right side and is closed by default whenever the editor workspace is entered.
+- Activating the grimoire tab opens its saved-code list and preview. Activating it again closes the grimoire.
+- While the grimoire is closed, the execution/output area expands vertically into the space that would otherwise be used by the grimoire.
+- Selecting saved code while the grimoire is open shows the code and enables copying it to the clipboard.
+- The grimoire never auto-inserts saved code into the editor. The player pastes copied code normally.
 - The right-side `出力` pane is stdout-only during normal test execution. It displays only text actually emitted by the player's program, such as `print()` output.
 - Test counts, expected output, calculation cost, MP, pass/fail explanations, and other diagnostics must not be mixed into the stdout pane during normal test execution.
 - During final answer judging, the same pane shows each judged random input value and the player's corresponding output value. A failed case may additionally show the expected value.
@@ -54,6 +60,20 @@ The menu contains, in this order:
 - Output mismatch is a test failure (`TEST FAILED`), not a Python exception. Lumiere gives a short response such as `これだとダメそうね。出力を確認してみて。` while the stdout pane shows the player's actual output.
 - Real Python-code exceptions and execution-environment failures are distinct. Lumiere may explain a Python exception by type, but a worker/CDN/runtime infrastructure failure must not be described as a Python-code error.
 - The editor dialogue is tall enough to show the normal one-line Lumiere response without its own vertical scrollbar. The `▼` indicator remains fully visible inside the lower-right corner.
+- `X` returns from the editor to the plug-in menu when keyboard focus is not inside an editable text field. Typing the character `x` inside the code editor must remain possible.
+
+### Temporary Fire debug seed
+
+- For the current debugging phase, opening an untouched, unlearned Fire editor seeds it with a correct Fire solution:
+
+```python
+n = int(input())
+print(n * 2)
+```
+
+- The seed is only an editor convenience; merely displaying or running it does not mark Fire as learned.
+- `コードをクリア` immediately empties the editor.
+- Once the Fire draft has been edited or explicitly cleared in the current session, reopening Fire must not automatically reinsert the debug seed.
 
 ### Current desktop layout values
 
@@ -63,7 +83,8 @@ The current `spell-operator/plugin-editor-layout@1` tuning is:
 - upper workspace: 85%
 - Lumiere dialogue: 15%
 - divider thickness: 2px
-- grimoire height: 30%
+- grimoire open height: 30%
+- grimoire default state: closed
 - execution output minimum height: 120px
 - execution pane gap: 2px
 - dialogue portrait column: 70px
@@ -74,9 +95,12 @@ The current `spell-operator/plugin-editor-layout@1` tuning is:
 
 The speaker-name badge inside the plug-in editor dialogue is reduced specifically for the 70px portrait column. This does not change the normal field dialogue speaker-name sizing.
 
-## Answer judging
+## Learning status and answer judging
 
-- The editor includes a separate `解答を判定` button in addition to `テスト実行`.
+- Spellbook unlock status, spell learned status, and saved source code are separate state concepts.
+- An unlocked spellbook may be opened in the editor even when its spell is still unlearned.
+- `テスト実行` is rehearsal only. It may run the code and show output, but it must never change learned status or make a spell battle-usable.
+- The editor includes a separate `解答を判定` button for actual learning.
 - Final answer judging uses newly generated random valid inputs for the current programming problem.
 - The current judge generates 3 random cases per judgment.
 - The canonical reference Python solutions are stored separately in `data/python-reference-solutions.json`.
@@ -84,9 +108,11 @@ The speaker-name badge inside the plug-in editor dialogue is reduced specificall
 - The player's code is then run against the same input set. A case passes only when its normalized stdout matches the expected stdout and no Python exception occurs.
 - After answer judging completes, the execution/output pane shows the random input value and the player's output value for all three judged cases. On a failed case, the expected output may also be shown as judgment information.
 - Lumiere's bottom dialogue remains separate and gives only a short response to the judgment result.
-- Passing all random cases records the submitted code as a learned/battle-usable spell using the existing MP/cost model; a less efficient submission does not replace a better saved implementation.
+- Passing all random cases sets the spell's learned status to true and records the submitted code as its battle implementation using the existing MP/cost model. A less efficient later submission does not replace a better saved implementation.
+- An unlearned spell is unavailable in battle even if an editor draft exists.
+- Learned status is included in magic save data and restored on load. Legacy saves that have a valid saved registered spell but no explicit learned-status field migrate that registered spell to learned status.
 - A fully passing judgment plays `plugin-clear`, currently assigned to 魔王魂 `システム46` by 森田交一. The canonical source page and attribution are recorded in `docs/ASSET_CREDITS.md`.
-- Reference solution code is judge data. It is not shown automatically in the editor or in normal hint output.
+- Reference solution code is judge data. It is not shown automatically in normal player-facing UI or normal hint output; the Fire seed above is a temporary debugging exception explicitly requested for the current development phase.
 
 ## Hint
 
@@ -102,7 +128,7 @@ The speaker-name badge inside the plug-in editor dialogue is reduced specificall
 ## Resizing and scrolling
 
 - The editor/right-pane boundary is draggable.
-- The grimoire/execution boundary is draggable.
+- The grimoire/execution boundary is draggable while the grimoire tab is open.
 - The upper workspace/bottom dialogue boundary is draggable.
 - The Lumiere/menu boundary on the plug-in menu is draggable.
 - These sizes are user-adjustable for the current session; persistence is not specified.
