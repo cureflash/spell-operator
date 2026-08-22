@@ -19,7 +19,7 @@
     "css/npc-pipoya.css?v=4",
     "css/computer.css?v=5",
     "css/plugin-editor-assistant.css?v=3",
-    "css/plugin-editor-layout-applied.css?v=4",
+    "css/plugin-editor-layout-applied.css?v=5",
     "css/grimoire-first-clear.css?v=3",
     "css/pipoya-map.css?v=2",
     "css/house-maps.css?v=1",
@@ -37,19 +37,19 @@
     "js/interpreter.js?v=3",
     "js/game03-core.js?v=8",
     { src: "js/lumiere-python-errors.js?v=4", optional: true },
-    "js/python-grimoire.js?v=1",
+    "js/python-grimoire.js?v=2",
     "js/plugin-hints.js?v=1",
-    "js/plugin-workspace.js?v=2",
+    "js/plugin-workspace.js?v=3",
     "js/plugin-editor-assistant.js?v=6",
     "js/plugin-answer-judge.js?v=3",
     { src: "js/grimoire-first-clear-celebration.js?v=4", optional: true },
-    "js/plugin-execution-controller.js?v=3",
+    "js/plugin-execution-controller.js?v=4",
     "js/map-transition.js?v=3",
     "js/game03-items.js?v=3",
     "js/game03-story.js?v=10",
     "js/friend-conversation.js?v=3",
     "js/game03-battle.js?v=6",
-    { src: "js/battle-ui-core-patch.js?v=4", optional: true },
+    { src: "js/battle-ui-core-patch.js?v=5", optional: true },
     "js/tilemap-runtime.js?v=5",
     { wait: () => window.SpellTilemapRuntime?.ready, label: "SpellTilemapRuntime.ready" },
     "js/game03-field.js?v=20",
@@ -63,8 +63,8 @@
     "js/battle-dq-ui.js?v=6",
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
-    "js/game03-menu.js?v=19",
-    "js/plugin-controller.js?v=2",
+    "js/game03-menu.js?v=20",
+    "js/plugin-controller.js?v=3",
     "js/house-room-layout.js?v=4",
     "js/field-scene-controller.js?v=1",
     { applyTilemap: true, label: "tilemap apply" },
@@ -174,7 +174,7 @@
     const area = document.querySelector(".field-area");
     if (area && !area.textContent) area.textContent = "フルール村";
     const help = [...document.querySelectorAll(".field-help span")];
-    if (help[1]) help[1].textContent = "話す・調べる・戻る：Z";
+    if (help[1]) help[1].textContent = "話す・調べる・決定：Z";
 
     clearDiagnostic();
     if (startButton) {
