@@ -23,6 +23,7 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - The first village uses PeriTune's `Village_Fete` as its field BGM.
 - The BGM applies to the current first-village field maps: `town`, `school`, `library`, `house1`, and `house2`.
 - `Village_Fete` loops continuously while the player remains on those field maps.
+- The first-village BGM playback volume is `0.6` on the HTML audio element.
 - Leaving the field screen for another game screen such as battle or plug-in/computer pauses the BGM; returning to the village field resumes it.
 - Browser autoplay restrictions are respected: playback starts after the player's first click or key input if automatic playback is blocked.
 - Source: `https://peritune.com/music/PeriTune_Village_Fete.mp3`.
@@ -51,7 +52,17 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
   - `instant`: when `true`, bypass stepped rendering for that line. `typing: false` is also treated as instant display.
 - Global defaults can be adjusted with `SpellDialogTyping.configureDefaults()`.
 - `SpellDialogTyping.prepare()` can configure the next dialog when a caller cannot pass a `typing` object directly.
-- `SpellDialogTyping.setStepListener(listener)` receives each discrete text step and is reserved for effects such as a future short `ポッ` text sound without coupling audio code to the renderer.
+- `SpellDialogTyping.setStepListener(listener)` receives each discrete text step and is used by the dialog text sound-effect layer.
+
+## Dialog text sound effect
+
+- Normal stepped field dialogue plays a short `ポッ`-style sound for each visible text step.
+- Whitespace-only steps do not play the sound.
+- The runtime asset is `assets/audio/sfx/dialog-pop.wav`.
+- The source sound is Kenney Interface Sounds `click_003.wav`, licensed CC0 1.0 Universal.
+- The dialog sound-effect playback volume is `0.35`.
+- The sound-effect layer is attached through `SpellDialogTyping.setStepListener()` so text rendering and audio remain separate systems.
+- Browser autoplay restrictions are respected; sound may remain silent until the player has interacted with the page.
 
 Example:
 

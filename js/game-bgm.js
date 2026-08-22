@@ -10,6 +10,7 @@
   const audio = new Audio();
   audio.preload = "auto";
   audio.loop = true;
+  audio.volume = 0.6;
 
   let activeTrack = null;
   let userActivated = false;
