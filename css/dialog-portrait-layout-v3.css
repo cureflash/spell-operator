@@ -49,6 +49,26 @@
   line-height:1.75!important;
 }
 .dialog-next{z-index:4!important}
+
+/* Applied from spell-operator/dialog-name-style@1. Desktop only; mobile keeps its existing overrides. */
+@media(min-width:761px){
+  .dialog-name{
+    left:167px!important;
+    top:12px!important;
+    width:auto!important;
+    height:auto!important;
+    min-width:92px!important;
+    padding:3px 40px!important;
+    background:#ffe8a3!important;
+    color:#202128!important;
+    border:0!important;
+    border-radius:30px!important;
+    font-size:16px!important;
+    font-weight:900!important;
+    line-height:1.25!important;
+  }
+}
+
 @media(max-width:760px){
   .field-dialog{
     grid-template-columns:144px 1fr!important;
