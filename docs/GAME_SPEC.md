@@ -26,6 +26,17 @@ This file is the implementation-facing mirror of confirmed game-wide specificati
 - `ラメールシティ` uses the reserved internal map ID `la_mer_city`.
 - Generic wording such as `町へ` may still be used for direction markers when it is functioning as a category/destination description rather than the proper place name.
 
+## Fast travel / イードウ
+
+- The field menu contains the command `イードウ`.
+- `イードウ` is the game-wide fast-travel command, analogous to Pokémon's Fly or Dragon Quest's Zoom.
+- Choosing `イードウ` replaces the main menu list with a destination list.
+- The destination list uses `↑/↓` for selection and `Z` to warp. `Enter` or `Escape` returns to the main field menu without moving.
+- At the current implementation stage, the destination list contains only `ラメールシティ`.
+- Selecting `ラメールシティ` activates map ID `la_mer_city` directly.
+- `la_mer_city` is the stable map ID used by the travel command and save data. The dedicated La Mer City field map may be implemented or replaced independently without changing the `イードウ` command contract.
+- Additional destinations can be appended to the travel destination list later.
+
 ## BGM
 
 - `フルール村` uses PeriTune's `Village_Fete` as its field BGM.
