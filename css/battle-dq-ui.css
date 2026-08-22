@@ -40,6 +40,21 @@
   background: #181722 center/cover no-repeat;
   box-shadow: 0 0 0 3px #30313a;
   overflow: hidden;
+  transform-origin: center bottom;
+}
+
+@keyframes dq-party-attack-bounce {
+  0%, 100% { transform: translateY(0); }
+  24% { transform: translateY(-14px); }
+  48% { transform: translateY(5px); }
+  70% { transform: translateY(-7px); }
+  86% { transform: translateY(2px); }
+}
+
+.dq-party-portrait.is-attacking {
+  animation: dq-party-attack-bounce 430ms cubic-bezier(.2,.8,.25,1);
+  will-change: transform;
+  z-index: 3;
 }
 
 .dq-party-stats {
