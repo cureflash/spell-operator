@@ -9,7 +9,7 @@
   const labels = { sophie: "ソフィー", lumiere: "ルミエル" };
   const portraitOverrides = Object.create(null);
   const statusExpressions = {
-    normal: "neutral",
+    normal: "battle",
     danger: "neutral",
     ko: "neutral",
     fainted: "neutral"
