@@ -92,6 +92,31 @@
   overflow: hidden;
 }
 
+#screen-battle .battle-menu-wrap {
+  display: block !important;
+  min-width: 0;
+}
+
+#screen-battle .command-grid.hidden {
+  display: none !important;
+}
+
+#screen-battle .command-grid:not(.hidden) {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#screen-battle .command-grid:not(.hidden) .command {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#screen-battle .command-grid:not(.hidden) .magic-command {
+  display: flex !important;
+}
+
 #screen-battle .command {
   position: relative;
   padding-left: 32px;
@@ -110,6 +135,12 @@
 
 #screen-battle .command.is-selected::before {
   content: "▶";
+}
+
+#screen-battle .command.is-selected {
+  outline: 0;
+  background: #efeafc;
+  border-color: #755eac;
 }
 
 @media(max-width:760px) {
