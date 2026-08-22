@@ -23,7 +23,7 @@
     "css/house-rooms-v2.css?v=2",
     "css/pokemon-house-compact.css?v=1",
     "css/sophie-sprite.css?v=21",
-    "css/battle-dq-ui.css?v=3"
+    "css/battle-dq-ui.css?v=4"
   ];
 
   const modules = [
@@ -44,7 +44,7 @@
     "js/plugin-workspace.js?v=2",
     "js/plugin-editor-assistant.js?v=6",
     "js/plugin-answer-judge.js?v=3",
-    "js/grimoire-first-clear-celebration.js?v=2",
+    { src: "js/grimoire-first-clear-celebration.js?v=2", optional: true },
     "js/plugin-execution-controller.js?v=3",
     "js/map-transition.js?v=3",
     "js/game03-items.js?v=3",
@@ -60,7 +60,7 @@
     "js/place-names.js?v=2",
     "js/game-bgm.js?v=8",
     "js/character-portraits.js?v=3",
-    "js/battle-dq-ui.js?v=3",
+    "js/battle-dq-ui.js?v=4",
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
     "js/game03-menu.js?v=19",
@@ -130,6 +130,7 @@
 
   boot().catch(error => {
     console.error("Spell Operator boot failed", error);
+    if (startButton) startButton.disabled = false;
     document.body.insertAdjacentHTML("beforeend", '<p style="padding:16px;color:#fff">ゲームの読み込みに失敗しました。再読み込みしてください。</p>');
   });
 })();
