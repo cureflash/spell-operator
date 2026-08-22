@@ -4,8 +4,7 @@
   const G = window.SpellGame03;
   if (!G?.state) return;
 
-  const DEFAULT_PORTRAIT = "assets/characters/portraits/lumiere/grimoire-clear.svg?v=1";
-  const FALLBACK_PORTRAIT = "assets/characters/portraits/lumiere/smile.jpg?v=1";
+  const DEFAULT_PORTRAIT = "assets/characters/portraits/lumiere/smile.jpg?v=1";
   let portraitSrc = DEFAULT_PORTRAIT;
   let currentSpellKey = null;
 
@@ -66,7 +65,9 @@
     overlay.setAttribute("aria-label", "魔導書クリア");
     overlay.innerHTML = `
       <div class="grimoire-first-clear-card">
-        <img id="grimoire-first-clear-portrait" class="grimoire-first-clear-portrait" alt="" aria-hidden="true">
+        <div class="grimoire-first-clear-portrait-frame" aria-hidden="true">
+          <img id="grimoire-first-clear-portrait" class="grimoire-first-clear-portrait" alt="">
+        </div>
         <div class="grimoire-first-clear-message">
           <div class="grimoire-first-clear-name">ルミエル</div>
           <div id="grimoire-first-clear-text" class="grimoire-first-clear-text">やった！クリアよ！</div>
@@ -78,13 +79,24 @@
     return overlay;
   }
 
+  function resolvePortraitSource() {
+    if (portraitSrc && portraitSrc !== DEFAULT_PORTRAIT) return portraitSrc;
+    return window.SpellPortraits?.resolve?.("lumiere", "smile") || DEFAULT_PORTRAIT;
+  }
+
   function applyPortrait() {
     const portrait = document.getElementById("grimoire-first-clear-portrait");
     if (!portrait) return;
-    portrait.onerror = () => {
-      if (!portrait.src.includes("/smile.jpg")) portrait.src = FALLBACK_PORTRAIT;
-    };
-    portrait.src = portraitSrc || DEFAULT_PORTRAIT;
+
+    const source = resolvePortraitSource();
+    const absoluteSource = new URL(source, document.baseURI).href;
+    portrait.style.display = "block";
+    portrait.style.width = "100%";
+    portrait.style.height = "100%";
+    portrait.style.objectFit = "cover";
+    portrait.style.objectPosition = "center";
+    portrait.removeAttribute("hidden");
+    portrait.src = absoluteSource;
   }
 
   function isOpen() {
