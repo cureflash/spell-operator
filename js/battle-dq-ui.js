@@ -19,8 +19,9 @@
     lumiere: { status: "normal", expression: "neutral" }
   };
 
+  const battleScreen = document.getElementById("screen-battle");
   const battleLog = document.getElementById("battle-log");
-  const commandMenuWrap = document.querySelector("#screen-battle .battle-menu-wrap");
+  const commandMenuWrap = battleScreen?.querySelector(".battle-menu-wrap");
   const battleLogLines = [];
   const MAX_BATTLE_LOG_LINES = 4;
   let renderedBattleLog = "";
@@ -73,36 +74,97 @@
     consumeBattleLogWrite();
   }
 
-  function setSelectedCommand(button) {
+  function visibleCommandGrid() {
+    if (!commandMenuWrap) return null;
+    return [...commandMenuWrap.querySelectorAll(".command-grid")]
+      .find(grid => !grid.classList.contains("hidden")) || null;
+  }
+
+  function availableCommands(grid = visibleCommandGrid()) {
+    if (!grid) return [];
+    return [...grid.querySelectorAll(".command")]
+      .filter(button => !button.disabled && !button.hidden);
+  }
+
+  function setSelectedCommand(button, { focus = false } = {}) {
     if (!commandMenuWrap || !button) return;
     commandMenuWrap.querySelectorAll(".command.is-selected").forEach(item => {
       if (item === button) return;
       item.classList.remove("is-selected");
       item.removeAttribute("aria-current");
     });
-    if (!button.classList.contains("is-selected")) button.classList.add("is-selected");
-    if (button.getAttribute("aria-current") !== "true") button.setAttribute("aria-current", "true");
+    button.classList.add("is-selected");
+    button.setAttribute("aria-current", "true");
+    if (focus) {
+      try {
+        button.focus({ preventScroll: true });
+      } catch (_) {
+        button.focus();
+      }
+    }
   }
 
   function syncCommandSelection() {
     if (!commandMenuWrap) return;
-    const visibleGrid = [...commandMenuWrap.querySelectorAll(".command-grid")]
-      .find(grid => !grid.classList.contains("hidden"));
-    if (!visibleGrid) {
+    const grid = visibleCommandGrid();
+    if (!grid) {
       commandMenuWrap.querySelectorAll(".command.is-selected").forEach(item => {
         item.classList.remove("is-selected");
         item.removeAttribute("aria-current");
       });
       return;
     }
-    const selected = visibleGrid.querySelector(".command.is-selected:not(:disabled)");
-    if (selected) return;
-    const first = visibleGrid.querySelector(".command:not(:disabled)");
-    setSelectedCommand(first);
+
+    const commands = availableCommands(grid);
+    if (!commands.length) return;
+    const selected = commands.find(button => button.classList.contains("is-selected"));
+    setSelectedCommand(selected || commands[0]);
+  }
+
+  function commandCenter(button) {
+    const rect = button.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  }
+
+  function moveCommandSelection(direction) {
+    const grid = visibleCommandGrid();
+    const commands = availableCommands(grid);
+    if (!commands.length) return false;
+
+    let current = commands.find(button => button.classList.contains("is-selected"));
+    if (!current) current = commands[0];
+    if (commands.length === 1) {
+      setSelectedCommand(current, { focus: true });
+      return true;
+    }
+
+    const origin = commandCenter(current);
+    const candidates = commands
+      .filter(button => button !== current)
+      .map(button => {
+        const center = commandCenter(button);
+        const dx = center.x - origin.x;
+        const dy = center.y - origin.y;
+        const valid = direction === "left" ? dx < -1
+          : direction === "right" ? dx > 1
+          : direction === "up" ? dy < -1
+          : dy > 1;
+        if (!valid) return null;
+        const primary = direction === "left" || direction === "right" ? Math.abs(dx) : Math.abs(dy);
+        const secondary = direction === "left" || direction === "right" ? Math.abs(dy) : Math.abs(dx);
+        return { button, score: primary * 1000 + secondary };
+      })
+      .filter(Boolean)
+      .sort((a, b) => a.score - b.score);
+
+    const next = candidates[0]?.button || current;
+    setSelectedCommand(next, { focus: true });
+    return true;
   }
 
   function installCommandSelection() {
-    if (!commandMenuWrap) return;
+    if (!commandMenuWrap || !battleScreen) return;
+
     const selectFromEvent = event => {
       const button = event.target.closest?.(".command");
       if (!button || button.disabled || button.closest(".command-grid")?.classList.contains("hidden")) return;
@@ -111,12 +173,44 @@
     commandMenuWrap.addEventListener("pointerdown", selectFromEvent);
     commandMenuWrap.addEventListener("mouseover", selectFromEvent);
     commandMenuWrap.addEventListener("focusin", selectFromEvent);
+
     new MutationObserver(syncCommandSelection).observe(commandMenuWrap, {
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ["class", "disabled"]
+      attributeFilter: ["class", "disabled", "hidden"]
     });
+
+    document.addEventListener("keydown", event => {
+      if (!battleScreen.classList.contains("active")) return;
+      const grid = visibleCommandGrid();
+      if (!grid) return;
+
+      const direction = {
+        ArrowLeft: "left",
+        ArrowRight: "right",
+        ArrowUp: "up",
+        ArrowDown: "down"
+      }[event.key];
+
+      if (direction) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        moveCommandSelection(direction);
+        return;
+      }
+
+      if (event.key === "z" || event.key === "Z" || event.key === "Enter") {
+        const commands = availableCommands(grid);
+        const selected = commands.find(button => button.classList.contains("is-selected")) || commands[0];
+        if (!selected) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        setSelectedCommand(selected, { focus: true });
+        selected.click();
+      }
+    }, true);
+
     syncCommandSelection();
   }
 
@@ -195,6 +289,7 @@
   function render() {
     ensurePanel();
     characters.forEach(renderCharacter);
+    syncCommandSelection();
   }
 
   function setStatus(character, status, expression = null) {
@@ -240,8 +335,11 @@
   legacyTargets.forEach(el => observer.observe(el, { childList: true, subtree: true, characterData: true }));
 
   new MutationObserver(() => {
-    if (document.getElementById("screen-battle")?.classList.contains("active")) render();
-  }).observe(document.getElementById("screen-battle"), { attributes: true, attributeFilter: ["class"] });
+    if (battleScreen?.classList.contains("active")) {
+      render();
+      syncCommandSelection();
+    }
+  }).observe(battleScreen, { attributes: true, attributeFilter: ["class"] });
 
   window.SpellBattlePortraits = {
     render,
