@@ -15,6 +15,7 @@
 
   const travelMenuItems = [
     { label: "フルール村", mapId: "town" },
+    { label: "ビエイユシティ", mapId: "kyoto_city" },
     { label: "ラメールシティ", mapId: "la_mer_city" }
   ];
   const travelConfirmItems = [
