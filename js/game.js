@@ -61,7 +61,7 @@
     "js/place-names.js?v=2",
     "js/game-bgm.js?v=8",
     "js/character-portraits.js?v=3",
-    "js/battle-dq-ui.js?v=5",
+    "js/battle-dq-ui.js?v=6",
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
     "js/game03-menu.js?v=19",
