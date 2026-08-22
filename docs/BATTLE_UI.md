@@ -11,8 +11,12 @@
 
 ## Command selection marker
 
+- Whenever the battle is waiting for player input, the currently active command menu and its selectable commands remain visible.
 - The visible command menu always has one current selection when selectable commands are present.
 - The current command is marked with `▶` immediately to the left of its label.
 - When the command submenu changes, the first available command becomes the visible selection.
 - Moving the pointer onto a command, focusing it, or pressing it moves the `▶` marker to that command.
-- This change is presentation-only; existing combat command behavior is unchanged.
+- While the battle screen is active, the arrow keys move the selection among commands in the currently visible command grid.
+- `Z` or `Enter` confirms the currently selected command.
+- Battle-command keyboard handling applies only while a command grid is visible.
+- These UI controls do not change combat calculations or turn-resolution behavior.
