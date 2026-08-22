@@ -1,6 +1,18 @@
-import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.28.3/full/pyodide.mjs";
+const PYODIDE_VERSION = "0.28.3";
+const PYODIDE_BASE = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
+const PYODIDE_MODULE = `${PYODIDE_BASE}pyodide.mjs`;
 
-const pyodideReady = loadPyodide();
+let pyodide = null;
+let ready = null;
+
+function serializeError(error) {
+  return {
+    name: String(error?.name || "Error"),
+    message: String(error?.message || error || "Unknown error"),
+    stack: String(error?.stack || "")
+  };
+}
+
 const PY_HELPER = String.raw`
 import ast
 import builtins
@@ -205,42 +217,39 @@ def _so_run_suite(source, tests):
         "maxCost": max_cost,
         "maxBreakdown": max_breakdown,
     }
+
+
+def _so_run_suite_json(source, tests_json):
+    return json.dumps(_so_run_suite(source, json.loads(tests_json)), ensure_ascii=False)
 `;
 
-let helperReady = false;
-
-async function ensureHelper() {
-  const pyodide = await pyodideReady;
-  if (!helperReady) {
-    await pyodide.runPythonAsync(PY_HELPER);
-    helperReady = true;
-  }
-  return pyodide;
+async function initialize() {
+  const module = await import(PYODIDE_MODULE);
+  pyodide = await module.loadPyodide({ indexURL: PYODIDE_BASE });
+  await pyodide.runPythonAsync(PY_HELPER);
+  self.postMessage({ type: "ready", pyodideVersion: pyodide.version });
 }
 
-self.postMessage({ type: "loading" });
-ensureHelper()
-  .then(() => self.postMessage({ type: "ready" }))
-  .catch(error => self.postMessage({ type: "fatal", error: String(error?.stack || error) }));
+ready = initialize().catch(error => {
+  self.postMessage({ type: "fatal", error: serializeError(error) });
+  throw error;
+});
 
-self.onmessage = async event => {
+self.addEventListener("message", async event => {
   const { id, type, source, tests } = event.data || {};
-  if (type !== "run") return;
+  if (type !== "run" || !id) return;
+
   try {
-    const pyodide = await ensureHelper();
+    await ready;
     pyodide.globals.set("__so_source", String(source ?? ""));
     pyodide.globals.set("__so_tests_json", JSON.stringify(Array.isArray(tests) ? tests : []));
-    const proxy = await pyodide.runPythonAsync(`__so_run_suite(__so_source, json.loads(__so_tests_json))`);
-    const result = proxy.toJs({ dict_converter: Object.fromEntries });
-    proxy.destroy();
+    const jsonText = await pyodide.runPythonAsync("_so_run_suite_json(__so_source, __so_tests_json)");
+    const result = JSON.parse(String(jsonText));
     self.postMessage({ id, type: "result", result });
   } catch (error) {
-    self.postMessage({ id, type: "error", error: String(error?.stack || error) });
+    self.postMessage({ id, type: "error", error: serializeError(error) });
   } finally {
-    try {
-      const pyodide = await pyodideReady;
-      pyodide.globals.delete("__so_source");
-      pyodide.globals.delete("__so_tests_json");
-    } catch {}
+    try { pyodide?.globals.delete("__so_source"); } catch {}
+    try { pyodide?.globals.delete("__so_tests_json"); } catch {}
   }
-};
+});
