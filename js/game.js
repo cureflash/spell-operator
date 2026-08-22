@@ -16,6 +16,7 @@
     "css/npc-pipoya.css?v=4",
     "css/computer.css?v=5",
     "css/plugin-editor-assistant.css?v=2",
+    "css/plugin-editor-layout-applied.css?v=1",
     "css/pipoya-map.css?v=2",
     "css/house-maps.css?v=1",
     "css/house-rooms-v2.css?v=2",
