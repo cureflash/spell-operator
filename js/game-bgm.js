@@ -39,7 +39,6 @@
   audio.loop = true;
   audio.volume = window.SpellAudioSettings?.get?.("bgm") ?? 0.5;
 
-  const positions = new Map();
   let activeTrack = null;
   let userActivated = false;
   let preparedBattleMode = null;
@@ -79,41 +78,31 @@
     return FIELD_TRACKS[mapId] || null;
   }
 
-  function restorePosition(track) {
-    const saved = positions.get(track.id) || 0;
-    if (saved <= 0) return;
-    const apply = () => {
-      if (Number.isFinite(audio.duration) && saved < audio.duration) audio.currentTime = saved;
-    };
-    if (audio.readyState >= 1) apply();
-    else audio.addEventListener("loadedmetadata", apply, { once: true });
+  function resetToStart() {
+    try {
+      audio.currentTime = 0;
+    } catch (_) {}
   }
 
   function setTrack(track) {
     if (activeTrack?.id === track.id) return;
-    if (activeTrack && Number.isFinite(audio.currentTime)) positions.set(activeTrack.id, audio.currentTime);
     audio.pause();
     activeTrack = track;
     audio.src = track.src;
     audio.loop = true;
-    restorePosition(track);
+    resetToStart();
   }
 
   function sync() {
     const battleActive = battleIsActive();
-    if (!wasBattleActive && battleActive) {
-      positions.delete(TRACKS.ancient_gust.id);
-      positions.delete(TRACKS.swift_strike.id);
-      if (activeTrack?.id === TRACKS.ancient_gust.id || activeTrack?.id === TRACKS.swift_strike.id) {
-        audio.currentTime = 0;
-      }
-    }
     if (wasBattleActive && !battleActive) preparedBattleMode = null;
     wasBattleActive = battleActive;
 
     const track = wantedTrack();
     if (!track) {
       audio.pause();
+      resetToStart();
+      activeTrack = null;
       return;
     }
 
