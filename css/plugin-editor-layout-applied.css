@@ -21,8 +21,30 @@
   white-space: nowrap;
 }
 
+/* Only the grimoire body is collapsible. Execution controls/output stay visible. */
+.plugin-right-pane {
+  overflow: hidden;
+}
+
+.plugin-right-pane .plugin-run-pane,
+.plugin-right-pane .plugin-execution-output-panel,
+.plugin-right-pane .plugin-execution-output {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.plugin-right-pane .plugin-run-pane {
+  display: grid !important;
+  min-height: 0;
+}
+
+.plugin-right-pane .plugin-execution-output-panel {
+  display: grid !important;
+  min-height: 120px !important;
+}
+
 .plugin-right-pane.grimoire-collapsed {
-  grid-template-rows: auto 0 minmax(0, 1fr) !important;
+  grid-template-rows: auto 0 minmax(180px, 1fr) !important;
 }
 
 .plugin-right-pane.grimoire-collapsed .plugin-code-library-pane {
@@ -35,12 +57,12 @@
   display: none !important;
 }
 
-.plugin-right-pane.grimoire-collapsed .plugin-run-pane {
-  min-height: 0;
-}
-
 .plugin-right-pane.grimoire-open .plugin-library-body {
   display: grid;
+}
+
+.plugin-right-pane.grimoire-open .plugin-run-pane {
+  min-height: 180px;
 }
 
 @media (min-width: 761px) {
@@ -59,11 +81,11 @@
   }
 
   .plugin-right-pane.grimoire-open {
-    grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, var(--plugin-grimoire-height)) 2px minmax(180px, 1fr) !important;
   }
 
   .plugin-right-pane.grimoire-collapsed {
-    grid-template-rows: auto 0 minmax(0, 1fr) !important;
+    grid-template-rows: auto 0 minmax(180px, 1fr) !important;
   }
 
   .plugin-resizer::before {
@@ -124,9 +146,14 @@
 
 @media (max-width: 760px) {
   .plugin-right-pane.grimoire-open {
-    grid-template-rows: minmax(0, 42%) 2px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 36%) 2px minmax(160px, 1fr) !important;
   }
+
   .plugin-right-pane.grimoire-collapsed {
-    grid-template-rows: auto 0 minmax(0, 1fr) !important;
+    grid-template-rows: auto 0 minmax(160px, 1fr) !important;
+  }
+
+  .plugin-right-pane.grimoire-open .plugin-run-pane {
+    min-height: 160px;
   }
 }
