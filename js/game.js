@@ -30,11 +30,6 @@
     "js/audio-settings.js?v=1",
     "js/audio-manager.js?v=1",
     "js/plugin-clear-audio.js?v=1",
-    { wait: () => Promise.all([
-      window.SpellAudio?.preloadSfx?.("dialog-pop"),
-      window.SpellAudio?.preloadSfx?.("plugin-sparkle"),
-      window.SpellAudio?.preloadSfx?.("plugin-clear")
-    ]) },
     "js/python-runner.js?v=6",
     "js/interpreter.js?v=3",
     "js/game03-core.js?v=8",
