@@ -44,7 +44,7 @@ The historical repository copy of `plugin-sparkle.base64` is three Base64 charac
 - `js/game-bgm.js` decides which track should be active from game state/screens.
 - `js/audio-manager.js` performs the actual HTMLAudio playback.
 - BGM and SE keep independent global volume settings.
-- Entering a new plug-in/computer session requests Dreambyte from 0:00; hub <-> editor navigation inside the same session does not restart it.
+- Entering a new plug-in/computer session requests Dreambyte from 0:00; navigation inside the same plug-in workspace does not restart it.
 
 Diagnostics:
 
@@ -56,7 +56,7 @@ SpellAudio.sfxStatus("plugin-sparkle")
 
 ## Plug-in
 
-`js/plugin-controller.js` is the only owner of the normal-field plug-in flow.
+`js/plugin-controller.js` is the only owner of the normal-field cinematic plug-in flow.
 
 It owns:
 
@@ -68,15 +68,30 @@ It owns:
 6. opaque full-screen Kirayuki/glow transition
 7. transition input lock
 8. computer opening after the effect
-9. automatic opening of the first available Python grimoire
 
-The field menu must not implement plug-in confirmation. Its `パソコン` command directly opens the computer/grimoire list and therefore does not play the plug-in transition.
+After the transition, the controller stops at the plug-in menu. It does not choose or open a Python grimoire automatically.
+
+`js/plugin-workspace.js` owns the plug-in/computer workspace UI after entry:
+
+- three-part plug-in menu layout with Lumiere, menu, and dialogue pane
+- `エディタ` and `チュートリアル` menu behavior
+- reserved disabled `カスタム` item
+- editor / saved-code grimoire / execution / shared output layout
+- clipboard copy of saved code without automatic insertion
+- draggable pane boundaries
+- the no-browser-scroll active workspace state
+- replay of the external tutorial script from `data/plugin-tutorial-dialogues.json`
+
+The Python test logic remains owned by `js/python-grimoire.js`; the workspace reuses and relocates the existing editor/run/output DOM controls rather than duplicating Python execution behavior.
 
 Diagnostics:
 
 ```js
 SpellPlugin.status()
 SpellPlugin.testSound()
+SpellPluginWorkspace.sync()
+SpellPluginWorkspace.renderCodeLibrary()
+SpellPluginTutorial.play()
 ```
 
 ## Field input and scene ownership
