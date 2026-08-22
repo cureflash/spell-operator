@@ -1,6 +1,6 @@
 /* Plug-in editor: execution output and Lumiere hint controls. */
 .plugin-run-pane{
-  grid-template-rows:auto auto auto minmax(0,1fr) auto!important;
+  grid-template-rows:auto auto minmax(0,1fr) auto!important;
   align-content:stretch!important;
 }
 .plugin-run-actions{
@@ -16,6 +16,10 @@
   grid-column:1/-1;
   width:100%;
   white-space:nowrap;
+}
+/* Cost/MP/result are internal values. The plug-in execution pane shows stdout only. */
+.plugin-run-pane .metrics{
+  display:none!important;
 }
 .plugin-execution-output-panel{
   min-width:0;
