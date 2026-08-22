@@ -1,0 +1,35 @@
+name: Fetch PeriTune BGM pack
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fetch-peritune-bgm-pack.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download BGM assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/audio/bgm
+          curl -L --fail --retry 3 --output assets/audio/bgm/ancient-gust.mp3 https://peritune.com/music/Peritune_Ancient_Gust.mp3
+          curl -L --fail --retry 3 --output assets/audio/bgm/resort5.mp3 https://peritune.com/music/PerituneMaterial_Resort5.mp3
+          curl -L --fail --retry 3 --output assets/audio/bgm/swift-strike.mp3 https://peritune.com/music/Peritune_Swift_Strike.mp3
+          test -s assets/audio/bgm/ancient-gust.mp3
+          test -s assets/audio/bgm/resort5.mp3
+          test -s assets/audio/bgm/swift-strike.mp3
+      - name: Commit downloaded assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/audio/bgm/ancient-gust.mp3 assets/audio/bgm/resort5.mp3 assets/audio/bgm/swift-strike.mp3
+          git commit -m "Add PeriTune city and battle BGM assets" || exit 0
+          git push
