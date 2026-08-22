@@ -2,7 +2,7 @@
   "use strict";
 
   const TABLE_URL="data/python-error-dialogues.json";
-  const FALLBACK="Pythonの実行中に問題が起きたみたい。下のエラー内容を確認してみて。";
+  const FALLBACK="Pythonの実行中に問題が起きたみたい。コードをもう一度確認してみて。";
   let tablePromise=null;
 
   function loadTable(){
@@ -38,7 +38,7 @@
 
   async function format(errorText){
     const result=await resolve(errorText);
-    return `ルミエル「${result.dialogue}」\n\nPython: ${result.raw}`;
+    return `ルミエル「${result.dialogue}」`;
   }
 
   function install(){
