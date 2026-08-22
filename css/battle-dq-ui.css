@@ -88,6 +88,67 @@
   box-shadow: 0 0 0 3px #30313a, inset 0 0 0 2px rgba(255,110,110,.55);
 }
 
+#screen-battle .battle-log {
+  overflow: hidden;
+}
+
+#screen-battle.active .battle-command-box {
+  display: grid !important;
+}
+
+#screen-battle .battle-menu-wrap {
+  display: block !important;
+  min-width: 0;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#screen-battle .command-grid.hidden {
+  display: none !important;
+}
+
+#screen-battle .command-grid:not(.hidden) {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#screen-battle .command-grid:not(.hidden) .command {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#screen-battle .command-grid:not(.hidden) .magic-command {
+  display: flex !important;
+}
+
+#screen-battle .command {
+  position: relative;
+  padding-left: 32px;
+}
+
+#screen-battle .command::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  width: 1em;
+  transform: translateY(-50%);
+  font-size: .9em;
+  line-height: 1;
+}
+
+#screen-battle .command.is-selected::before {
+  content: "▶";
+}
+
+#screen-battle .command.is-selected {
+  outline: 0;
+  background: #efeafc;
+  border-color: #755eac;
+}
+
 @media(max-width:760px) {
   #screen-battle .battle-scene {
     height: 410px;
