@@ -58,6 +58,7 @@ SpellDialogTyping.resume();
 ## Character portraits
 
 - Sophie and Lumiere use square character portraits in dialogue UI.
+- The current speaker name is displayed at the top-left of the text pane, above the dialogue text. For example, `speaker: "sophie"` displays `ソフィー` and `speaker: "lumiere"` displays `ルミエル`.
 - Portraits are selected by a character ID plus an expression ID.
 - The default expression ID is `neutral`.
 - If a requested expression is not registered, the character's `neutral` portrait is used as the fallback.

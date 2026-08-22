@@ -6,7 +6,8 @@
 .dialog-speaker{
   padding:0!important;
   justify-content:stretch!important;
-  overflow:hidden!important;
+  /* The name badge is positioned into the text pane, so it must not be clipped by the portrait pane. */
+  overflow:visible!important;
 }
 .dialog-portrait{
   width:100%!important;
@@ -38,6 +39,7 @@
   z-index:3!important;
 }
 .dialog-message{
+  position:relative!important;
   padding:45px 42px 20px 18px!important;
   min-height:160px!important;
   align-items:flex-start!important;
@@ -46,6 +48,7 @@
   font-size:14px!important;
   line-height:1.75!important;
 }
+.dialog-next{z-index:4!important}
 @media(max-width:760px){
   .field-dialog{
     grid-template-columns:144px 1fr!important;
