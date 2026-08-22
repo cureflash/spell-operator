@@ -33,7 +33,7 @@
   const audio = new Audio();
   audio.preload = "auto";
   audio.loop = true;
-  audio.volume = 0.6;
+  audio.volume = window.SpellAudioSettings?.get?.("bgm") ?? 0.5;
 
   const positions = new Map();
   let activeTrack = null;
@@ -119,6 +119,10 @@
     preparedBattleMode = mode === "boss" ? "boss" : "normal";
     sync();
   }
+
+  window.SpellAudioSettings?.subscribe?.(settings => {
+    audio.volume = settings.bgm;
+  });
 
   document.addEventListener("click", activateAudio);
   document.addEventListener("keydown", activateAudio);
