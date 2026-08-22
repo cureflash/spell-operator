@@ -64,7 +64,7 @@
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
     "js/game03-menu.js?v=20",
-    "js/plugin-controller.js?v=3",
+    "js/plugin-controller.js?v=4",
     "js/house-room-layout.js?v=4",
     "js/field-scene-controller.js?v=1",
     { applyTilemap: true, label: "tilemap apply" },
