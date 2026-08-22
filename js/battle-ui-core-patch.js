@@ -74,6 +74,7 @@
       box-shadow: none !important;
       outline: 0 !important;
     }
+    #screen-battle .battle-menu-wrap button.command:disabled { opacity: .38 !important; }
     #screen-battle .battle-menu-wrap button.command::before { content: none !important; }
     #screen-battle .battle-menu-wrap button.command:hover,
     #screen-battle .battle-menu-wrap button.command:focus,
@@ -141,9 +142,7 @@
     if (prompt && lines[lines.length - 1] !== prompt && !window.SpellGame03?.state?.busy) {
       lines = [...lines.slice(-(MAX_LINES - 1)), prompt];
     }
-    if (!lines.length && battleScreen.classList.contains("active")) {
-      lines = [prompt || "戦闘開始！"];
-    }
+    if (!lines.length && battleScreen.classList.contains("active")) lines = [prompt || "戦闘開始！"];
     rendered = lines.join("\n");
     if (battleLog.textContent !== rendered) battleLog.textContent = rendered;
     battleLog.style.setProperty("color", "#fff", "important");
@@ -161,8 +160,7 @@
     const lines = raw.split(/\r?\n/).map(normalize).filter(keep);
     if (lines.some(line => line.includes("が あらわれた！"))) history.length = 0;
     for (const line of lines) {
-      if (!line) continue;
-      if (history[history.length - 1] === line) continue;
+      if (!line || history[history.length - 1] === line) continue;
       history.push(line);
     }
     if (history.length > MAX_LINES) history.splice(0, history.length - MAX_LINES);
@@ -178,8 +176,7 @@
   function visibleCommands() {
     const grid = visibleGrid();
     if (!grid) return [];
-    return [...grid.querySelectorAll("button.command")]
-      .filter(button => !button.disabled && !button.hidden);
+    return [...grid.querySelectorAll("button.command")].filter(button => !button.disabled && !button.hidden);
   }
 
   function ensureCursor(button) {
@@ -197,17 +194,13 @@
     if (!button) return false;
     menuWrap.querySelectorAll("button.command").forEach(item => {
       const selected = item === button;
-      if (item.classList.contains("is-selected") !== selected) {
-        item.classList.toggle("is-selected", selected);
-      }
+      if (item.classList.contains("is-selected") !== selected) item.classList.toggle("is-selected", selected);
       const cursor = ensureCursor(item);
       const cursorText = selected ? "▶" : "";
       if (cursor.textContent !== cursorText) cursor.textContent = cursorText;
       if (selected) {
         if (item.getAttribute("aria-current") !== "true") item.setAttribute("aria-current", "true");
-      } else if (item.hasAttribute("aria-current")) {
-        item.removeAttribute("aria-current");
-      }
+      } else if (item.hasAttribute("aria-current")) item.removeAttribute("aria-current");
     });
     if (focus) {
       try { button.focus({ preventScroll: true }); }
@@ -230,6 +223,20 @@
     const current = commands.find(button => button.classList.contains("is-selected")) || commands[0];
     const index = commands.indexOf(current);
     return select(commands[(index + delta + commands.length) % commands.length], true);
+  }
+
+  function cancelSubmenu() {
+    const grid = visibleGrid();
+    if (!grid) return false;
+    if (grid.id === "heal-target-menu") {
+      document.getElementById("heal-back")?.click();
+      return true;
+    }
+    if (grid.id === "magic-menu") {
+      document.getElementById("magic-back")?.click();
+      return true;
+    }
+    return false;
   }
 
   menuWrap.addEventListener("pointerover", event => {
@@ -255,7 +262,14 @@
       return;
     }
 
-    if (event.key === "z" || event.key === "Z" || event.key === "Enter") {
+    if (event.code === "KeyX" || event.key === "x" || event.key === "X") {
+      if (!cancelSubmenu()) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    if (event.code === "KeyZ" || event.key === "z" || event.key === "Z") {
       event.preventDefault();
       event.stopImmediatePropagation();
       const selected = commands.find(button => button.classList.contains("is-selected")) || commands[0];
@@ -292,7 +306,7 @@
   syncSelection();
 
   window.SpellBattleUiCore = {
-    version: "2026-08-23-dq-command-v4",
+    version: "2026-08-23-dq-command-v5",
     syncSelection,
     moveSelection,
     renderLog,
