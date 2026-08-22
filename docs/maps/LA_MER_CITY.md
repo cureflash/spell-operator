@@ -46,6 +46,29 @@ The seams between sectors are adjusted only enough to make the intended routes c
 - The visible buffer is refreshed only when the player approaches its safe margin, rather than rebuilding on every single step.
 - This rendering optimization must not change map coordinates, collision, save data, or the continuous one-map design.
 
+## AI加工タイル素材・仮配置
+
+2026-08-22時点の外観検討用として、AI生成の港町素材案を32pxグリッドへ再構成した仮素材を登録している。
+
+- アトラス: `assets/tiles/la_mer_ai_pack.svg`
+- 地面3×3: `assets/tiles/la_mer/ground.svg`
+- エディタ素材セット名: `ラメールシティ AI加工素材`
+- 分類: 地面 / 橋 / 建物 / 港 / 市場 / 小物
+- 大型素材は 3×3、8×4、7×8、7×9、9×9、9×4、6×4 等の矩形スタンプとして扱う。
+- 海面は画像タイルを全面敷き詰めるのではなく、青色ベース + 波・反射エフェクトで表現する。
+- 白石畳は32×32の基準チップから3×3パターンとして構成し、反復可能な地面表現に使う。
+
+通常ゲームでは `js/la-mer-ai-preview.js` が**外観検討用の仮配置**を重ねる。
+
+仮配置対象:
+- 三宮: 青屋根建物A/B
+- 港1: 市場、ボート、石橋、街灯
+- 港2: 市場、ランドマーク建物、ボート、街灯
+- 港の舗装: 白石畳
+- 海: 青色ベース + 水面エフェクト
+
+この仮配置は既存の `144 x 104` 論理座標・既存の移動経路・セクター構造を変更しない。最終配置ではなく、マップエディタで調整するための叩き台である。
+
 ## Temporary access
 
 Until the external city entrance is implemented, the field menu has the temporary `イードウ` command.
