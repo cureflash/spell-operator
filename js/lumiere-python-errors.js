@@ -2,7 +2,7 @@
   "use strict";
 
   const TABLE_URL="data/python-error-dialogues.json";
-  const FALLBACK="Pythonの実行中に問題が起きたみたい。コードをもう一度確認してみて。";
+  const FALLBACK="Pythonのコードに問題があるみたい。もう一度確認してみて。";
   let tablePromise=null;
 
   function loadTable(){
@@ -41,37 +41,10 @@
     return `ルミエル「${result.dialogue}」`;
   }
 
-  function failureResult(message){
-    return {
-      ok:false,
-      compileError:message,
-      tests:[],
-      maxCost:0,
-      maxBreakdown:null
-    };
-  }
-
+  // Error guidance is presentation-only. Never rewrite SpellPython.runSuite results.
   function install(){
-    const python=window.SpellPython;
-    if(!python||python.__lumiereErrorGuideInstalled)return false;
-    const originalRunSuite=python.runSuite.bind(python);
-    python.runSuite=async(...args)=>{
-      let result;
-      try{
-        result=await originalRunSuite(...args);
-      }catch(error){
-        const raw=`${error?.name||"Error"}: ${error?.message||error}`;
-        return failureResult(await format(raw));
-      }
-      if(result?.compileError)result.compileError=await format(result.compileError);
-      if(Array.isArray(result?.tests)){
-        for(const test of result.tests){
-          if(test?.error)test.error=await format(test.error);
-        }
-      }
-      return result;
-    };
-    python.__lumiereErrorGuideInstalled=true;
+    if(!window.SpellPython)return false;
+    window.SpellPython.__lumiereErrorGuideInstalled=true;
     return true;
   }
 
