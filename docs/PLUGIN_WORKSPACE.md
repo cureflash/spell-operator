@@ -45,11 +45,21 @@ The menu contains, in this order:
 - Selecting saved code shows the code and enables copying it to the clipboard.
 - The grimoire never auto-inserts code into the editor. The player pastes copied code normally.
 - Execution controls are below the grimoire on the right.
-- There is no separate console panel.
-- The bottom area is the shared Lumiere dialogue / program-output area.
-- When Lumiere speaks in the editor, the bottom area uses the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
-- Python exceptions are converted to Lumiere guidance. Do not show a separate raw-error console.
-- Normal program/test output uses the same bottom area but uses `実行結果` as the speaker label so it is distinguishable from Lumiere speech.
+- The right-side execution area includes a separate `実行結果 / 出力` pane.
+- Python exception text, test results, output mismatch details, and other technical execution information are shown in that output pane.
+- The bottom area is only Lumiere dialogue and keeps the same normal field dialogue-window appearance with Lumiere portrait and speaker name.
+- Test failure does not turn the bottom area into a console. Lumiere gives a short response such as `これだとダメそうね。出力結果を確認してみて。` while the detailed result remains in the output pane.
+- Python exceptions may still be translated into Lumiere guidance, but the technical exception/result text remains separately inspectable in the output pane.
+
+## Hint
+
+- The editor includes a `ヒントを聞く` button.
+- Activating it makes Lumiere show a problem-specific hint in the bottom dialogue area.
+- Hint text is stored in `data/python-hints.json`.
+- Hint acquisition is routed through `js/plugin-hints.js` rather than directly consuming inventory in the UI.
+- The current policy allows hints without consuming an item.
+- The hint service exposes separate eligibility and consumption hooks so a later specification can require an inventory item without rewriting the editor UI.
+- The future item type and quantity are not specified yet and must not be hardcoded now.
 
 ## Resizing and scrolling
 
