@@ -87,6 +87,13 @@
 
   function sync() {
     const battleActive = battleIsActive();
+    if (!wasBattleActive && battleActive) {
+      positions.delete(TRACKS.ancient_gust.id);
+      positions.delete(TRACKS.swift_strike.id);
+      if (activeTrack?.id === TRACKS.ancient_gust.id || activeTrack?.id === TRACKS.swift_strike.id) {
+        audio.currentTime = 0;
+      }
+    }
     if (wasBattleActive && !battleActive) preparedBattleMode = null;
     wasBattleActive = battleActive;
 
