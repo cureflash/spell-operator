@@ -5,6 +5,7 @@
   const SE_SOURCE = "assets/audio/sfx/plugin-sparkle.base64";
   const FRAME_COUNT = 10;
   const FRAME_MS = 154;
+  const EFFECT_DURATION_MS = FRAME_COUNT * FRAME_MS;
   const ARM_WINDOW_MS = 500;
   const IMAGE_LOAD_TIMEOUT_MS = 2500;
 
@@ -12,6 +13,7 @@
   image.decoding = "async";
   image.src = EFFECT_SOURCE;
 
+  let overlay = null;
   let canvas = null;
   let context = null;
   let playing = null;
@@ -55,20 +57,36 @@
 
   function ensureCanvas() {
     if (canvas) return;
-    canvas = document.createElement("canvas");
-    canvas.id = "plugin-kirayuki-transition";
-    canvas.setAttribute("aria-hidden", "true");
-    Object.assign(canvas.style, {
+
+    overlay = document.createElement("div");
+    overlay.id = "plugin-kirayuki-overlay";
+    overlay.setAttribute("aria-hidden", "true");
+    Object.assign(overlay.style, {
       position: "fixed",
       inset: "0",
       width: "100vw",
       height: "100vh",
       pointerEvents: "none",
-      zIndex: "10000",
+      zIndex: "2147483000",
       display: "none",
-      mixBlendMode: "screen"
+      overflow: "hidden",
+      background: "radial-gradient(circle at 50% 50%, rgba(255,255,255,.88) 0%, rgba(225,235,255,.46) 22%, rgba(176,154,255,.20) 46%, rgba(255,255,255,0) 72%)"
     });
-    document.body.appendChild(canvas);
+
+    canvas = document.createElement("canvas");
+    canvas.id = "plugin-kirayuki-transition";
+    Object.assign(canvas.style, {
+      position: "absolute",
+      inset: "0",
+      width: "100%",
+      height: "100%",
+      display: "block",
+      opacity: "1",
+      filter: "brightness(1.7) contrast(1.12) saturate(1.15)"
+    });
+
+    overlay.appendChild(canvas);
+    document.body.appendChild(overlay);
     context = canvas.getContext("2d", { alpha: true });
   }
 
@@ -113,10 +131,11 @@
   function drawFrame(frame, width, height) {
     const frameWidth = image.naturalWidth;
     const frameHeight = image.naturalHeight / FRAME_COUNT;
-    const scale = Math.max(width / frameWidth, height / frameHeight);
+    const scale = Math.min(width / frameWidth, height / frameHeight);
     const drawWidth = frameWidth * scale;
     const drawHeight = frameHeight * scale;
     context.clearRect(0, 0, width, height);
+    context.globalCompositeOperation = "source-over";
     context.drawImage(
       image,
       0,
@@ -149,23 +168,51 @@
     });
   }
 
+  function showOverlayPulse() {
+    overlay.style.display = "block";
+    overlay.getAnimations?.().forEach(animation => animation.cancel());
+    if (typeof overlay.animate === "function") {
+      overlay.animate(
+        [
+          { opacity: 0 },
+          { opacity: 1, offset: 0.16 },
+          { opacity: 0.82, offset: 0.72 },
+          { opacity: 0 }
+        ],
+        { duration: EFFECT_DURATION_MS, easing: "ease-in-out", fill: "forwards" }
+      );
+    } else {
+      overlay.style.opacity = "1";
+    }
+  }
+
   function play() {
     if (playing) return playing;
     playing = (async () => {
       ensureCanvas();
       playSound();
-      await ensureImage();
-      canvas.style.display = "block";
-      for (let frame = 0; frame < FRAME_COUNT; frame += 1) {
-        const { width, height } = resize();
-        drawFrame(frame, width, height);
-        await delay(FRAME_MS);
+      showOverlayPulse();
+
+      try {
+        await ensureImage();
+        for (let frame = 0; frame < FRAME_COUNT; frame += 1) {
+          const { width, height } = resize();
+          drawFrame(frame, width, height);
+          await delay(FRAME_MS);
+        }
+      } catch (error) {
+        console.warn("Spell plug-in Kirayuki image failed; using visible glow fallback.", error);
+        await delay(EFFECT_DURATION_MS);
       }
     })().finally(() => {
       if (context && canvas) {
         context.setTransform(1, 0, 0, 1, 0, 0);
         context.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.style.display = "none";
+      }
+      if (overlay) {
+        overlay.getAnimations?.().forEach(animation => animation.cancel());
+        overlay.style.display = "none";
+        overlay.style.opacity = "";
       }
       playing = null;
     });
@@ -197,9 +244,7 @@
     game.openComputer = function (...args) {
       if (performance.now() > armedUntil) return originalOpenComputer.apply(this, args);
       armedUntil = 0;
-      return play()
-        .catch(error => console.warn("Spell plug-in transition failed; opening editor without effect.", error))
-        .then(() => originalOpenComputer.apply(this, args));
+      return play().then(() => originalOpenComputer.apply(this, args));
     };
     openComputerWrapped = true;
     return true;
