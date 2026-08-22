@@ -5,47 +5,11 @@
   if(!field)return;
 
   const definitions={
-    school:{
-      key:"school",
-      name:"学校",
-      mapId:"town",
-      classes:["school-roof","school-building","school-door"],
-      source:"Pipoya FREE RPG Tileset 32x32",
-      stylesheet:"css/pipoya-map.css"
-    },
-    library:{
-      key:"library",
-      name:"ピジブルの図書館",
-      mapId:"town",
-      classes:["library-roof","library-building","library-door"],
-      source:"Pipoya FREE RPG Tileset 32x32",
-      stylesheet:"css/pipoya-map.css"
-    },
-    sophie_home:{
-      key:"sophie_home",
-      name:"ソフィーの家",
-      mapId:"town",
-      classes:["workshop-roof","workshop-building","workshop-door"],
-      source:"Pipoya FREE RPG Tileset 32x32",
-      stylesheet:"css/pipoya-map.css",
-      legacyClassPrefix:"workshop"
-    },
-    parts_shop:{
-      key:"parts_shop",
-      name:"パーツ屋",
-      mapId:"town",
-      classes:["parts-roof","parts-building","parts-door"],
-      source:"Pipoya FREE RPG Tileset 32x32",
-      stylesheet:"css/pipoya-map.css"
-    },
-    magic_shop:{
-      key:"magic_shop",
-      name:"魔導具店",
-      mapId:"town",
-      classes:["shop-roof","shop-building","shop-door"],
-      source:"Pipoya FREE RPG Tileset 32x32",
-      stylesheet:"css/pipoya-map.css"
-    }
+    school:{key:"school",name:"学校",mapId:"town",classes:["school-roof","school-building","school-door"],source:"Pipoya FREE RPG Tileset 32x32",stylesheet:"css/pipoya-map.css"},
+    library:{key:"library",name:"ピジブルの図書館",mapId:"town",classes:["library-roof","library-building","library-door"],source:"Pipoya FREE RPG Tileset 32x32",stylesheet:"css/pipoya-map.css"},
+    sophie_home:{key:"sophie_home",name:"ソフィーの家",mapId:"town",classes:["workshop-roof","workshop-building","workshop-door"],source:"Pipoya FREE RPG Tileset 32x32",stylesheet:"css/pipoya-map.css",legacyClassPrefix:"workshop"},
+    parts_shop:{key:"parts_shop",name:"パーツ屋",mapId:"town",classes:["parts-roof","parts-building","parts-door"],source:"Pipoya FREE RPG Tileset 32x32",stylesheet:"css/pipoya-map.css"},
+    magic_shop:{key:"magic_shop",name:"魔導具店",mapId:"town",classes:["shop-roof","shop-building","shop-door"],source:"Pipoya FREE RPG Tileset 32x32",stylesheet:"css/pipoya-map.css"}
   };
 
   const registry=new Map(Object.entries(definitions).map(([key,value])=>[
@@ -62,14 +26,30 @@
 
   function decorateTownFacilitySprites(){
     if(field.currentMap?.()!=="town")return;
+    const world=document.getElementById("field-world");
+    if(!world)return;
     for(const sprite of registry.values()){
       for(const className of sprite.classes){
-        document.querySelectorAll(`#field-world .${className}`).forEach(tile=>{
+        world.querySelectorAll(`.${className}`).forEach(tile=>{
           tile.dataset.facilitySprite=sprite.key;
           tile.dataset.facilityName=sprite.name;
         });
       }
     }
+  }
+
+  const world=document.getElementById("field-world");
+  if(world){
+    let scheduled=false;
+    const scheduleDecorate=()=>{
+      if(scheduled)return;
+      scheduled=true;
+      requestAnimationFrame(()=>{
+        scheduled=false;
+        decorateTownFacilitySprites();
+      });
+    };
+    new MutationObserver(scheduleDecorate).observe(world,{childList:true,subtree:false,attributes:true,attributeFilter:["data-map"]});
   }
 
   if(typeof field.activateMap==="function"){
@@ -82,9 +62,9 @@
   }
 
   /*
-   * The core GAME START listener is registered before this module loads.
-   * Run after that listener and make house2 the final new-game location.
-   * This intentionally does not affect LOAD, which restores the saved map.
+   * The original GAME START handler first initializes Chapter 1 in town.
+   * This listener was registered later, so house2 becomes the final location
+   * after the new-game reset has completed. LOAD is untouched.
    */
   const startButton=document.getElementById("start-button");
   if(startButton){
