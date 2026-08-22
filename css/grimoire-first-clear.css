@@ -1,0 +1,88 @@
+#grimoire-first-clear-overlay{
+  position:fixed;
+  inset:0;
+  z-index:1400;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(7,10,18,.34);
+  backdrop-filter:blur(1.5px);
+}
+#grimoire-first-clear-overlay.hidden{display:none!important}
+.grimoire-first-clear-card{
+  position:relative;
+  width:min(72vw,760px);
+  min-width:min(520px,calc(100vw - 40px));
+  min-height:156px;
+  display:grid;
+  grid-template-columns:136px minmax(0,1fr);
+  align-items:stretch;
+  overflow:hidden;
+  border:4px solid #333946;
+  border-radius:10px;
+  background:#fffef2;
+  color:#202128;
+  box-shadow:inset 0 0 0 2px #adb5c4,0 22px 55px rgba(0,0,0,.42);
+  font-family:ui-monospace,"Noto Sans JP",monospace;
+  animation:grimoireClearPop .22s ease-out;
+}
+.grimoire-first-clear-portrait{
+  min-height:156px;
+  background:#f6edcf center/cover no-repeat;
+  border-right:3px solid #c6b993;
+}
+.grimoire-first-clear-message{
+  position:relative;
+  min-width:0;
+  padding:50px 46px 30px 24px;
+  display:flex;
+  align-items:center;
+}
+.grimoire-first-clear-name{
+  position:absolute;
+  left:18px;
+  top:12px;
+  min-width:86px;
+  padding:3px 18px;
+  border:2px solid #c89531;
+  border-radius:999px;
+  background:#fff0a8;
+  color:#4a3514;
+  font-size:14px;
+  font-weight:900;
+  text-align:center;
+  box-shadow:0 2px 0 rgba(94,67,22,.18);
+}
+.grimoire-first-clear-text{
+  font-size:clamp(18px,2.1vw,25px);
+  line-height:1.65;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+.grimoire-first-clear-next{
+  position:absolute;
+  right:17px;
+  bottom:10px;
+  color:#6a6156;
+  font-size:16px;
+  animation:grimoireClearBlink .72s step-end infinite;
+}
+@keyframes grimoireClearPop{
+  from{opacity:0;transform:translateY(8px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@keyframes grimoireClearBlink{50%{opacity:.25}}
+@media(max-width:760px){
+  #grimoire-first-clear-overlay{padding:14px}
+  .grimoire-first-clear-card{
+    width:min(88vw,620px);
+    min-width:0;
+    grid-template-columns:104px minmax(0,1fr);
+    min-height:126px;
+  }
+  .grimoire-first-clear-portrait{min-height:126px}
+  .grimoire-first-clear-message{padding:42px 34px 24px 16px}
+  .grimoire-first-clear-name{left:12px;top:9px;padding:2px 13px;font-size:12px}
+  .grimoire-first-clear-text{font-size:17px}
+  .grimoire-first-clear-next{right:12px;bottom:7px}
+}
