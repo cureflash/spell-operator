@@ -27,7 +27,7 @@
     "css/house-rooms-v2.css?v=2",
     "css/pokemon-house-compact.css?v=1",
     "css/sophie-sprite.css?v=21",
-    "css/battle-dq-ui.css?v=6"
+    "css/battle-dq-ui.css?v=7"
   ];
 
   const modules = [
@@ -61,7 +61,7 @@
     "js/place-names.js?v=2",
     "js/game-bgm.js?v=8",
     "js/character-portraits.js?v=3",
-    "js/battle-dq-ui.js?v=7",
+    "js/battle-dq-ui.js?v=8",
     "js/dialog-typewriter.js?v=4",
     "js/dialog-sfx.js?v=4",
     "js/game03-menu.js?v=20",
